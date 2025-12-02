@@ -1,3 +1,4 @@
+#include "mopch.h"
 #include <Monsi.h>
 
 class Sandbox : public Monsi::Application {
@@ -10,6 +11,6 @@ public:
 
 };
 
-std::unique_ptr<Monsi::Application> Monsi::CreateApplication() {
-	return std::make_unique<Sandbox>();
+Monsi::Application* Monsi::CreateApplication() {
+	return new Sandbox();
 }

@@ -1,13 +1,16 @@
 #pragma once
 #include "Engine.h"
-#include <iostream>
 
-#ifdef _WIN32
-    extern std::unique_ptr<Monsi::Application> Monsi::CreateApplication();
+#ifdef MONSI_PLATFORM_WINDOWS
 
-    int main() {
-        std::cout << "Entry point of Monsi!" << std::endl;
+    extern Monsi::Application* Monsi::CreateApplication();
+
+    int main(int agrc, char* argv[]) {
+        Monsi::Log::Init();
+
         auto app = Monsi::CreateApplication();
         app->Run();
+        delete app;
     }
+
 #endif

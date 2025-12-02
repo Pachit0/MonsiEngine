@@ -1,17 +1,32 @@
 add_library(Engine SHARED
     src/Engine.cpp
- "include/Core.h" "Monsi.h"  "include/EntryPoint.h" )
+    src/Logger.cpp
+    "include/Core.h" 
+    "Monsi.h"
+    "include/EntryPoint.h"  
+    "include/Logger.h" 
+    "Events/Events.h" 
+    "Events/MouseEvent.h" 
+    "Events/KeyEvent.h" 
+    "Events/ApplicationEvent.h" 
+    "Events/EventFormatter.h" 
+    "mopch.h" 
+    "mopch.cpp"
+)
+ 
+if(WIN32)
+    target_compile_definitions(Engine PRIVATE MONSI_PLATFORM_WINDOWS ENGINE_BUILD_DLL)
+endif()
 
 add_subdirectory(thirdparty)
 
 target_include_directories(Engine
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Events
 )
 
-if(WIN32)
-    target_compile_definitions(Engine PRIVATE ENGINE_BUILD_DLL)
-endif()
+target_precompile_headers(Engine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/mopch.h)
 
 target_link_libraries(Engine
     PUBLIC
@@ -19,7 +34,7 @@ target_link_libraries(Engine
         glfw
         imgui
         glm
-        spdlog::spdlog
+        spdlog::spdlog_header_only
 )
 
 # Copy Engine.dll to Sandbox output folder after build

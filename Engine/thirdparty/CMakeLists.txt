@@ -33,5 +33,8 @@ add_library(glad STATIC
 )
 target_include_directories(glad PUBLIC glad/include)
 
-# spdlog
+#spdlog
+set(SPDLOG_BUILD_SHARED OFF CACHE BOOL "Disable shared library" FORCE)
+set(SPDLOG_BUILD_STATIC_LIB ON CACHE BOOL "Enable static library" FORCE)
+set(SPDLOG_INSTALL OFF CACHE BOOL "" FORCE)
 add_subdirectory(spdlog)

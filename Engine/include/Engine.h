@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core.h"
-#include <memory>
+#include "Events.h"
 
 namespace Monsi {
 
@@ -11,10 +11,9 @@ namespace Monsi {
         virtual ~Application();
 
         void Run();
-        void Print();
-
+            
     };
 
-    std::unique_ptr<Application> CreateApplication();
+    Application* CreateApplication();
 
 }
