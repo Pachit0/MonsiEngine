@@ -1,15 +1,15 @@
-message(STATUS "Configuring third-party libraries...")
-
 # GLFW
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_DOCS     OFF CACHE BOOL "" FORCE)
-set(GLFW_INSTALL        OFF CACHE BOOL "" FORCE)
+set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+
 add_subdirectory(glfw)
 
-# GLM
-add_library(glm INTERFACE)
-target_include_directories(glm INTERFACE glm)
+# Glad
+add_library(glad STATIC glad/src/glad.c)
+target_include_directories(glad PUBLIC glad/include)
 
 # ImGui
 file(GLOB IMGUI_SRC
@@ -21,20 +21,12 @@ file(GLOB IMGUI_SRC
     imgui-docking/backends/imgui_impl_opengl3.cpp
 )
 add_library(imgui STATIC ${IMGUI_SRC})
-target_include_directories(imgui PUBLIC
-    imgui-docking
-    imgui-docking/backends
-)
+target_include_directories(imgui PUBLIC imgui-docking imgui-docking/backends)
 target_link_libraries(imgui PUBLIC glfw glad)
 
-#Glad
-add_library(glad STATIC
-    glad/src/glad.c
-)
-target_include_directories(glad PUBLIC glad/include)
+# GLM as interface
+add_library(glm INTERFACE)
+target_include_directories(glm INTERFACE glm)
 
-#spdlog
-set(SPDLOG_BUILD_SHARED OFF CACHE BOOL "Disable shared library" FORCE)
-set(SPDLOG_BUILD_STATIC_LIB ON CACHE BOOL "Enable static library" FORCE)
-set(SPDLOG_INSTALL OFF CACHE BOOL "" FORCE)
+# spdlog
 add_subdirectory(spdlog)

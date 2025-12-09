@@ -48,6 +48,7 @@ namespace Monsi {
 	};
 
 	class MouseEventButtonReleased : public MouseEventButton {
+		public:
 		MouseEventButtonReleased(int button) : MouseEventButton(button) {}
 
 		std::string ToString() const override {
@@ -57,5 +58,28 @@ namespace Monsi {
 		}
 
 		EVENT_CLASS_TYPE(MouseButtonReleased)
+	};
+
+	class MouseEventScrolled : public Event
+	{
+	public:
+		MouseEventScrolled(const float xOffset, const float yOffset)
+			: m_XOffset(xOffset), m_YOffset(yOffset) {
+		}
+
+		float GetXOffset() const { return m_XOffset; }
+		float GetYOffset() const { return m_YOffset; }
+
+		std::string ToString() const override
+		{
+			std::stringstream ss;
+			ss << "MouseEventScrolled: " << GetXOffset() << ", " << GetYOffset();
+			return ss.str();
+		}
+
+		EVENT_CLASS_TYPE(MouseScrolled)
+		EVENT_CLASS_CATEGORY(CategoryMouse | CategoryInput)
+	private:
+		float m_XOffset, m_YOffset;
 	};
 }

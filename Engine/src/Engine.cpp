@@ -1,32 +1,41 @@
-#include "mopch.h"
+#include "MonsiPch.h"
 #include "Engine.h"
 
-#include "ApplicationEvent.h"
-#include "MouseEvent.h"
-#include "KeyEvent.h"
-
+#include "EventFormatter.h"
 #include "Logger.h"
+#include <GLFW/glfw3.h>
 
 namespace Monsi {
+
+#define BIND_EVENT_FN(x) std::bind(&Application::x, this, std::placeholders::_1)
     
     Application::Application() {
-
+        m_Window = std::unique_ptr<Window>(Window::Create());
+        m_Window->SetEventCallbackFn(BIND_EVENT_FN(OnEvent));
     }
 
     Application::~Application() {
 
     }
 
+    void Application::OnEvent(Event& event) {
+        EventDispatcher dispatcher(event);
+        dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
+
+        ENGINE_LOG_TRACE("{0}", event);
+    }
+
     void Application::Run() {
-        WindowResizeEvent a(1920, 1080);
-        MouseEventMoved b(50, 60);
-        KeyEventPressed c(51, 1);
+        while (m_Running) {
+            glClearColor(0.5, 0, 0.05, 1);
+            glClear(GL_COLOR_BUFFER_BIT);
+            m_Window->OnUpdate();
+        }
+    }
 
-        MO_TRACE(a);
-        MO_TRACE(b);
-        MO_ENGINE_TRACE(c);
-
-        while (true);
+    bool Application::OnWindowClose(WindowCloseEvent& event) {
+        m_Running = false;
+        return true;
     }
 
 }
