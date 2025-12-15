@@ -1,3 +1,7 @@
+cmake_minimum_required(VERSION 3.16)
+
+set(CMAKE_CXX_STANDARD 17)
+
 add_library(Engine SHARED
     src/Engine.cpp
     src/Logger.cpp
@@ -14,10 +18,10 @@ add_library(Engine SHARED
     Platform/Windows/PlatformWindows.cpp
     Platform/Windows/PlatformWindows.h
     include/Window.h
-)
+ "src/Layer.cpp" "include/Layer.h" "include/LayerStack.h" "src/LayerStack.cpp")
 
 if(WIN32)
-    target_compile_definitions(Engine PRIVATE MONSI_PLATFORM_WINDOWS ENGINE_BUILD_DLL MONSI_ENABLE_ASSERTS)
+    target_compile_definitions(Engine PRIVATE MONSI_PLATFORM_WINDOWS ENGINE_BUILD_DLL MONSI_ENABLE_ASSERTS GLFW_INCLUDE_NONE)
 endif()
 
 add_subdirectory(thirdparty)
@@ -51,4 +55,8 @@ if(WIN32)
             $<TARGET_FILE:Engine>
             $<TARGET_FILE_DIR:Sandbox>
     )
+endif()
+
+if(MSVC)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 endif()

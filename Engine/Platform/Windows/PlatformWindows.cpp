@@ -5,6 +5,7 @@
 #include "KeyEvent.h"
 #include "ApplicationEvent.h"
 
+#include <glad/glad.h>
 
 namespace Monsi {
 	static void GLFWErrorCallback(int error_code, const char* description) {
@@ -40,6 +41,10 @@ namespace Monsi {
 
 		m_Window = glfwCreateWindow(info.Width, info.Height, m_Data.Title.c_str(), nullptr, nullptr);
 		glfwMakeContextCurrent(m_Window);
+		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+
+		ENGINE_ASSERT(status, "Failed to initialize Glad!");
+
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		SetVSync(true);
 
