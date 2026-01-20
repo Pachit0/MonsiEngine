@@ -18,10 +18,10 @@ add_library(Engine SHARED
     Platform/Windows/PlatformWindows.cpp
     Platform/Windows/PlatformWindows.h
     include/Window.h
- "src/Layer.cpp" "include/Layer.h" "include/LayerStack.h" "src/LayerStack.cpp")
+ "src/Layer.cpp" "include/Layer.h" "include/LayerStack.h" "src/LayerStack.cpp" "ImGui/ImGuiLayer.cpp" "ImGui/ImGuiLayer.h" "include/Input.h" "Platform/Windows/WindowsInput.h" "Platform/Windows/WindowsInput.cpp" "include/MonsiKeyCodes.h" "include/MonsiMouseButtonCodes.h" "include/MonsiControllerButtonCodes.h")
 
 if(WIN32)
-    target_compile_definitions(Engine PRIVATE MONSI_PLATFORM_WINDOWS ENGINE_BUILD_DLL MONSI_ENABLE_ASSERTS GLFW_INCLUDE_NONE)
+    target_compile_definitions(Engine PRIVATE MONSI_PLATFORM_WINDOWS ENGINE_BUILD_DLL MONSI_ENABLE_ASSERTS GLFW_INCLUDE_NONE IMGUI_IMPL_OPENGL_LOADER_CUSTOM IMGUI_DISABLE_OBSOLETE_FUNCTIONS)
 endif()
 
 add_subdirectory(thirdparty)

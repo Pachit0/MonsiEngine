@@ -11,6 +11,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
+#include <fstream>
 #include "Logger.h"
 
 #ifdef MONSI_PLATFORM_WINDOWS

@@ -19,6 +19,7 @@ namespace Monsi {
 		void SetVSync(bool enabled) override;
 		bool IsVSync() const override;
 	
+		inline virtual void* GetNativeWindow() const { return m_Window; }
 	private:
 		virtual void Init(const WindowInfo& info);
 		virtual void Shutdown();
@@ -34,5 +35,7 @@ namespace Monsi {
 		};
 
 		PlatformWindowData m_Data;
+
+		void frameBufferSizeCallback(GLFWwindow* window, int width, int height);
 	};
 }

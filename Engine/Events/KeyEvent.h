@@ -44,4 +44,17 @@ namespace Monsi {
 
 		EVENT_CLASS_TYPE(KeyReleased)
 	};
+
+	class ENGINE_API KeyEventTyped : public KeyEvent {
+	public:
+		KeyEventTyped(int keycode) : KeyEvent(keycode) {}
+
+		std::string ToString() const override {
+			std::stringstream ss;
+			ss << "KeyEventTyped: " << m_keyCode;
+			return ss.str();
+		}
+
+		EVENT_CLASS_TYPE(KeyTyped)
+	};
 }

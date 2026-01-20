@@ -19,6 +19,7 @@ file(GLOB IMGUI_SRC
     imgui-docking/imgui_draw.cpp
     imgui-docking/imgui_widgets.cpp
     imgui-docking/imgui_tables.cpp
+    imgui-docking/imgui_demo.cpp
     imgui-docking/backends/imgui_impl_glfw.cpp
     imgui-docking/backends/imgui_impl_opengl3.cpp
 )

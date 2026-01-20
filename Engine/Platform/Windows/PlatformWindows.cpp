@@ -26,6 +26,10 @@ namespace Monsi {
 
 	}
 
+	void PlatformWindows::frameBufferSizeCallback(GLFWwindow* window, int width, int height) {
+		glViewport(0, 0, width, height);
+	}
+
 	void PlatformWindows::Init(const WindowInfo& info) {
 		m_Data.Title = info.Title;
 		m_Data.Width = info.Width;
@@ -86,6 +90,13 @@ namespace Monsi {
 			}
 		});
 
+		glfwSetCharCallback(m_Window, [](GLFWwindow* window, unsigned int keycode) {
+			PlatformWindowData& data = *(PlatformWindowData*)glfwGetWindowUserPointer(window);
+
+			KeyEventTyped event(keycode);
+			data.EventCallback(event);
+		});
+
 		glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xoffset, double yoffset) {
 			PlatformWindowData& data = *(PlatformWindowData*)glfwGetWindowUserPointer(window);
 
@@ -117,7 +128,6 @@ namespace Monsi {
 			}
 		});
 
-
 	}
 
 	void PlatformWindows::Shutdown() {
@@ -125,6 +135,7 @@ namespace Monsi {
 	}
 
 	void PlatformWindows::OnUpdate() {
+
 		glfwPollEvents();
 		glfwSwapBuffers(m_Window);
 	}
