@@ -21,7 +21,7 @@ namespace Monsi {
 		std::vector<Layer*>::iterator end() { return m_LayerVector.end(); }
 	private:
 		std::vector<Layer*> m_LayerVector;
-		std::vector<Layer*>::iterator m_LayerInsert;
+		unsigned int m_LayerInsertIndex = 0;
 	};
 
 }

@@ -23,7 +23,8 @@ file(GLOB IMGUI_SRC
     imgui-docking/backends/imgui_impl_glfw.cpp
     imgui-docking/backends/imgui_impl_opengl3.cpp
 )
-add_library(imgui STATIC ${IMGUI_SRC})
+add_library(imgui SHARED ${IMGUI_SRC})
+target_compile_definitions(imgui PRIVATE IMGUI_BUILD_DLL)
 target_include_directories(imgui PUBLIC imgui-docking imgui-docking/backends)
 target_link_libraries(imgui PUBLIC glfw glad)
 

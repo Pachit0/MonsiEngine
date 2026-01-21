@@ -1,5 +1,8 @@
 #pragma once
 
+#include <functional>
+#include <string>
+#include <iostream>
 #include "Core.h"
 #include "spdlog/fmt/ostr.h"
 

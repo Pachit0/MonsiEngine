@@ -12,6 +12,7 @@ namespace Monsi {
 		virtual void OnLayerAttach() {}
 		virtual void OnLayerUpdate() {}
 		virtual void OnLayerDetach() {}
+		virtual void OnImGuiDraw() {}
 		virtual void OnLayerEvent(Event& event) {}
 
 		inline const std::string& GetDebugName() const { return m_DebugName; }

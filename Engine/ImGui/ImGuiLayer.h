@@ -15,18 +15,10 @@ namespace Monsi {
 
 		void OnLayerAttach() override;
 		void OnLayerDetach() override;
-		void OnLayerUpdate() override;
-		void OnLayerEvent(Event& event) override;
-	private:
-		bool MouseButtonPressedEvent(MouseEventButtonPressed& event);
-		bool MouseButtonReleasedEvent(MouseEventButtonReleased& event);
-		bool MouseMovedEvent(MouseEventMoved& event);
-		bool MouseScrolledEvent(MouseEventScrolled& event);
-		bool KeyReleasedEvent(KeyEventReleased& event);
-		bool KeyPressedEvent(KeyEventPressed& event);
-		bool WinResizedEvent(WindowResizeEvent& event);
-		bool KeyTypedEvent(KeyEventTyped& event);
-		ImGuiKey ToImGuiKey(int keycode);
+		void OnImGuiDraw() override;
+
+		void Begin();
+		void End();
 	private:
 		float m_Time = 0.0f;
 	};

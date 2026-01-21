@@ -1,9 +1,10 @@
+#include "MonsiPch.h"
 #include "LayerStack.h"
 
 namespace Monsi {
 
 	LayerStack::LayerStack() {
-		m_LayerInsert = m_LayerVector.begin();
+		m_LayerVector.begin();
 	}
 
 	LayerStack::~LayerStack() {
@@ -13,7 +14,8 @@ namespace Monsi {
 	}
 
 	void LayerStack::PushLayer(Layer* layer) {
-		m_LayerInsert = m_LayerVector.emplace(m_LayerInsert, layer);
+		m_LayerVector.emplace(m_LayerVector.begin() + m_LayerInsertIndex, layer);
+		m_LayerInsertIndex++;
 	}
 
 	void LayerStack::PushOverlay(Layer* overlay) {
@@ -24,7 +26,7 @@ namespace Monsi {
 		auto it = std::find(m_LayerVector.begin(), m_LayerVector.end(), layer);
 		if (it != m_LayerVector.end()) {
 			m_LayerVector.erase(it);
-			m_LayerInsert--;
+			m_LayerInsertIndex--;
 		}
 	}
 

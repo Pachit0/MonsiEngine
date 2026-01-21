@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Events.h"
+#include <sstream>
 #include "EventFormatter.h"
 
 namespace Monsi {

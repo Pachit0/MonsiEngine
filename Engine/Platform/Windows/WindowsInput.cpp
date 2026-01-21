@@ -27,7 +27,7 @@ namespace Monsi {
 		double xPos, yPos;
 		glfwGetCursorPos(window, &xPos, &yPos);*/
 		auto [x, y] = GetMousePosImpl();
-		return x; // c++17 feature don't need to use std::get<>
+		return x; // c++17 feature! Doesn't need to use std::get<>
 	}
 
 	float WindowsInput::GetMouseYImpl()
@@ -35,7 +35,7 @@ namespace Monsi {
 		/*auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
 		double xPos, yPos;
 		glfwGetCursorPos(window, &xPos, &yPos);*/
-		auto[x, y] = GetMousePosImpl();
+		auto [x, y] = GetMousePosImpl();
 		return y;
 
 	}

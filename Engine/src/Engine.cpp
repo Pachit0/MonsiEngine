@@ -19,6 +19,9 @@ namespace Monsi {
 
         m_Window = std::unique_ptr<Window>(Window::Create());
         m_Window->SetEventCallbackFn(BIND_EVENT_FN(OnEvent));
+
+        m_ImGuiLayer = new ImGuiLayer();
+        PushOverlay(m_ImGuiLayer);
     }
 
     Application::~Application() {
@@ -46,6 +49,12 @@ namespace Monsi {
             for (Layer* layer : m_LayerStack) {
                 layer->OnLayerUpdate();
             }
+
+            m_ImGuiLayer->Begin();
+            for (Layer* layer : m_LayerStack) {
+                layer->OnImGuiDraw();
+            }
+            m_ImGuiLayer->End();
 
             m_Window->OnUpdate();
         }
