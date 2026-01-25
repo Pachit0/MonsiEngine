@@ -22,7 +22,9 @@ add_library(Engine STATIC
     include/Window.h
     Renderer/Shader.h
     Renderer/Shader.cpp
-    "src/Layer.cpp" "include/Layer.h" "include/LayerStack.h" "src/LayerStack.cpp" "ImGui/ImGuiLayer.cpp" "ImGui/ImGuiLayer.h" "include/Input.h" "Platform/Windows/WindowsInput.h" "Platform/Windows/WindowsInput.cpp" "include/MonsiKeyCodes.h" "include/MonsiMouseButtonCodes.h" "include/MonsiControllerButtonCodes.h" "ImGui/ImGuiBuild.cpp" "Renderer/RenderContext.h" "Platform/OpenGL/OpenGLContext.h" "Platform/OpenGL/OpenGLContext.cpp")
+    Renderer/Buffers.h
+    Renderer/Buffers.cpp
+    "src/Layer.cpp" "include/Layer.h" "include/LayerStack.h" "src/LayerStack.cpp" "ImGui/ImGuiLayer.cpp" "ImGui/ImGuiLayer.h" "include/Input.h" "Platform/Windows/WindowsInput.h" "Platform/Windows/WindowsInput.cpp" "include/MonsiKeyCodes.h" "include/MonsiMouseButtonCodes.h" "include/MonsiControllerButtonCodes.h" "ImGui/ImGuiBuild.cpp" "Renderer/RenderContext.h" "Platform/OpenGL/OpenGLContext.h" "Platform/OpenGL/OpenGLContext.cpp" "Renderer/Buffers.h" "Renderer/Buffers.cpp" "Platform/OpenGL/OpenGLBuffer.h" "Platform/OpenGL/OpenGLBuffer.cpp" "Renderer/Renderer.cpp" "Renderer/Renderer.h")
 
 if(WIN32)
     target_compile_definitions(Engine PRIVATE MONSI_PLATFORM_WINDOWS GLFW_INCLUDE_NONE MONSI_BUILD_DEBUG)

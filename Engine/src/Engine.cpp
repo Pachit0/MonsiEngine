@@ -2,7 +2,6 @@
 #include "Engine.h"
 
 #include "EventFormatter.h"
-#include "Logger.h"
 #include "Input.h"
 
 #include <glad/glad.h>
@@ -26,24 +25,21 @@ namespace Monsi {
         glGenVertexArrays(1, &m_VAO);
         glBindVertexArray(m_VAO);
 
-        glGenBuffers(1, &m_VBO);
-        glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-
         float vertices[]{
             -0.5f, -0.5f, 0.0f,
             0.5f, -0.5f, 0.0f,
             0.0f, 0.5f, 0.0f
         };
 
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+        m_VertexBuffer.reset(VertexBuffer::Create(vertices, sizeof(vertices))); // Create vertex buffer and transfer ownership to m_VertexBuffer
 
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
 
-        glGenBuffers(1, &m_EBO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
+        uint32_t indices[]{ 0 ,1 ,2 };
 
-        unsigned int indices[]{ 0 ,1 ,2 };
+        m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
+
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
         m_Shader = std::make_unique<Shader>("D:/Monsi Engine/Engine/Renderer/vertexShader.vert", "D:/Monsi Engine/Engine/Renderer/fragmentShader.frag");

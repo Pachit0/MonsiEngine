@@ -6,6 +6,8 @@
 #include "LayerStack.h"
 #include "ImGui/ImGuiLayer.h"
 #include "Renderer/Shader.h"
+#include "Renderer/Buffers.h"
+#include "Platform/OpenGL/OpenGLBuffer.h"
 
 #include "Window.h"
 
@@ -36,8 +38,10 @@ namespace Monsi {
 
         static Application* s_Instance;
         
-        unsigned int m_VBO, m_VAO, m_EBO; // vertexBuffer, vertexArray, index/elementBuffer
+        unsigned int m_VAO;
         std::unique_ptr<Shader> m_Shader;
+        std::unique_ptr<VertexBuffer> m_VertexBuffer;
+        std::unique_ptr<IndexBuffer> m_IndexBuffer;
     };
 
     Application* CreateApplication();

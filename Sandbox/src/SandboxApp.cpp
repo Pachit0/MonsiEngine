@@ -16,7 +16,7 @@ public:
 	}
 
 	void OnLayerEvent(Monsi::Event& event) override {
-		//CLIENT_LOG_TRACE("{0}", event);
+		CLIENT_LOG_TRACE("{0}", event);
 	}
 	
 	void OnImGuiDraw() override {

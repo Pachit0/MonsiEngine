@@ -10,7 +10,6 @@ target_include_directories(Sandbox PRIVATE
 
 target_link_libraries(Sandbox PRIVATE 
     Engine
-    spdlog
 )
 
 if(WIN32)
