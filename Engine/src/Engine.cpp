@@ -12,6 +12,23 @@ namespace Monsi {
     
     Application* Application::s_Instance = nullptr;
 
+    static GLenum ShaderDataTypeToOpenGLBaseType(ShaderDataType type) {
+        switch (type)
+        {
+        case Monsi::ShaderDataType::Float:  return GL_FLOAT;
+        case Monsi::ShaderDataType::Float2: return GL_FLOAT;
+        case Monsi::ShaderDataType::Float3: return GL_FLOAT;   
+        case Monsi::ShaderDataType::Float4: return GL_FLOAT;   
+        case Monsi::ShaderDataType::Mat3:   return GL_FLOAT;
+        case Monsi::ShaderDataType::Mat4:   return GL_FLOAT;
+        case Monsi::ShaderDataType::Int:    return GL_INT;
+        case Monsi::ShaderDataType::Int2:   return GL_INT;
+        case Monsi::ShaderDataType::Int3:   return GL_INT;   
+        case Monsi::ShaderDataType::Int4:   return GL_INT;   
+        case Monsi::ShaderDataType::Bool:   return GL_BOOL;
+        }
+    }
+
     Application::Application() {
         ENGINE_ASSERT(!s_Instance, "Application object already exists!");
         s_Instance = this;
@@ -26,15 +43,30 @@ namespace Monsi {
         glBindVertexArray(m_VAO);
 
         float vertices[]{
-            -0.5f, -0.5f, 0.0f,
-            0.5f, -0.5f, 0.0f,
-            0.0f, 0.5f, 0.0f
+            -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+            0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.3f, 1.0f,
+            0.0f, 0.5f, 0.0f, 0.5f, 0.5f, 1.0f, 1.0f
         };
 
-        m_VertexBuffer.reset(VertexBuffer::Create(vertices, sizeof(vertices))); // Create vertex buffer and transfer ownership to m_VertexBuffer
+        m_VertexBuffer.reset(VertexBuffer::Create(vertices, sizeof(vertices)));
 
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+        BufferLayout layout = { //  Vertex code needs the same layout order as here
+            {ShaderDataType::Float3, "a_Position"},
+            {ShaderDataType::Float4, "a_Color"}
+        };
+
+        m_VertexBuffer->SetLayout(layout);
+
+        uint32_t index = 0;
+        for (const auto& element : layout) {
+
+            glEnableVertexAttribArray(index);
+            glVertexAttribPointer(index, element.GetComponentCount(), 
+                ShaderDataTypeToOpenGLBaseType(element.Type), element.Normalized ? GL_TRUE : GL_FALSE, 
+                layout.GetStride(), (const void*)element.Offset);
+            index++;
+        }
+
 
         uint32_t indices[]{ 0 ,1 ,2 };
 
@@ -42,7 +74,7 @@ namespace Monsi {
 
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-        m_Shader = std::make_unique<Shader>("D:/Monsi Engine/Engine/Renderer/vertexShader.vert", "D:/Monsi Engine/Engine/Renderer/fragmentShader.frag");
+        m_Shader.reset(Shader::Create("D:/Monsi Engine/Engine/Renderer/vertexShader.vert", "D:/Monsi Engine/Engine/Renderer/fragmentShader.frag"));
     }
 
     Application::~Application() {
