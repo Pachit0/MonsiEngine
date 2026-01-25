@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.16)
 
+project(Engine)
+
 set(CMAKE_CXX_STANDARD 17)
 
-add_library(Engine SHARED
+add_library(Engine STATIC
     src/Engine.cpp
     src/Logger.cpp
     include/Core.h
@@ -18,10 +20,12 @@ add_library(Engine SHARED
     Platform/Windows/PlatformWindows.cpp
     Platform/Windows/PlatformWindows.h
     include/Window.h
- "src/Layer.cpp" "include/Layer.h" "include/LayerStack.h" "src/LayerStack.cpp" "ImGui/ImGuiLayer.cpp" "ImGui/ImGuiLayer.h" "include/Input.h" "Platform/Windows/WindowsInput.h" "Platform/Windows/WindowsInput.cpp" "include/MonsiKeyCodes.h" "include/MonsiMouseButtonCodes.h" "include/MonsiControllerButtonCodes.h" "ImGui/ImGuiBuild.cpp")
+    Renderer/Shader.h
+    Renderer/Shader.cpp
+    "src/Layer.cpp" "include/Layer.h" "include/LayerStack.h" "src/LayerStack.cpp" "ImGui/ImGuiLayer.cpp" "ImGui/ImGuiLayer.h" "include/Input.h" "Platform/Windows/WindowsInput.h" "Platform/Windows/WindowsInput.cpp" "include/MonsiKeyCodes.h" "include/MonsiMouseButtonCodes.h" "include/MonsiControllerButtonCodes.h" "ImGui/ImGuiBuild.cpp" "Renderer/RenderContext.h" "Platform/OpenGL/OpenGLContext.h" "Platform/OpenGL/OpenGLContext.cpp")
 
 if(WIN32)
-    target_compile_definitions(Engine PRIVATE MONSI_PLATFORM_WINDOWS ENGINE_BUILD_DLL MONSI_ENABLE_ASSERTS GLFW_INCLUDE_NONE)
+    target_compile_definitions(Engine PRIVATE MONSI_PLATFORM_WINDOWS GLFW_INCLUDE_NONE MONSI_BUILD_DEBUG)
 endif()
 
 add_subdirectory(thirdparty)
@@ -48,20 +52,7 @@ if(WIN32)
 target_link_libraries(Engine PUBLIC opengl32)
 endif()
 
-# Copy DLL to Sandbox
-if (WIN32)
-    add_custom_command(TARGET Engine POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            $<TARGET_FILE:Engine>
-            $<TARGET_FILE_DIR:Sandbox>
-
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            $<TARGET_FILE:imgui>
-            $<TARGET_FILE_DIR:Sandbox>
-    )
-endif()
-
-
 if(MSVC)
-    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Release>:Release>")
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()

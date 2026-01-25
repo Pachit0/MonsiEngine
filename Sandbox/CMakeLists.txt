@@ -1,3 +1,5 @@
+project(Sandbox)
+
 add_executable(Sandbox
     src/SandboxApp.cpp
 )

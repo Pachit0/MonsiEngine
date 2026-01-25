@@ -1,15 +1,21 @@
 #pragma once
 
-//IMPORTANT: in imconfig.h in thirdparty/imgui there is the ifdef structure for handling symbol exports for imgui to sandbox!!!!
-
 #ifdef MONSI_PLATFORM_WINDOWS
-    #ifdef ENGINE_BUILD_DLL
-        #define ENGINE_API __declspec(dllexport)
+    #if ENGINE_LINK_DYNAMICALLY
+        #ifdef ENGINE_BUILD_DLL
+            #define ENGINE_API __declspec(dllexport)
+        #else
+            #define ENGINE_API __declspec(dllimport)
+        #endif
     #else
-        #define ENGINE_API __declspec(dllimport)
+        #define ENGINE_API
     #endif
 #else
     #error Monsi supports only Windows!
+#endif
+
+#ifdef MONSI_BUILD_DEBUG
+    #define MONSI_ENABLE_ASSERTS
 #endif
 
 #ifdef MONSI_ENABLE_ASSERTS

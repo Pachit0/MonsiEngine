@@ -5,6 +5,7 @@
 #include "ApplicationEvent.h"
 #include "LayerStack.h"
 #include "ImGui/ImGuiLayer.h"
+#include "Renderer/Shader.h"
 
 #include "Window.h"
 
@@ -34,6 +35,9 @@ namespace Monsi {
         LayerStack m_LayerStack;
 
         static Application* s_Instance;
+        
+        unsigned int m_VBO, m_VAO, m_EBO; // vertexBuffer, vertexArray, index/elementBuffer
+        std::unique_ptr<Shader> m_Shader;
     };
 
     Application* CreateApplication();

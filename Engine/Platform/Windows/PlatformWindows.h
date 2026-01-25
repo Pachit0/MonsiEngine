@@ -2,6 +2,7 @@
 
 #include "Window.h"
 #include <GLFW/glfw3.h>
+#include "Renderer/RenderContext.h"
 
 namespace Monsi {
 
@@ -25,6 +26,7 @@ namespace Monsi {
 		virtual void Shutdown();
 	private:
 		GLFWwindow* m_Window;
+		RenderContext* m_Context;
 
 		struct PlatformWindowData {
 			std::string Title;

@@ -5,6 +5,8 @@
 #include "KeyEvent.h"
 #include "ApplicationEvent.h"
 
+#include "Platform/OpenGL/OpenGLContext.h"
+
 #include <glad/glad.h>
 
 namespace Monsi {
@@ -35,7 +37,7 @@ namespace Monsi {
 		m_Data.Width = info.Width;
 		m_Data.Height = info.Height;
 		
-		CLIENT_LOG_INFO("Creating Window {0} ({1}, {2})", info.Title, info.Width, info.Height);
+		ENGINE_LOG_INFO("Creating Window {0} ({1}, {2})", info.Title, info.Width, info.Height);
 		if (!s_GLFWInitialized) {
 			int success = glfwInit();
 			ENGINE_ASSERT(success, "Failed to initialize GLFW!");
@@ -44,10 +46,8 @@ namespace Monsi {
 		}
 
 		m_Window = glfwCreateWindow(info.Width, info.Height, m_Data.Title.c_str(), nullptr, nullptr);
-		glfwMakeContextCurrent(m_Window);
-		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-
-		ENGINE_ASSERT(status, "Failed to initialize Glad!");
+		m_Context = new OpenGLContext(m_Window);
+		m_Context->Init();
 
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		SetVSync(true);
@@ -137,7 +137,7 @@ namespace Monsi {
 	void PlatformWindows::OnUpdate() {
 
 		glfwPollEvents();
-		glfwSwapBuffers(m_Window);
+		m_Context->SwapBuffer();
 	}
 	
 	void PlatformWindows::SetVSync(bool enabled) {
