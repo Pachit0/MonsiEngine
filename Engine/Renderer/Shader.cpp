@@ -9,8 +9,8 @@ namespace Monsi {
 
 	Shader* Shader::Create(const std::string& vertexPath, const std::string& fragmentPath) {
 		switch (Renderer::GetRendererAPI()) {
-		case RendererAPI::None: ENGINE_ASSERT(false, "RendererAPI::None is not supported!") return nullptr;
-		case RendererAPI::OpenGL: return new OpenGLShader(vertexPath, fragmentPath);
+		case RendererAPI::API::None: ENGINE_ASSERT(false, "RendererAPI::None is not supported!") return nullptr;
+		case RendererAPI::API::OpenGL: return new OpenGLShader(vertexPath, fragmentPath);
 		}
 	ENGINE_ASSERT(false, "Unknown Shader!");
 	return nullptr;

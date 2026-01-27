@@ -1,18 +1,16 @@
 #pragma once
 
+#include "Renderer/RenderCommand.h"
+
 namespace Monsi {
-
-	enum class RendererAPI {
-
-		None = 0, OpenGL = 1
-
-	};
 
 	class Renderer {
 	public:
-		inline static RendererAPI GetRendererAPI() { return s_RendererAPI; }
-	private:
-		static RendererAPI s_RendererAPI;
+		static void Begin();
+		static void End();
+		static void Sumbit(const std::shared_ptr<VertexArray>& vertexArray);
+
+		inline static RendererAPI::API GetRendererAPI() { return RendererAPI::GetAPI(); }
 	};
 
 }
