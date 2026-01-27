@@ -11,8 +11,8 @@ namespace Monsi {
 		void Bind() const override;
 		void Unbind() const override;
 
-		virtual void SetLayout(const BufferLayout& layout) override { m_Layout = layout; }
-		virtual const BufferLayout& GetLayout() const override { return m_Layout; };
+		void SetLayout(const BufferLayout& layout) override { m_Layout = layout; }
+		const BufferLayout& GetLayout() const override { return m_Layout; };
 	private:
 		uint32_t m_ID;
 		BufferLayout m_Layout;
