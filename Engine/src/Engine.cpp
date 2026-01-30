@@ -32,7 +32,7 @@ namespace Monsi {
         EventDispatcher dispatcher(event);
         dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
 
-        ENGINE_LOG_TRACE("{0}", event);
+        //ENGINE_LOG_TRACE("{0}", event);
 
         for (auto it = m_LayerStack.end(); it != m_LayerStack.begin(); ) {
             (*--it)->OnLayerEvent(event);

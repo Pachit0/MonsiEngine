@@ -1,6 +1,8 @@
 #include "ExampleLayer.h"
 
-ExampleLayer::ExampleLayer() : Layer("ADD YOUR LAYER'S NAME HERE!") {
+ExampleLayer::ExampleLayer() 
+	: Layer("ADD YOUR LAYER'S NAME HERE!"), m_Camera(-3.0f, 3.0f, -3.0f, 3.0f), m_CameraPosition(0.0f), m_CameraSpeed(0.01f),
+	m_CameraRotation(0.0f), m_CameraRotationSpeed(0.1f){
 
 	m_VertexArray.reset(Monsi::VertexArray::Create());
 
@@ -13,7 +15,7 @@ ExampleLayer::ExampleLayer() : Layer("ADD YOUR LAYER'S NAME HERE!") {
 	std::shared_ptr<Monsi::VertexBuffer> VBO;
 	VBO.reset(Monsi::VertexBuffer::Create(vertices, sizeof(vertices)));
 
-	Monsi::BufferLayout layout = { //  Vertex code needs the same layout order as here
+	Monsi::BufferLayout layout = { // Vertex code needs the same layout order as here
 		{Monsi::ShaderDataType::Float3, "aPos"},
 		{Monsi::ShaderDataType::Float4, "aColor"}
 	};
@@ -65,13 +67,33 @@ void ExampleLayer::OnLayerUpdate() {
 	Monsi::RenderCommand::Clear();
 	Monsi::RenderCommand::SetClearColor({ 0.5f, 0.0f, 0.05f, 1.0f });
 
-	Monsi::Renderer::Begin();
+	if (Monsi::Input::KeyPressed(MONSI_KEY_A)) {
+		m_CameraPosition.x += m_CameraSpeed;
+	}
+	else if (Monsi::Input::KeyPressed(MONSI_KEY_D)) {
+		m_CameraPosition.x -= m_CameraSpeed;
+	}
+	if (Monsi::Input::KeyPressed(MONSI_KEY_W)) {
+		m_CameraPosition.y -= m_CameraSpeed;
+	}
+	else if (Monsi::Input::KeyPressed(MONSI_KEY_S)) {
+		m_CameraPosition.y += m_CameraSpeed;
+	}
 
-	m_SingleColorShader->Bind();
-	Monsi::Renderer::Sumbit(m_SquareVertexArray);
+	if (Monsi::Input::KeyPressed(MONSI_KEY_E)) {
+		m_CameraRotation += m_CameraRotationSpeed;
+	}
+	else if (Monsi::Input::KeyPressed(MONSI_KEY_Q)) {
+		m_CameraRotation -= m_CameraRotationSpeed;
+	}
 
-	m_Shader->Bind();
-	Monsi::Renderer::Sumbit(m_VertexArray);
+	m_Camera.SetPosition(m_CameraPosition);
+	m_Camera.SetRotation(m_CameraRotation);
+
+	Monsi::Renderer::Begin(m_Camera);
+
+	Monsi::Renderer::Sumbit(m_SquareVertexArray, m_SingleColorShader);
+	Monsi::Renderer::Sumbit(m_VertexArray, m_Shader);
 
 	Monsi::Renderer::End();
 }
@@ -81,8 +103,10 @@ void ExampleLayer::OnLayerDetach() {
 }
 
 void ExampleLayer::OnLayerEvent(Monsi::Event& event) {
-	CLIENT_LOG_TRACE("{0}", event);
+
 }
+
+
 
 void ExampleLayer::OnImGuiDraw() {
 	ImGui::Begin("TEST");

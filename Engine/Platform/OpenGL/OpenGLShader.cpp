@@ -1,5 +1,6 @@
 #include "MonsiPch.h"
 #include "OpenGLShader.h"
+#include "glm/gtc/type_ptr.hpp"
 
 namespace Monsi {
 
@@ -158,7 +159,7 @@ namespace Monsi {
 	}
 
 	void OpenGLShader::setBool(const std::string& name, bool value) {
-		glUniform1i(glGetUniformLocation(m_ID, name.c_str()), (int)value);
+		glUniform1i(glGetUniformLocation(m_ID, name.c_str()), static_cast<int>(value));
 	}
 
 	void OpenGLShader::setInt(const std::string& name, int value) {
@@ -194,15 +195,15 @@ namespace Monsi {
 	}
 
 	void OpenGLShader::setMat2(const std::string& name, const glm::mat2& mat) {
-		glUniformMatrix2fv(glGetUniformLocation(m_ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+		glUniformMatrix2fv(glGetUniformLocation(m_ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
 	}
 
 	void OpenGLShader::setMat3(const std::string& name, const glm::mat3& mat) {
-		glUniformMatrix3fv(glGetUniformLocation(m_ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+		glUniformMatrix3fv(glGetUniformLocation(m_ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
 	}
 
 	void OpenGLShader::setMat4(const std::string& name, const glm::mat4& mat) {
-		glUniformMatrix4fv(glGetUniformLocation(m_ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(m_ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
 	}
 
 }
