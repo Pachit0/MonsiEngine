@@ -1,13 +1,6 @@
 #pragma once
 
 #include <string>
-#include <fstream>
-#include <sstream>
-#include <iostream>
-#include "glad/glad.h"
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
 
 namespace Monsi {
 
@@ -18,19 +11,23 @@ namespace Monsi {
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
 
-		virtual void setBool(const std::string& name, bool value) = 0;
-		virtual void setInt(const std::string& name, int value) = 0;
-		virtual void setFloat(const std::string& name, float value) = 0;
-		virtual void setVec2(const std::string& name, const glm::vec2& value) = 0;
-		virtual void setVec2(const std::string& name, float x, float y) = 0;
-		virtual void setVec3(const std::string& name, const glm::vec3& value) = 0;
-		virtual void setVec3(const std::string& name, float x, float y, float z) = 0;
-		virtual void setVec4(const std::string& name, const glm::vec4& value) = 0;
-		virtual void setVec4(const std::string& name, float x, float y, float z, float w) = 0;
-		virtual void setMat2(const std::string& name, const glm::mat2& mat) = 0;
-		virtual void setMat3(const std::string& name, const glm::mat3& mat) = 0;
-		virtual void setMat4(const std::string& name, const glm::mat4& mat) = 0;
+		virtual const std::string& GetName() const = 0;
 
-		static Shader* Create(const std::string& vertexPath, const std::string& fragmentPath);
+		static Reference<Shader> Create(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath);
+		static Reference<Shader> Create(const std::string& filePath);
+	};
+
+	class ShaderLibrary {
+	public:
+		void Add(const std::string& name, const Reference<Shader>& shader);
+		void Add(const Reference<Shader>& shader);
+		Reference<Shader> Load(const std::string& name, const std::string& filePath);
+		Reference<Shader> Load(const std::string& filePath);
+		Reference<Shader> Get(const std::string& name);
+
+		bool Exists(const std::string& name) const;
+	
+	private:
+		std::unordered_map<std::string, Reference<Shader>> m_ShaderMap;
 	};
 }

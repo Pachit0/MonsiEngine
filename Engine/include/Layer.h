@@ -1,6 +1,7 @@
 #pragma once
 #include "Core.h"
 #include "Events.h"
+#include "Core/TimeStep.h"
 
 namespace Monsi {
 
@@ -10,7 +11,7 @@ namespace Monsi {
 		virtual ~Layer();
 
 		virtual void OnLayerAttach() {}
-		virtual void OnLayerUpdate() {}
+		virtual void OnLayerUpdate(TimeStep timestep) {}
 		virtual void OnLayerDetach() {}
 		virtual void OnImGuiDraw() {}
 		virtual void OnLayerEvent(Event& event) {}

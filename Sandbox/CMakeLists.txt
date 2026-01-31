@@ -1,8 +1,9 @@
 project(Sandbox)
 
-add_executable(Sandbox
-    src/SandboxApp.cpp
- "include/ExampleLayer.h" "src/ExampleLayer.cpp")
+add_executable( Sandbox
+    "src/SandboxApp.cpp"
+    "src/ExampleLayer.cpp"
+)
 
 target_include_directories(Sandbox PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include

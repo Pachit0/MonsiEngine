@@ -12,16 +12,16 @@ namespace Monsi {
 		void Bind() const override;
 		void Unbind() const override;
 
-		void AddVertexBuffer(const std::shared_ptr<VertexBuffer>& vertexBuffer) override;
-		void SetIndexBuffer(const std::shared_ptr<IndexBuffer>& indexBuffer) override;
+		void AddVertexBuffer(const Reference<VertexBuffer>& vertexBuffer) override;
+		void SetIndexBuffer(const Reference<IndexBuffer>& indexBuffer) override;
 
-		const std::vector<std::shared_ptr<VertexBuffer>>& GetVertexBuffers() const override { return m_VertexBuffers; }
-		const std::shared_ptr<IndexBuffer>& GetIndexBuffer() const override { return m_IndexBuffer; }
+		const std::vector<Reference<VertexBuffer>>& GetVertexBuffers() const override { return m_VertexBuffers; }
+		const Reference<IndexBuffer>& GetIndexBuffer() const override { return m_IndexBuffer; }
 	private:
 		uint32_t m_ID;
 		uint32_t m_VBIndex = 0;
-		std::shared_ptr<IndexBuffer> m_IndexBuffer;
-		std::vector<std::shared_ptr<VertexBuffer>> m_VertexBuffers;
+		Reference<IndexBuffer> m_IndexBuffer;
+		std::vector<Reference<VertexBuffer>> m_VertexBuffers;
 	};
 
 }

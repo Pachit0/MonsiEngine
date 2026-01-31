@@ -9,7 +9,7 @@ namespace Monsi {
 		OrthographicCamera(float left, float right, float bottom, float top);
 
 		void SetPosition(const glm::vec3& position);
-		const glm::vec3& GetPos() const { return m_Position; }
+		const glm::vec3& GetPosition() const { return m_Position; }
 
 		void SetRotation(float rotation);
 		float GetRotation() const { return m_Rotation; }

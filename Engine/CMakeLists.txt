@@ -5,26 +5,68 @@ project(Engine)
 set(CMAKE_CXX_STANDARD 17)
 
 add_library(Engine STATIC
-    src/Engine.cpp
-    src/Logger.cpp
-    include/Core.h
-    Core/EntryPoint.h
-    include/Logger.h
-    Events/Events.h
-    Events/MouseEvent.h
-    Events/KeyEvent.h
-    Events/ApplicationEvent.h
-    Events/EventFormatter.h
-    MonsiPch.h
-    MonsiPch.cpp
-    Platform/Windows/PlatformWindows.cpp
-    Platform/Windows/PlatformWindows.h
-    include/Window.h
-    Renderer/Shader.h
-    Renderer/Shader.cpp
-    Renderer/Buffers.h
-    Renderer/Buffers.cpp
-    "src/Layer.cpp" "include/Layer.h" "include/LayerStack.h" "src/LayerStack.cpp" "ImGui/ImGuiLayer.cpp" "ImGui/ImGuiLayer.h" "include/Input.h" "Platform/Windows/WindowsInput.h" "Platform/Windows/WindowsInput.cpp" "include/MonsiKeyCodes.h" "include/MonsiMouseButtonCodes.h" "include/MonsiControllerButtonCodes.h" "ImGui/ImGuiBuild.cpp" "Renderer/RenderContext.h" "Platform/OpenGL/OpenGLContext.h" "Platform/OpenGL/OpenGLContext.cpp" "Renderer/Buffers.h" "Renderer/Buffers.cpp" "Platform/OpenGL/OpenGLBuffer.h" "Platform/OpenGL/OpenGLBuffer.cpp" "Renderer/Renderer.cpp" "Renderer/Renderer.h" "Platform/OpenGL/OpenGLShader.h" "Platform/OpenGL/OpenGLShader.cpp" "Renderer/VertexArray.h" "Renderer/VertexArray.cpp" "Platform/OpenGL/OpenGLVertexArray.h" "Platform/OpenGL/OpenGLVertexArray.cpp" "Renderer/RendererAPI.h" "Renderer/RendererAPI.cpp" "Renderer/RenderCommand.h" "Renderer/RenderCommand.cpp" "Platform/OpenGL/OpenGLRendererAPI.h" "Platform/OpenGL/OpenGLRendererAPI.cpp" "include/OrthographicCamera.h" "src/OrthographicCamera.cpp")
+    "src/Engine.cpp"
+    "src/Logger.cpp"
+    "include/Core.h"
+    "Core/EntryPoint.h"
+    "include/Logger.h"
+    "Events/Events.h"
+    "Events/MouseEvent.h"
+    "Events/KeyEvent.h"
+    "Events/ApplicationEvent.h"
+    "Events/EventFormatter.h"
+    "MonsiPch.h"
+    "MonsiPch.cpp"
+    "Platform/Windows/PlatformWindows.cpp"
+    "Platform/Windows/PlatformWindows.h"
+    "include/Window.h"
+    "Renderer/Shader.h"
+    "Renderer/Shader.cpp"
+    "Renderer/Buffers.h"
+    "Renderer/Buffers.cpp"
+    "src/Layer.cpp"
+    "include/Layer.h" 
+    "include/LayerStack.h" 
+    "src/LayerStack.cpp" 
+    "ImGui/ImGuiLayer.cpp" 
+    "ImGui/ImGuiLayer.h" 
+    "include/Input.h"
+    "Platform/Windows/WindowsInput.h"
+    "Platform/Windows/WindowsInput.cpp"
+    "include/MonsiKeyCodes.h"
+    "include/MonsiMouseButtonCodes.h"
+    "include/MonsiControllerButtonCodes.h"
+    "ImGui/ImGuiBuild.cpp"
+    "Renderer/RenderContext.h"
+    "Platform/OpenGL/OpenGLContext.h" 
+    "Platform/OpenGL/OpenGLContext.cpp"
+    "Renderer/Buffers.h" 
+    "Renderer/Buffers.cpp" 
+    "Platform/OpenGL/OpenGLBuffer.h"
+    "Platform/OpenGL/OpenGLBuffer.cpp"
+    "Renderer/Renderer.cpp"
+    "Renderer/Renderer.h"
+    "Platform/OpenGL/OpenGLShader.h"
+    "Platform/OpenGL/OpenGLShader.cpp" 
+    "Renderer/VertexArray.h" 
+    "Renderer/VertexArray.cpp"
+    "Platform/OpenGL/OpenGLVertexArray.h" 
+    "Platform/OpenGL/OpenGLVertexArray.cpp"
+    "Renderer/RendererAPI.h" 
+    "Renderer/RendererAPI.cpp"
+    "Renderer/RenderCommand.h" 
+    "Renderer/RenderCommand.cpp" 
+    "Platform/OpenGL/OpenGLRendererAPI.h" 
+    "Platform/OpenGL/OpenGLRendererAPI.cpp" 
+    "include/OrthographicCamera.h" 
+    "src/OrthographicCamera.cpp" 
+    "Core/TimeStep.h" 
+    "Renderer/Texture.h" 
+    "Renderer/Texture.cpp" 
+    "Platform/OpenGL/OpenGLTexture.h" 
+    "Platform/OpenGL/OpenGLTexture.cpp"
+    "thirdparty/stb_image/stb_image.cpp"    
+)
 
 if(WIN32)
     target_compile_definitions(Engine PRIVATE MONSI_PLATFORM_WINDOWS GLFW_INCLUDE_NONE MONSI_BUILD_DEBUG)
@@ -49,6 +91,7 @@ target_link_libraries(Engine
            spdlog::spdlog_header_only
            imgui
            glfw
+           stb_image
 )
 
 if(WIN32)

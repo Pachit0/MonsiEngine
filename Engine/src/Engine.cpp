@@ -5,6 +5,7 @@
 #include "Input.h"
 
 #include "Renderer/Renderer.h"
+#include <glfw/glfw3.h>
 
 namespace Monsi {
 
@@ -18,6 +19,8 @@ namespace Monsi {
 
         m_Window = std::unique_ptr<Window>(Window::Create());
         m_Window->SetEventCallbackFn(BIND_EVENT_FN(OnEvent));
+
+        Renderer::Init();
 
         m_ImGuiLayer = new ImGuiLayer();
         PushOverlay(m_ImGuiLayer);
@@ -44,9 +47,12 @@ namespace Monsi {
 
     void Application::Run() {
         while (m_Running) {
+            float currentTime = static_cast<float>(glfwGetTime());
+            TimeStep timeStep = currentTime - m_PrevFrameTime;
+            m_PrevFrameTime = currentTime;
 
             for (Layer* layer : m_LayerStack) {
-                layer->OnLayerUpdate();
+                layer->OnLayerUpdate(timeStep);
             }
 
             m_ImGuiLayer->Begin();

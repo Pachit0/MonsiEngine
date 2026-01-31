@@ -15,5 +15,8 @@
 #include "Renderer/Buffers.h"
 #include "Renderer/Shader.h"
 #include "Renderer/VertexArray.h"
+#include "Renderer/Texture.h"
 
 #include "OrthographicCamera.h"
+
+#include "Core/TimeStep.h"

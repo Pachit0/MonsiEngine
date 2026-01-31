@@ -8,9 +8,11 @@ namespace Monsi {
 
 	class Renderer {
 	public:
+		static void Init();
+
 		static void Begin(OrthographicCamera& camera);
 		static void End();
-		static void Sumbit(const std::shared_ptr<VertexArray>& vertexArray, const std::shared_ptr<Shader>& shader);
+		static void Sumbit(const Reference<VertexArray>& vertexArray, const Reference<Shader>& shader, const glm::mat4 transform = glm::mat4(1.0f));
 
 		inline static RendererAPI::API GetRendererAPI() { return RendererAPI::GetAPI(); }
 	private:

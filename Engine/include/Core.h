@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 
 #ifdef MONSI_PLATFORM_WINDOWS
     #if ENGINE_LINK_DYNAMICALLY
@@ -29,3 +30,11 @@
 #define BIT(x) (1 << x)
 
 #define ENGINE_BIND_EVENT_FN(fn) std::bind(&fn, this, std::placeholders::_1)
+
+namespace Monsi{
+    template<typename T>
+    using Scope = std::unique_ptr<T>;
+
+    template<typename T>
+    using Reference = std::shared_ptr<T>;
+}

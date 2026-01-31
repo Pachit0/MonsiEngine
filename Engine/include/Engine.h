@@ -9,6 +9,7 @@
 #include "Renderer/Buffers.h"
 #include "Platform/OpenGL/OpenGLBuffer.h"
 #include "Renderer/VertexArray.h"
+#include "Core/TimeStep.h"
 
 #include "Window.h"
 
@@ -38,7 +39,7 @@ namespace Monsi {
         LayerStack m_LayerStack;
 
         static Application* s_Instance;
-        
+        float m_PrevFrameTime;
     };
 
     Application* CreateApplication();
