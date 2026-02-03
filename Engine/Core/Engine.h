@@ -31,10 +31,12 @@ namespace Monsi {
         inline static Application& Get() { return *s_Instance; }
     private:
         bool OnWindowClose(WindowCloseEvent& event);
+        bool onWindowResize(WindowResizeEvent& event);
 
         std::unique_ptr<Window> m_Window;
         ImGuiLayer* m_ImGuiLayer;
         bool m_Running = true;
+        bool m_Minimized = false;
 
         LayerStack m_LayerStack;
 

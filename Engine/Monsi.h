@@ -4,9 +4,10 @@
 #include "Logger.h"
 #include "Layer.h"
 
-#include "MonsiKeyCodes.h"
-#include "MonsiMouseButtonCodes.h"
-#include "Input.h"
+#include "Core/MonsiKeyCodes.h"
+#include "Core/MonsiMouseButtonCodes.h"
+#include "Core/Input.h"
+#include "Core/TimeStep.h"
 
 #include "ImGui/ImGuiLayer.h"
 
@@ -16,7 +17,7 @@
 #include "Renderer/Shader.h"
 #include "Renderer/VertexArray.h"
 #include "Renderer/Texture.h"
+#include "Renderer/OrthographicCamera.h"
+#include "Renderer/Renderer2D.h"
 
-#include "OrthographicCamera.h"
-
-#include "Core/TimeStep.h"
+#include "include/OrthographicControl.h"

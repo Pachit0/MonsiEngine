@@ -1,18 +1,15 @@
 #pragma once
 #include <memory>
 
-#ifdef MONSI_PLATFORM_WINDOWS
-    #if ENGINE_LINK_DYNAMICALLY
-        #ifdef ENGINE_BUILD_DLL
-            #define ENGINE_API __declspec(dllexport)
-        #else
-            #define ENGINE_API __declspec(dllimport)
-        #endif
+#ifdef _WIN32
+    #ifdef _WIN64
+        #define MONSI_PLATFORM_WINDOWS
     #else
-        #define ENGINE_API
+        #error "x86 architecture not supported!"
     #endif
-#else
-    #error Monsi supports only Windows!
+#elif defined(__linux__)
+    #define MONSI_PLATFORM_LINUX
+    #error "Linux not supported yet!"
 #endif
 
 #ifdef MONSI_BUILD_DEBUG
@@ -38,3 +35,17 @@ namespace Monsi{
     template<typename T>
     using Reference = std::shared_ptr<T>;
 }
+
+#ifdef MONSI_PLATFORM_WINDOWS
+    #if ENGINE_LINK_DYNAMICALLY
+        #ifdef ENGINE_BUILD_DLL
+            #define ENGINE_API __declspec(dllexport)
+        #else
+            #define ENGINE_API __declspec(dllimport)
+        #endif
+    #else
+        #define ENGINE_API
+    #endif
+#else
+    #error Monsi supports only Windows!
+#endif

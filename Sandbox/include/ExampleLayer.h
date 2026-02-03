@@ -23,11 +23,7 @@ private:
 
 	Monsi::Reference<Monsi::Texture2D> m_Texture, m_MonsiTest;
 
-	Monsi::OrthographicCamera m_Camera;
-	glm::vec3 m_CameraPosition;
-	float m_CameraSpeed;
-	float m_CameraRotation;
-	float m_CameraRotationSpeed;
+	Monsi::OrthographicControl m_CameraControl;
 
 	glm::vec3 m_SquareColor;
 };

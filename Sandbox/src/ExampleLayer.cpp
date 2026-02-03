@@ -1,13 +1,12 @@
 #include "ExampleLayer.h"
 #include "glm/gtc/matrix_transform.hpp"
-#include "Platform/OpenGL/OpenGLShader.h"
+#include "OpenGL/OpenGLShader.h"
 #include "glm/gtc/type_ptr.hpp"
 
 ExampleLayer::ExampleLayer() 
-	: Layer("ADD YOUR LAYER'S NAME HERE!"), m_Camera(-1.6f, 1.6f, -0.9f, 0.9f), m_CameraPosition(0.0f), m_CameraSpeed(10.0f),
-	m_CameraRotation(0.0f), m_CameraRotationSpeed(90.0f), m_SquareColor({ 0.8f, 0.1f, 0.1f }) {
+	: Layer("ADD YOUR LAYER'S NAME HERE!"), m_CameraControl(1280.0f / 720.0f, true), m_SquareColor({ 0.8f, 0.1f, 0.1f }) {
 
-	m_VertexArray.reset(Monsi::VertexArray::Create());
+	m_VertexArray = Monsi::VertexArray::Create();
 
 	float vertices[] = {
 		-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
@@ -33,7 +32,7 @@ ExampleLayer::ExampleLayer()
 	EBO.reset(Monsi::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
 	m_VertexArray->SetIndexBuffer(EBO);
 
-	m_SquareVertexArray.reset(Monsi::VertexArray::Create());
+	m_SquareVertexArray = Monsi::VertexArray::Create();
 
 	float squareVertices[] = {
 		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
@@ -64,7 +63,7 @@ ExampleLayer::ExampleLayer()
 	m_MonsiTest = Monsi::Texture2D::Create("D:/Monsi Engine/Sandbox/assets/Textures/MonsiTest.png");
 
 	std::dynamic_pointer_cast<Monsi::OpenGLShader>(textureShader)->Bind();
-	std::dynamic_pointer_cast<Monsi::OpenGLShader>(textureShader)->setInt("u_Texture", 0);
+	std::dynamic_pointer_cast<Monsi::OpenGLShader>(textureShader)->UploadInt("u_Texture", 0);
 
 }
 
@@ -74,33 +73,12 @@ void ExampleLayer::OnLayerAttach() {
 
 void ExampleLayer::OnLayerUpdate(Monsi::TimeStep timeStep) {
 
+	m_CameraControl.OnLayerUpdate(timeStep);
+
 	Monsi::RenderCommand::Clear();
 	Monsi::RenderCommand::SetClearColor({ 0.5f, 0.0f, 0.05f, 1.0f });
 
-	if (Monsi::Input::KeyPressed(MONSI_KEY_D)) {
-		m_CameraPosition.x += m_CameraSpeed * timeStep;
-	}
-	else if (Monsi::Input::KeyPressed(MONSI_KEY_A)) {
-		m_CameraPosition.x -= m_CameraSpeed * timeStep;
-	}
-	if (Monsi::Input::KeyPressed(MONSI_KEY_S)) {
-		m_CameraPosition.y -= m_CameraSpeed * timeStep;
-	}
-	else if (Monsi::Input::KeyPressed(MONSI_KEY_W)) {
-		m_CameraPosition.y += m_CameraSpeed * timeStep;
-	}
-
-	if (Monsi::Input::KeyPressed(MONSI_KEY_E)) {
-		m_CameraRotation += m_CameraRotationSpeed * timeStep;
-	}
-	else if (Monsi::Input::KeyPressed(MONSI_KEY_Q)) {
-		m_CameraRotation -= m_CameraRotationSpeed * timeStep;
-	}
-
-	m_Camera.SetPosition(m_CameraPosition);
-	m_Camera.SetRotation(m_CameraRotation);
-
-	Monsi::Renderer::Begin(m_Camera);
+	Monsi::Renderer::Begin(m_CameraControl.GetCamera());
 
 	glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 
@@ -128,7 +106,8 @@ void ExampleLayer::OnLayerDetach() {
 }
 
 void ExampleLayer::OnLayerEvent(Monsi::Event& event) {
-
+	m_CameraControl.OnLayerEvent(event);
+	if (event.GetEventType() == Monsi::EventType::WindowResize) { (Monsi::WindowResizeEvent&)event; }
 }
 
 

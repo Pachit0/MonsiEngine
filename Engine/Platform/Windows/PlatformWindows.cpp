@@ -37,7 +37,6 @@ namespace Monsi {
 		m_Data.Width = info.Width;
 		m_Data.Height = info.Height;
 		
-		ENGINE_LOG_INFO("Creating Window {0} ({1}, {2})", info.Title, info.Width, info.Height);
 		if (!s_GLFWInitialized) {
 			int success = glfwInit();
 			ENGINE_ASSERT(success, "Failed to initialize GLFW!");

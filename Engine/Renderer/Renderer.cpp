@@ -1,5 +1,6 @@
 #include "MonsiPch.h"
 #include "Renderer.h"
+#include "Renderer2D.h"
 #include "Platform/OpenGL/OpenGLShader.h"
 
 namespace Monsi {
@@ -8,6 +9,12 @@ namespace Monsi {
 
 	void Renderer::Init() {
 		RenderCommand::Init();
+		Renderer2D::Init();
+	}
+
+	void Renderer::onWindowResize(uint32_t width, uint32_t height)
+	{
+		RenderCommand::SetViewport(0, 0, width, height);
 	}
 
 	void Renderer::Begin(OrthographicCamera& camera) {

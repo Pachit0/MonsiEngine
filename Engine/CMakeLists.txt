@@ -7,9 +7,9 @@ set(CMAKE_CXX_STANDARD 17)
 add_library(Engine STATIC
     "src/Engine.cpp"
     "src/Logger.cpp"
-    "include/Core.h"
+    "Core/Core.h"
     "Core/EntryPoint.h"
-    "include/Logger.h"
+    "Core/Logger.h"
     "Events/Events.h"
     "Events/MouseEvent.h"
     "Events/KeyEvent.h"
@@ -19,23 +19,23 @@ add_library(Engine STATIC
     "MonsiPch.cpp"
     "Platform/Windows/PlatformWindows.cpp"
     "Platform/Windows/PlatformWindows.h"
-    "include/Window.h"
+    "Core/Window.h"
     "Renderer/Shader.h"
     "Renderer/Shader.cpp"
     "Renderer/Buffers.h"
     "Renderer/Buffers.cpp"
     "src/Layer.cpp"
-    "include/Layer.h" 
-    "include/LayerStack.h" 
+    "Core/Layer.h" 
+    "Core/LayerStack.h" 
     "src/LayerStack.cpp" 
     "ImGui/ImGuiLayer.cpp" 
     "ImGui/ImGuiLayer.h" 
-    "include/Input.h"
+    "Core/Input.h"
     "Platform/Windows/WindowsInput.h"
     "Platform/Windows/WindowsInput.cpp"
-    "include/MonsiKeyCodes.h"
-    "include/MonsiMouseButtonCodes.h"
-    "include/MonsiControllerButtonCodes.h"
+    "Core/MonsiKeyCodes.h"
+    "Core/MonsiMouseButtonCodes.h"
+    "Core/MonsiControllerButtonCodes.h"
     "ImGui/ImGuiBuild.cpp"
     "Renderer/RenderContext.h"
     "Platform/OpenGL/OpenGLContext.h" 
@@ -58,18 +58,19 @@ add_library(Engine STATIC
     "Renderer/RenderCommand.cpp" 
     "Platform/OpenGL/OpenGLRendererAPI.h" 
     "Platform/OpenGL/OpenGLRendererAPI.cpp" 
-    "include/OrthographicCamera.h" 
-    "src/OrthographicCamera.cpp" 
+    "Renderer/OrthographicCamera.h" 
+    "Renderer/OrthographicCamera.cpp" 
     "Core/TimeStep.h" 
     "Renderer/Texture.h" 
     "Renderer/Texture.cpp" 
     "Platform/OpenGL/OpenGLTexture.h" 
     "Platform/OpenGL/OpenGLTexture.cpp"
     "thirdparty/stb_image/stb_image.cpp"    
-)
+    "include/OrthographicControl.h" 
+    "src/OrthographicControl.cpp" "Renderer/Renderer2D.h" "Renderer/Renderer2D.cpp")
 
 if(WIN32)
-    target_compile_definitions(Engine PRIVATE MONSI_PLATFORM_WINDOWS GLFW_INCLUDE_NONE MONSI_BUILD_DEBUG)
+    target_compile_definitions(Engine PRIVATE GLFW_INCLUDE_NONE MONSI_BUILD_DEBUG)
 endif()
 
 add_subdirectory(thirdparty)
@@ -77,6 +78,8 @@ add_subdirectory(thirdparty)
 target_include_directories(Engine PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/Platform
+    ${CMAKE_CURRENT_SOURCE_DIR}/Core
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer
     ${CMAKE_CURRENT_SOURCE_DIR}/Events
     ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glfw/include

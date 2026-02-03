@@ -4,7 +4,7 @@
 #include "EventFormatter.h"
 #include "Input.h"
 
-#include "Renderer/Renderer.h"
+#include "Renderer.h"
 #include <glfw/glfw3.h>
 
 namespace Monsi {
@@ -34,6 +34,7 @@ namespace Monsi {
     void Application::OnEvent(Event& event) {
         EventDispatcher dispatcher(event);
         dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
+        dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(onWindowResize));
 
         //ENGINE_LOG_TRACE("{0}", event);
 
@@ -51,8 +52,10 @@ namespace Monsi {
             TimeStep timeStep = currentTime - m_PrevFrameTime;
             m_PrevFrameTime = currentTime;
 
-            for (Layer* layer : m_LayerStack) {
-                layer->OnLayerUpdate(timeStep);
+            if (!m_Minimized) {
+                for (Layer* layer : m_LayerStack) {
+                    layer->OnLayerUpdate(timeStep);
+                }
             }
 
             m_ImGuiLayer->Begin();
@@ -68,6 +71,17 @@ namespace Monsi {
     bool Application::OnWindowClose(WindowCloseEvent& event) {
         m_Running = false;
         return true;
+    }
+
+    bool Application::onWindowResize(WindowResizeEvent& event) {
+        if (event.GetWidth() == 0 || event.GetHeight() == 0) {
+            m_Minimized = true;
+            return false;
+        }
+        m_Minimized = false;
+        Renderer::onWindowResize(event.GetWidth(), event.GetHeight());
+
+        return false;
     }
 
     void Application::PushLayer(Layer* layer) {

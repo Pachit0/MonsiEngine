@@ -19,7 +19,7 @@ namespace Monsi {
 		virtual const std::vector<Reference<VertexBuffer>>& GetVertexBuffers() const = 0;
 		virtual const Reference<IndexBuffer>& GetIndexBuffer() const = 0;
 
-		static VertexArray* Create();
+		static Reference<VertexArray> Create();
 	};
 
 }
