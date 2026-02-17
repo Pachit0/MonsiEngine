@@ -15,7 +15,3 @@ target_include_directories(Sandbox PRIVATE
 target_link_libraries(Sandbox PRIVATE 
     Engine
 )
-
-if(WIN32)
-    target_compile_definitions(Sandbox PRIVATE MONSI_PLATFORM_WINDOWS)
-endif()

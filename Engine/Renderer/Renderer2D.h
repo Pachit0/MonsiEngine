@@ -19,11 +19,11 @@ namespace Monsi {
 		static void drawQuad(const glm::vec2& position, const glm::vec2& size, const Reference<Texture2D>& texture);
 		static void drawQuad(const glm::vec3& position, const glm::vec2& size, const Reference<Texture2D>& texture);
 
-		static void drawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, const Reference<Texture2D>& texture);
-		static void drawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color, const Reference<Texture2D>& texture);
+		static void drawQuad(const glm::vec2& position, const glm::vec2& size, const Reference<Texture2D>& texture, const glm::vec4& color);
+		static void drawQuad(const glm::vec3& position, const glm::vec2& size, const Reference<Texture2D>& texture, const glm::vec4& color);
 
-		static void drawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, const Reference<Texture2D>& texture, float scale);
-		static void drawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color, const Reference<Texture2D>& texture, float scale);
+		static void drawQuad(const glm::vec2& position, const glm::vec2& size, const Reference<Texture2D>& texture, const glm::vec4& color, float scale);
+		static void drawQuad(const glm::vec3& position, const glm::vec2& size, const Reference<Texture2D>& texture, const glm::vec4& color, float scale);
 		
 	};
 

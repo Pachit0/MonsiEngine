@@ -9,8 +9,9 @@ namespace Monsi {
 
 	struct Renderer2DData {
 		Reference<VertexArray> QuadVA;
-		Reference<Shader> FlatColorShader;
 		Reference<Shader> TextureShader;
+		Reference<Texture2D> WhiteTexture;
+		float TextureScale;
 	};
 
 	static Renderer2DData* s_Data;
@@ -42,7 +43,12 @@ namespace Monsi {
 		squareEB.reset(IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
 		s_Data->QuadVA->SetIndexBuffer(squareEB);
 
-		s_Data->FlatColorShader = Shader::Create("D:/Monsi Engine/Sandbox/assets/Shader/ShaderFlatColor.glsl");
+		s_Data->WhiteTexture = Texture2D::Create(1, 1);
+		uint32_t WhiteColorData = 0xffffffff;
+		s_Data->WhiteTexture->modifyData(&WhiteColorData, sizeof(uint32_t));
+		s_Data->TextureScale = 1.0f;
+
+
 		s_Data->TextureShader = Shader::Create("D:/Monsi Engine/Sandbox/assets/Shader/Textures.glsl");
 		s_Data->TextureShader->Bind();
 		s_Data->TextureShader->setInt("u_Texture", 0);
@@ -53,9 +59,6 @@ namespace Monsi {
 	}
 
 	void Renderer2D::Begin2D(const OrthographicCamera& camera) {
-		s_Data->FlatColorShader->Bind();
-		s_Data->FlatColorShader->setMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
-
 		s_Data->TextureShader->Bind();
 		s_Data->TextureShader->setMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
 		
@@ -68,15 +71,16 @@ namespace Monsi {
 	void Renderer2D::drawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color) {
 		drawQuad({ position.x, position.y, 0.0f }, size, color);
 	}
-
+	
 	void Renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color) {
-		s_Data->FlatColorShader->Bind();
-		s_Data->FlatColorShader->setVec4("u_Color", color);
+		s_Data->TextureShader->setFloat("u_Scale", s_Data->TextureScale);
+		s_Data->TextureShader->setVec4("u_Color", color);
+		s_Data->WhiteTexture->Bind();
 		
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) /* Translation * rotation(optinal) * scale */
 			* glm::scale(glm::mat4(1.0f), {size.x, size.y, 1.0f});
-		s_Data->FlatColorShader->setMat4("u_Transform", transform);
-
+		s_Data->TextureShader->setMat4("u_Transform", transform);
+	
 		s_Data->QuadVA->Bind();
 		RenderCommand::DrawIndexed(s_Data->QuadVA);
 	}
@@ -88,25 +92,26 @@ namespace Monsi {
 
 	void Renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size, const Reference<Texture2D>& texture)
 	{
-		s_Data->TextureShader->Bind();
+		s_Data->TextureShader->setFloat("u_Scale", s_Data->TextureScale);
+		s_Data->TextureShader->setVec4("u_Color", glm::vec4(1.0f));
+		texture->Bind();
 
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
 		s_Data->TextureShader->setMat4("u_Transform", transform);
 
-		texture->Bind();
 
 		s_Data->QuadVA->Bind();
 		RenderCommand::DrawIndexed(s_Data->QuadVA);
 	}
 
-	void Renderer2D::drawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, const Reference<Texture2D>& texture)
+	void Renderer2D::drawQuad(const glm::vec2& position, const glm::vec2& size, const Reference<Texture2D>& texture, const glm::vec4& color)
 	{
-		drawQuad({ position.x, position.y, 0.0f }, size, color, texture);
+		drawQuad({ position.x, position.y, 0.0f }, size, texture, color);
 	}
 
-	void Renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color, const Reference<Texture2D>& texture)
+	void Renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size, const Reference<Texture2D>& texture, const glm::vec4& color)
 	{
-		s_Data->TextureShader->Bind();
+		s_Data->TextureShader->setFloat("u_Scale", s_Data->TextureScale);
 		s_Data->TextureShader->setVec4("u_Color", color);
 
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
@@ -118,21 +123,20 @@ namespace Monsi {
 		RenderCommand::DrawIndexed(s_Data->QuadVA);
 	}
 
-	void Renderer2D::drawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, const Reference<Texture2D>& texture, float scale)
+	void Renderer2D::drawQuad(const glm::vec2& position, const glm::vec2& size, const Reference<Texture2D>& texture, const glm::vec4& color, float scale)
 	{
-		drawQuad({ position.x, position.y, 0.0f }, size, color, texture, scale);
+		drawQuad({ position.x, position.y, 0.0f }, size, texture, color, scale);
 	}
 
-	void Renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color, const Reference<Texture2D>& texture, float scale)
+	void Renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size, const Reference<Texture2D>& texture, const glm::vec4& color, float scale)
 	{
-		s_Data->TextureShader->Bind();
-		s_Data->TextureShader->setVec4("u_Color", color);
 		s_Data->TextureShader->setFloat("u_Scale", scale);
+		s_Data->TextureShader->setVec4("u_Color", color);
+		texture->Bind();
 
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
 		s_Data->TextureShader->setMat4("u_Transform", transform);
 
-		texture->Bind();
 
 		s_Data->QuadVA->Bind();
 		RenderCommand::DrawIndexed(s_Data->QuadVA);

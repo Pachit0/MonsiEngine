@@ -67,7 +67,9 @@ add_library(Engine STATIC
     "Platform/OpenGL/OpenGLTexture.cpp"
     "thirdparty/stb_image/stb_image.cpp"    
     "include/OrthographicControl.h" 
-    "src/OrthographicControl.cpp" "Renderer/Renderer2D.h" "Renderer/Renderer2D.cpp")
+    "src/OrthographicControl.cpp" 
+    "Renderer/Renderer2D.h" 
+    "Renderer/Renderer2D.cpp")
 
 if(WIN32)
     target_compile_definitions(Engine PRIVATE GLFW_INCLUDE_NONE MONSI_BUILD_DEBUG)
