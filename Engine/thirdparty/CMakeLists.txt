@@ -27,6 +27,7 @@ add_library(imgui STATIC ${IMGUI_SRC})
 target_include_directories(imgui PUBLIC imgui-docking imgui-docking/backends)
 target_link_libraries(imgui PUBLIC glfw glad)
 
+
 # GLM as interface
 add_library(glm INTERFACE)
 target_include_directories(glm INTERFACE glm)
@@ -41,3 +42,13 @@ target_include_directories(stb_image
     INTERFACE
         ${CMAKE_CURRENT_LIST_DIR}/stb_image
 )
+
+# ImPlot
+file(GLOB IMPLOT_SRC
+    implot/implot.cpp
+    implot/implot_demo.cpp
+    implot/implot_items.cpp
+)
+add_library(implot STATIC ${IMPLOT_SRC})
+target_include_directories(implot PUBLIC implot)
+target_link_libraries(implot PUBLIC imgui)

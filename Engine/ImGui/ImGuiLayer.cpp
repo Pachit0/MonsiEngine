@@ -81,8 +81,7 @@ namespace Monsi {
         }
     }
 
-    void ImGuiLayer::OnImGuiDraw() {
-        static bool show = true;
-        ImGui::ShowDemoWindow(&show);
-    }
+	void ImGuiLayer::OnImGuiDraw() {
+
+	}
 }

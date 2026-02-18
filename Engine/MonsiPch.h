@@ -15,6 +15,8 @@
 
 #include "Logger.h"
 
+#include "debug/instrumentor.h"
+
 #ifdef MONSI_PLATFORM_WINDOWS
 	#include <Windows.h>
 #endif

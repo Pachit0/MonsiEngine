@@ -20,5 +20,12 @@ private:
 	Monsi::Reference<Monsi::Shader> m_FlatColorShader;
 	Monsi::Reference<Monsi::Texture2D> m_MonsiTest;
 
+	struct TimeProfilerResult {
+		const char* Name;
+		float Time;
+	};
+
+	std::vector<TimeProfilerResult> m_TimeResults;
+
 	glm::vec4 m_SquareColor = {0.6f, 0.4f, 0.2f, 1.0f};
 };

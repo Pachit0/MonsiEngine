@@ -69,10 +69,11 @@ add_library(Engine STATIC
     "include/OrthographicControl.h" 
     "src/OrthographicControl.cpp" 
     "Renderer/Renderer2D.h" 
-    "Renderer/Renderer2D.cpp")
+    "Renderer/Renderer2D.cpp"   
+    "debug/instrumentor.h")
 
 if(WIN32)
-    target_compile_definitions(Engine PRIVATE GLFW_INCLUDE_NONE MONSI_BUILD_DEBUG)
+    target_compile_definitions(Engine PRIVATE GLFW_INCLUDE_NONE MONSI_BUILD_DEBUG ENGINE_PROFILER)
 endif()
 
 add_subdirectory(thirdparty)
@@ -97,6 +98,7 @@ target_link_libraries(Engine
            imgui
            glfw
            stb_image
+           implot
 )
 
 if(WIN32)

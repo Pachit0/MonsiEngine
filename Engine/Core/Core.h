@@ -27,6 +27,8 @@
 #define BIT(x) (1 << x)
 
 #define ENGINE_BIND_EVENT_FN(fn) std::bind(&fn, this, std::placeholders::_1)
+#define ENGINE_CONCAT_INTERNAL(x, y) x##y
+#define ENGINE_CONCAT(x, y) ENGINE_CONCAT_INTERNAL(x, y)
 
 namespace Monsi{
     template<typename T>
