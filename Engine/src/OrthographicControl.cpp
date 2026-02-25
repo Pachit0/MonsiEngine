@@ -13,6 +13,7 @@ namespace Monsi {
 	}
 
 	void OrthographicControl::OnLayerUpdate(TimeStep timeStep) {
+		ENGINE_PROFILER_FUNCTION();
 		if (Input::KeyPressed(MONSI_KEY_D)) {
 			m_CameraPosition.x += m_CameraTranslationSpeed * timeStep;
 		}
@@ -41,6 +42,7 @@ namespace Monsi {
 	}
 
 	void OrthographicControl::OnLayerEvent(Event& event) {
+		ENGINE_PROFILER_FUNCTION();
 		EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<MouseEventScrolled>(ENGINE_BIND_EVENT_FN(OrthographicControl::OnZoomEvent));
 		dispatcher.Dispatch<WindowResizeEvent>(ENGINE_BIND_EVENT_FN(OrthographicControl::OnResizeEvent));
@@ -48,6 +50,7 @@ namespace Monsi {
 
 	bool OrthographicControl::OnZoomEvent(MouseEventScrolled& event)
 	{
+		ENGINE_PROFILER_FUNCTION();
 		m_ZoomControl -= event.GetYOffset() * 0.15f;
 		if (m_ZoomControl < 0.25f) {
 			m_ZoomControl = 0.25f;
@@ -58,6 +61,7 @@ namespace Monsi {
 
 	bool OrthographicControl::OnResizeEvent(WindowResizeEvent& event)
 	{
+		ENGINE_PROFILER_FUNCTION();
 		m_AspectRation = static_cast<float>(event.GetWidth()) / static_cast<float>(event.GetHeight());
 		m_Camera.SetProjection(-m_AspectRation * m_ZoomControl, m_AspectRation * m_ZoomControl, -m_ZoomControl, m_ZoomControl);
 		return false;

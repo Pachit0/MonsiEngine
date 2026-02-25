@@ -23,25 +23,30 @@ namespace Monsi {
 	}
 
 	OpenGLVertexArray::OpenGLVertexArray() {
+		ENGINE_PROFILER_FUNCTION();
 		glCreateVertexArrays(1, &m_ID);
 	}
 
 	OpenGLVertexArray::~OpenGLVertexArray() {
+		ENGINE_PROFILER_FUNCTION();
 		glDeleteVertexArrays(1, &m_ID);
 	}
 
 	void OpenGLVertexArray::Bind() const
 	{
+		ENGINE_PROFILER_FUNCTION();
 		glBindVertexArray(m_ID);
 	}
 
 	void OpenGLVertexArray::Unbind() const
 	{
+		ENGINE_PROFILER_FUNCTION();
 		glBindVertexArray(0);
 	}
 
 	void OpenGLVertexArray::AddVertexBuffer(const Reference<VertexBuffer>& vertexBuffer)
 	{
+		ENGINE_PROFILER_FUNCTION();
 		ENGINE_ASSERT(vertexBuffer->GetLayout().GetElements().size(), "Vertex Buffer doesn't have a layout!");
 		glBindVertexArray(m_ID);
 		vertexBuffer->Bind();
@@ -59,6 +64,7 @@ namespace Monsi {
 
 	void OpenGLVertexArray::SetIndexBuffer(const Reference<IndexBuffer>& indexBuffer)
 	{
+		ENGINE_PROFILER_FUNCTION();
 		glBindVertexArray(m_ID);
 		indexBuffer->Bind();
 		m_IndexBuffer = indexBuffer;

@@ -14,7 +14,7 @@ namespace Monsi {
 		ENGINE_LOG_ERROR("GLFW Error ({0}): {1}", error_code, description);
 	}
 	
-	static bool s_GLFWInitialized = false;
+	static uint32_t s_GLFWInitializedCount = 0;
 
 	Window* Window::Create(const WindowInfo& info) {
 		return new PlatformWindows(info);
@@ -33,18 +33,21 @@ namespace Monsi {
 	}
 
 	void PlatformWindows::Init(const WindowInfo& info) {
+		ENGINE_PROFILER_FUNCTION();
+
 		m_Data.Title = info.Title;
 		m_Data.Width = info.Width;
 		m_Data.Height = info.Height;
 		
-		if (!s_GLFWInitialized) {
+		if (s_GLFWInitializedCount == 0) {
 			int success = glfwInit();
 			ENGINE_ASSERT(success, "Failed to initialize GLFW!");
 			glfwSetErrorCallback(GLFWErrorCallback);
-			s_GLFWInitialized = true;
 		}
 
 		m_Window = glfwCreateWindow(info.Width, info.Height, m_Data.Title.c_str(), nullptr, nullptr);
+		s_GLFWInitializedCount++;
+
 		m_Context = new OpenGLContext(m_Window);
 		m_Context->Init();
 
@@ -131,15 +134,28 @@ namespace Monsi {
 
 	void PlatformWindows::Shutdown() {
 
+		ENGINE_PROFILER_FUNCTION();
+
+		glfwDestroyWindow(m_Window);
+		s_GLFWInitializedCount--;
+
+		if (s_GLFWInitializedCount == 0) {
+			glfwTerminate();
+		}
+		
+
 	}
 
 	void PlatformWindows::OnUpdate() {
+		ENGINE_PROFILER_FUNCTION();
 
 		glfwPollEvents();
 		m_Context->SwapBuffer();
 	}
 	
 	void PlatformWindows::SetVSync(bool enabled) {
+		ENGINE_PROFILER_FUNCTION();
+
 		if (enabled) {
 			glfwSwapInterval(1);
 		}

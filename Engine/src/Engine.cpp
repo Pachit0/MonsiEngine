@@ -14,6 +14,8 @@ namespace Monsi {
     Application* Application::s_Instance = nullptr;
 
     Application::Application() {
+        ENGINE_PROFILER_FUNCTION();
+
         ENGINE_ASSERT(!s_Instance, "Application object already exists!");
         s_Instance = this;
 
@@ -28,10 +30,13 @@ namespace Monsi {
     }
 
     Application::~Application() {
+        ENGINE_PROFILER_FUNCTION();
 
+        Renderer::End();
     }
 
     void Application::OnEvent(Event& event) {
+        ENGINE_PROFILER_FUNCTION();
         EventDispatcher dispatcher(event);
         dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
         dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(onWindowResize));
@@ -47,22 +52,31 @@ namespace Monsi {
     }
 
     void Application::Run() {
+        ENGINE_PROFILER_FUNCTION();
         while (m_Running) {
+            ENGINE_PROFILER_SCOPE("RUN LOOP SCOPE");
             float currentTime = static_cast<float>(glfwGetTime());
             TimeStep timeStep = currentTime - m_PrevFrameTime;
             m_PrevFrameTime = currentTime;
 
             if (!m_Minimized) {
-                for (Layer* layer : m_LayerStack) {
-                    layer->OnLayerUpdate(timeStep);
+                {
+                    ENGINE_PROFILER_SCOPE("LayerStack::OnLayerUpdate");
+                    for (Layer* layer : m_LayerStack) {
+                        layer->OnLayerUpdate(timeStep);
+                    }
                 }
+                
+                m_ImGuiLayer->Begin();
+                {
+                    ENGINE_PROFILER_SCOPE("LayerStack::OnLayerUpdate - IMGUI");
+                    for (Layer* layer : m_LayerStack) {
+                        layer->OnImGuiDraw();
+                    }
+                }
+                m_ImGuiLayer->End();
             }
 
-            m_ImGuiLayer->Begin();
-            for (Layer* layer : m_LayerStack) {
-                layer->OnImGuiDraw();
-            }
-            m_ImGuiLayer->End();
 
             m_Window->OnUpdate();
         }
@@ -74,6 +88,7 @@ namespace Monsi {
     }
 
     bool Application::onWindowResize(WindowResizeEvent& event) {
+        ENGINE_PROFILER_FUNCTION();
         if (event.GetWidth() == 0 || event.GetHeight() == 0) {
             m_Minimized = true;
             return false;
@@ -85,11 +100,13 @@ namespace Monsi {
     }
 
     void Application::PushLayer(Layer* layer) {
+        ENGINE_PROFILER_FUNCTION();
         m_LayerStack.PushLayer(layer);
         layer->OnLayerAttach();
     }
 
     void Application::PushOverlay(Layer* overlay) {
+        ENGINE_PROFILER_FUNCTION();
         m_LayerStack.PushOverlay(overlay);
         overlay->OnLayerAttach();
     }

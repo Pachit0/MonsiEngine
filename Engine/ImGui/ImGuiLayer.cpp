@@ -20,6 +20,7 @@ namespace Monsi {
 	}
 
 	void ImGuiLayer::OnLayerAttach() {
+        ENGINE_PROFILER_FUNCTION();
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -53,18 +54,21 @@ namespace Monsi {
 	}
 
 	void ImGuiLayer::OnLayerDetach() {
+        ENGINE_PROFILER_FUNCTION();
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
 	}
 
     void ImGuiLayer::Begin() {
+        ENGINE_PROFILER_FUNCTION();
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
     }
 
     void ImGuiLayer::End() {
+        ENGINE_PROFILER_FUNCTION();
         ImGuiIO& io = ImGui::GetIO();
         Application& app = Application::Get();
         io.DisplaySize = ImVec2(app.GetWindow().GetWidth(), app.GetWindow().GetHeight());

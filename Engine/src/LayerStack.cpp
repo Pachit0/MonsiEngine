@@ -25,6 +25,7 @@ namespace Monsi {
 	void LayerStack::PopLayer(Layer* layer) {
 		auto it = std::find(m_LayerVector.begin(), m_LayerVector.end(), layer);
 		if (it != m_LayerVector.end()) {
+			layer->OnLayerDetach();
 			m_LayerVector.erase(it);
 			m_LayerInsertIndex--;
 		}

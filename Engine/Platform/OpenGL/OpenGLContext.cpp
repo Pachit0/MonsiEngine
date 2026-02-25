@@ -11,6 +11,7 @@ namespace Monsi {
 	}
 
 	void OpenGLContext::Init() {
+		ENGINE_PROFILER_FUNCTION();
 		glfwMakeContextCurrent(m_WindowHandle);
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		ENGINE_ASSERT(status, "Failed to initialize Glad!");
@@ -22,6 +23,7 @@ namespace Monsi {
 	}
 
 	void OpenGLContext::SwapBuffer() {
+		ENGINE_PROFILER_FUNCTION();
 		glfwSwapBuffers(m_WindowHandle);
 	}
 

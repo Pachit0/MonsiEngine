@@ -15,6 +15,7 @@ namespace Monsi {
 	}
 
 	OpenGLShader::OpenGLShader(const std::string& filePath) {
+		ENGINE_PROFILER_FUNCTION();
 		std::string source = ReadFile(filePath);
 		auto shaderSources = PreProcess(source);
 		Compile(shaderSources);
@@ -29,6 +30,7 @@ namespace Monsi {
 
 	OpenGLShader::OpenGLShader(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc)
 		: m_Name(name) {
+		ENGINE_PROFILER_FUNCTION();
 		std::unordered_map<GLenum, std::string> sources;
 		sources[GL_VERTEX_SHADER] = vertexSrc;
 		sources[GL_FRAGMENT_SHADER] = fragmentSrc;
@@ -37,11 +39,12 @@ namespace Monsi {
 
 	OpenGLShader::~OpenGLShader()
 	{
+		ENGINE_PROFILER_FUNCTION();
 		glDeleteProgram(m_ID);
 	}
 
 	void OpenGLShader::Compile(const std::unordered_map<GLenum, std::string>& shaderSources) {
-
+		ENGINE_PROFILER_FUNCTION();
 		GLuint program = glCreateProgram();
 		std::vector<GLenum> glShaderIDs;
 		glShaderIDs.reserve(shaderSources.size());
@@ -102,6 +105,7 @@ namespace Monsi {
 	}
 
 	std::unordered_map<GLenum, std::string> OpenGLShader::PreProcess(const std::string& source) {
+		ENGINE_PROFILER_FUNCTION();
 		std::unordered_map<GLenum, std::string> shaderSources;
 
 		const char* tokenShaderType = "#shadertype";
@@ -124,6 +128,7 @@ namespace Monsi {
 	}
 
 	std::string OpenGLShader::ReadFile(const std::string& filePath) {
+		ENGINE_PROFILER_FUNCTION();
 		std::string result;
 		std::ifstream in(filePath, std::ios::in, std::ios::binary);
 		if (in) {

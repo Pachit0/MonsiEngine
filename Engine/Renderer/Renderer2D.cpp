@@ -17,6 +17,8 @@ namespace Monsi {
 	static Renderer2DData* s_Data;
 
 	void Renderer2D::Init() {
+		ENGINE_PROFILER_FUNCTION();
+
 		s_Data = new Renderer2DData();
 		s_Data->QuadVA = VertexArray::Create();
 
@@ -55,17 +57,19 @@ namespace Monsi {
 	}
 
 	void Renderer2D::Shutdown() {
+		ENGINE_PROFILER_FUNCTION();
 		delete s_Data;
 	}
 
 	void Renderer2D::Begin2D(const OrthographicCamera& camera) {
+		ENGINE_PROFILER_FUNCTION();
 		s_Data->TextureShader->Bind();
 		s_Data->TextureShader->setMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
 		
 	}
 
 	void Renderer2D::End2D() {
-
+		ENGINE_PROFILER_FUNCTION();
 	}
 
 	void Renderer2D::drawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color) {
@@ -73,6 +77,7 @@ namespace Monsi {
 	}
 	
 	void Renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color) {
+		ENGINE_PROFILER_FUNCTION();
 		s_Data->TextureShader->setFloat("u_Scale", s_Data->TextureScale);
 		s_Data->TextureShader->setVec4("u_Color", color);
 		s_Data->WhiteTexture->Bind();
@@ -92,6 +97,7 @@ namespace Monsi {
 
 	void Renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size, const Reference<Texture2D>& texture)
 	{
+		ENGINE_PROFILER_FUNCTION();
 		s_Data->TextureShader->setFloat("u_Scale", s_Data->TextureScale);
 		s_Data->TextureShader->setVec4("u_Color", glm::vec4(1.0f));
 		texture->Bind();
@@ -111,6 +117,7 @@ namespace Monsi {
 
 	void Renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size, const Reference<Texture2D>& texture, const glm::vec4& color)
 	{
+		ENGINE_PROFILER_FUNCTION();
 		s_Data->TextureShader->setFloat("u_Scale", s_Data->TextureScale);
 		s_Data->TextureShader->setVec4("u_Color", color);
 
@@ -130,6 +137,7 @@ namespace Monsi {
 
 	void Renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size, const Reference<Texture2D>& texture, const glm::vec4& color, float scale)
 	{
+		ENGINE_PROFILER_FUNCTION();
 		s_Data->TextureShader->setFloat("u_Scale", scale);
 		s_Data->TextureShader->setVec4("u_Color", color);
 		texture->Bind();

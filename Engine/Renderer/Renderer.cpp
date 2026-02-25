@@ -8,6 +8,8 @@ namespace Monsi {
 	Renderer::SceneData* Renderer::m_Scene = new Renderer::SceneData;
 
 	void Renderer::Init() {
+		ENGINE_PROFILER_FUNCTION();
+
 		RenderCommand::Init();
 		Renderer2D::Init();
 	}

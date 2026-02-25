@@ -5,67 +5,44 @@
 #include "Platform/OpenGL/OpenGLShader.h"
 #include "debug/instrumentor.h"
 
-struct ScrollingBuffer {
-	int MaxSize;
-	int Offset;
-	ImVector<ImVec2> Data;
-	ScrollingBuffer(int max_size = 2000) {
-		MaxSize = max_size;
-		Offset = 0;
-		Data.reserve(MaxSize);
-	}
-	void AddPoint(float x, float y) {
-		if (Data.size() < MaxSize)
-			Data.push_back(ImVec2(x, y));
-		else {
-			Data[Offset] = ImVec2(x, y);
-			Offset = (Offset + 1) % MaxSize;
-		}
-	}
-	void Erase() {
-		if (Data.size() > 0) {
-			Data.shrink(0);
-			Offset = 0;
-		}
-	}
-};
-
-struct RollingBuffer {
-	float Span;
-	ImVector<ImVec2> Data;
-	RollingBuffer() {
-		Span = 10.0f;
-		Data.reserve(2000);
-	}
-	void AddPoint(float x, float y) {
-		float xmod = fmodf(x, Span);
-		if (!Data.empty() && xmod < Data.back().x)
-			Data.shrink(0);
-		Data.push_back(ImVec2(xmod, y));
-	}
-};
+// struct RollingBuffer {
+// 	float Span;
+// 	ImVector<ImVec2> Data;
+// 	RollingBuffer() {
+// 		Span = 10.0f;
+// 		Data.reserve(2000);
+// 	}
+// 	void AddPoint(float x, float y) {
+// 		float xmod = fmodf(x, Span);
+// 		if (!Data.empty() && xmod < Data.back().x)
+// 			Data.shrink(0);
+// 		Data.push_back(ImVec2(xmod, y));
+// 	}
+// };
 
 Sandbox2D::Sandbox2D() : Layer("Sandbox2D"), m_CameraControl(1280.0f / 720.0f) {}
 
 void Sandbox2D::OnLayerAttach() {
+	ENGINE_PROFILER_FUNCTION();
 	m_MonsiTest = Monsi::Texture2D::Create("D:/Monsi Engine/Sandbox/assets/Textures/background.png");
 }
 
 void Sandbox2D::OnLayerUpdate(Monsi::TimeStep timestep) {
 	//ENGINE_PROFILER_SCOPE_LAMBDA("Sandbox2D::OnLayerUpdate1");
 	ENGINE_PROFILER_FUNCTION();
-	ENGINE_PROFILER_SCOPE("Sandbox2D::OnLayerUpdate");
 
 	m_CameraControl.OnLayerUpdate(timestep);
-
 	//ENGINE_PROFILER_SCOPE_LAMBDA("RenderCommand1");
+	{
 	ENGINE_PROFILER_SCOPE("RenderCommand");
 	Monsi::RenderCommand::SetClearColor({ 0.5f, 0.0f, 0.05f, 1.0f });
 	Monsi::RenderCommand::Clear();
-
+	}
 	//ENGINE_PROFILER_SCOPE_LAMBDA("Begin2D1");
+	{
 	ENGINE_PROFILER_SCOPE("Begin2D");
 	Monsi::Renderer2D::Begin2D(m_CameraControl.GetCamera());
+	}
 
 	Monsi::Renderer2D::drawQuad({ -1.0f,0.0f }, { 0.8f, 0.8f }, { 0.0f, 1.0f, 0.0f, 1.0f });
 	Monsi::Renderer2D::drawQuad({ 0.5f,-0.5f }, { 0.5f, 0.75f }, { 1.0f, 0.0f, 1.0f, 1.0f });
@@ -75,7 +52,7 @@ void Sandbox2D::OnLayerUpdate(Monsi::TimeStep timestep) {
 }
 
 void Sandbox2D::OnLayerDetach() {
-
+	ENGINE_PROFILER_FUNCTION();
 }
 
 void Sandbox2D::OnImGuiDraw() {
