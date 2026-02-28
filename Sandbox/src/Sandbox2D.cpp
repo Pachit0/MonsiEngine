@@ -42,13 +42,11 @@ void Sandbox2D::OnLayerUpdate(Monsi::TimeStep timestep) {
 	{
 	ENGINE_PROFILER_SCOPE("Begin2D");
 	Monsi::Renderer2D::Begin2D(m_CameraControl.GetCamera());
-	}
-
 	Monsi::Renderer2D::drawQuad({ -1.0f,0.0f }, { 0.8f, 0.8f }, { 0.0f, 1.0f, 0.0f, 1.0f });
-	Monsi::Renderer2D::drawQuad({ 0.5f,-0.5f }, { 0.5f, 0.75f }, { 1.0f, 0.0f, 1.0f, 1.0f });
-	Monsi::Renderer2D::drawQuad({ 0.0f, 0.0f, -0.1f }, { 10.0f, 10.0f }, m_MonsiTest);
-
+	Monsi::Renderer2D::drawQuad({ 0.5f,-0.5f}, { 0.5f, 0.75f }, { 1.0f, 0.0f, 1.0f, 1.0f });
+	Monsi::Renderer2D::drawQuad({ -5.0f, -5.0f, -0.1f }, { 10.0f, 10.0f }, m_MonsiTest);
 	Monsi::Renderer2D::End2D();
+	}
 }
 
 void Sandbox2D::OnLayerDetach() {

@@ -15,6 +15,7 @@ namespace Monsi {
 		virtual const std::string& GetName() const = 0;
 
 		virtual const void setInt(const std::string& name, int value) = 0;
+		virtual const void setIntArray(const std::string& name, int* value, uint32_t count) = 0;
 		virtual const void setFloat(const std::string& name, float value) = 0;
 		virtual const void setVec3(const std::string& name, const glm::vec3& value) = 0;
 		virtual const void setVec4(const std::string& name, const glm::vec4& value) = 0;

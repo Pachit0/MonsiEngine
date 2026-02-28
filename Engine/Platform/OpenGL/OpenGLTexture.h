@@ -17,6 +17,11 @@ namespace Monsi {
 		void modifyData(void* data, uint32_t size) override;
 
 		void Bind(uint32_t slot) const override;
+
+		bool operator==(const Texture& other) const override 
+		{ 
+			return m_ID == ((OpenGLTexture2D&)other).m_ID;
+		}
 	private:
 		std::string m_ResourcePath;
 		uint32_t m_Width, m_Height;

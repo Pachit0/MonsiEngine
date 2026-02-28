@@ -149,6 +149,11 @@ namespace Monsi {
 		UploadInt(name, value);
 	}
 
+	const void OpenGLShader::setIntArray(const std::string& name, int* value, uint32_t count)
+	{
+		UploadIntArray(name, value, count);
+	}
+
 	const void OpenGLShader::setFloat(const std::string& name, float value) {
 		UploadFloat(name, value);
 	}
@@ -179,6 +184,11 @@ namespace Monsi {
 
 	void OpenGLShader::UploadInt(const std::string& name, int value) {
 		glUniform1i(glGetUniformLocation(m_ID, name.c_str()), value);
+	}
+
+	void OpenGLShader::UploadIntArray(const std::string& name, int* value, uint32_t count)
+	{
+		glUniform1iv(glGetUniformLocation(m_ID, name.c_str()), count, value);
 	}
 
 	void OpenGLShader::UploadFloat(const std::string& name, float value) {

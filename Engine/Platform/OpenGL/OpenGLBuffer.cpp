@@ -12,6 +12,14 @@ namespace Monsi {
 		glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
 	}
 
+	OpenGLVertexBuffer::OpenGLVertexBuffer(uint32_t size)
+	{
+		ENGINE_PROFILER_FUNCTION();
+		glCreateBuffers(1, &m_ID);
+		glBindBuffer(GL_ARRAY_BUFFER, m_ID);
+		glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW); //adding data to the buffer every frame
+	}
+
 	OpenGLVertexBuffer::~OpenGLVertexBuffer()
 	{
 		ENGINE_PROFILER_FUNCTION();
@@ -28,7 +36,13 @@ namespace Monsi {
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
-	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t* indices, uint32_t count) 
+	void OpenGLVertexBuffer::SetData(const void* data, uint32_t size)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, m_ID);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
+	}
+
+	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t* indices, uint32_t count)
 		: m_Count(count) {
 		ENGINE_PROFILER_FUNCTION();
 		glCreateBuffers(1, &m_ID);

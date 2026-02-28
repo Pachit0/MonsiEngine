@@ -39,7 +39,7 @@ namespace Monsi {
 		glTextureStorage2D(m_ID, 1, OpenGLFormat, m_Width, m_Height);
 
 		glTextureParameteri(m_ID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTextureParameteri(m_ID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTextureParameteri(m_ID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 		glTextureParameteri(m_ID, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTextureParameteri(m_ID, GL_TEXTURE_WRAP_T, GL_REPEAT);

@@ -14,8 +14,7 @@ ExampleLayer::ExampleLayer()
 		0.0f, 0.5f, 0.0f, 0.5f, 0.5f, 1.0f, 1.0f
 	};
 
-	Monsi::Reference<Monsi::VertexBuffer> VBO;
-	VBO.reset(Monsi::VertexBuffer::Create(vertices, sizeof(vertices)));
+	Monsi::Reference<Monsi::VertexBuffer> VBO = Monsi::VertexBuffer::Create(vertices, sizeof(vertices));
 
 	Monsi::BufferLayout layout = { // Vertex code needs the same layout order as here
 		{Monsi::ShaderDataType::Float3, "aPos"},
@@ -28,8 +27,7 @@ ExampleLayer::ExampleLayer()
 
 	uint32_t indices[] = { 0 ,1 ,2 };
 
-	Monsi::Reference<Monsi::IndexBuffer> EBO;
-	EBO.reset(Monsi::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
+	Monsi::Reference<Monsi::IndexBuffer> EBO = Monsi::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
 	m_VertexArray->SetIndexBuffer(EBO);
 
 	m_SquareVertexArray = Monsi::VertexArray::Create();
@@ -41,8 +39,7 @@ ExampleLayer::ExampleLayer()
 		-0.5f,  0.5f, 0.0f, 0.0f, 1.0f
 	};
 
-	Monsi::Reference<Monsi::VertexBuffer> squareVB;
-	squareVB.reset(Monsi::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
+	Monsi::Reference<Monsi::VertexBuffer> squareVB = Monsi::VertexBuffer::Create(squareVertices, sizeof(squareVertices));
 	Monsi::BufferLayout squareLayout = {
 		{Monsi::ShaderDataType::Float3, "aPos"},
 		{Monsi::ShaderDataType::Float2, "aTexCoord"}
@@ -52,8 +49,7 @@ ExampleLayer::ExampleLayer()
 
 	uint32_t squareIndices[] = { 0,1,2,2,3,0 };
 
-	Monsi::Reference<Monsi::IndexBuffer> squareEB;
-	squareEB.reset(Monsi::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
+	Monsi::Reference<Monsi::IndexBuffer> squareEB = Monsi::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t));
 	m_SquareVertexArray->SetIndexBuffer(squareEB);
 
 	m_Shader = Monsi::Shader::Create("D:/Monsi Engine/Sandbox/assets/Shader/Shader.glsl");

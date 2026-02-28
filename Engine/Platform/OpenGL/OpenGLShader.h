@@ -20,6 +20,7 @@ namespace Monsi {
 		const std::string& GetName() const override { return m_Name; }
 
 		const void setInt(const std::string& name, int value) override;
+		const void setIntArray(const std::string& name, int* value, uint32_t count) override;
 		const void setVec3(const std::string& name, const glm::vec3& value) override;
 		const void setVec4(const std::string& name, const glm::vec4& value) override;
 		const void setMat4(const std::string& name, const glm::mat4& value) override;
@@ -27,6 +28,7 @@ namespace Monsi {
 
 		void UploadBool(const std::string& name, bool value);
 		void UploadInt(const std::string& name, int value);
+		void UploadIntArray(const std::string& name, int* value, uint32_t count);
 		void UploadFloat(const std::string& name, float value);
 		void UploadVec2(const std::string& name, const glm::vec2& value);
 		void UploadVec2(const std::string& name, float x, float y);
