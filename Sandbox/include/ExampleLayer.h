@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Monsi.h"
+#include <Monsi.h>
 
 class ExampleLayer : public Monsi::Layer {
 public:
@@ -14,16 +14,7 @@ public:
 	void OnLayerEvent(Monsi::Event& event) override;
 
 private:
-	Monsi::ShaderLibrary m_ShaderLibrary;
-	Monsi::Reference<Monsi::Shader> m_Shader;
-	Monsi::Reference<Monsi::VertexArray> m_VertexArray;
 
-	Monsi::Reference<Monsi::Shader> m_SingleColorShader, m_TextureShader;
-	Monsi::Reference<Monsi::VertexArray> m_SquareVertexArray;
-
-	Monsi::Reference<Monsi::Texture2D> m_Texture, m_MonsiTest;
-
-	Monsi::OrthographicControl m_CameraControl;
-
-	glm::vec3 m_SquareColor;
+	Monsi::PerspectiveControl m_CameraControl;
+	Monsi::Reference<Monsi::Texture2D> m_MonsiTest;
 };

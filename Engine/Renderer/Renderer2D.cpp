@@ -245,16 +245,50 @@ namespace Monsi {
 	void Renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size, const Reference<Texture2D>& texture, const glm::vec4& color)
 	{
 		ENGINE_PROFILER_FUNCTION();
-		s_Data.TextureShader->setFloat("u_Scale", 1.0f);
-		s_Data.TextureShader->setVec4("u_Color", color);
+		const float scale = 1.0f;
+		float textureIndex = 0.0f;
+		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++) {
+			if (*s_Data.TextureSlots[i].get() == *texture.get()) {
+				textureIndex = static_cast<float>(i);
+				break;
+			}
+		}
 
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
-		s_Data.TextureShader->setMat4("u_Transform", transform);
+		if (textureIndex == 0.0f) {
+			textureIndex = static_cast<float>(s_Data.TextureSlotIndex);
+			s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;
+			s_Data.TextureSlotIndex++;
+		}
 
-		texture->Bind();
+		s_Data.QuadVertexBufferItr->Position = position;
+		s_Data.QuadVertexBufferItr->Color = color;
+		s_Data.QuadVertexBufferItr->TexIndex = textureIndex;
+		s_Data.QuadVertexBufferItr->Scale = scale;
+		s_Data.QuadVertexBufferItr->TexCoord = { 0.0f, 0.0f };
+		s_Data.QuadVertexBufferItr++;
 
-		s_Data.QuadVA->Bind();
-		RenderCommand::DrawIndexed(s_Data.QuadVA);
+		s_Data.QuadVertexBufferItr->Position = { position.x + size.x, position.y, 0.0f };
+		s_Data.QuadVertexBufferItr->Color = color;
+		s_Data.QuadVertexBufferItr->TexIndex = textureIndex;
+		s_Data.QuadVertexBufferItr->Scale = scale;
+		s_Data.QuadVertexBufferItr->TexCoord = { 1.0f, 0.0f };
+		s_Data.QuadVertexBufferItr++;
+
+		s_Data.QuadVertexBufferItr->Position = { position.x + size.x, position.y + size.y, 0.0f };
+		s_Data.QuadVertexBufferItr->Color = color;
+		s_Data.QuadVertexBufferItr->TexIndex = textureIndex;
+		s_Data.QuadVertexBufferItr->Scale = scale;
+		s_Data.QuadVertexBufferItr->TexCoord = { 1.0f, 1.0f };
+		s_Data.QuadVertexBufferItr++;
+
+		s_Data.QuadVertexBufferItr->Position = { position.x, position.y + size.y, 0.0f };
+		s_Data.QuadVertexBufferItr->Color = color;
+		s_Data.QuadVertexBufferItr->TexIndex = textureIndex;
+		s_Data.QuadVertexBufferItr->Scale = scale;
+		s_Data.QuadVertexBufferItr->TexCoord = { 0.0f, 1.0f };
+		s_Data.QuadVertexBufferItr++;
+
+		s_Data.QuadIndexCount += 6;
 	}
 
 	void Renderer2D::drawQuad(const glm::vec2& position, const glm::vec2& size, const Reference<Texture2D>& texture, const glm::vec4& color, float scale)
@@ -265,16 +299,49 @@ namespace Monsi {
 	void Renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size, const Reference<Texture2D>& texture, const glm::vec4& color, float scale)
 	{
 		ENGINE_PROFILER_FUNCTION();
-		s_Data.TextureShader->setFloat("u_Scale", scale);
-		s_Data.TextureShader->setVec4("u_Color", color);
-		texture->Bind();
+		float textureIndex = 0.0f;
+		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++) {
+			if (*s_Data.TextureSlots[i].get() == *texture.get()) {
+				textureIndex = static_cast<float>(i);
+				break;
+			}
+		}
 
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
-		s_Data.TextureShader->setMat4("u_Transform", transform);
+		if (textureIndex == 0.0f) {
+			textureIndex = static_cast<float>(s_Data.TextureSlotIndex);
+			s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;
+			s_Data.TextureSlotIndex++;
+		}
 
+		s_Data.QuadVertexBufferItr->Position = position;
+		s_Data.QuadVertexBufferItr->Color = color;
+		s_Data.QuadVertexBufferItr->TexIndex = textureIndex;
+		s_Data.QuadVertexBufferItr->Scale = scale;
+		s_Data.QuadVertexBufferItr->TexCoord = { 0.0f, 0.0f };
+		s_Data.QuadVertexBufferItr++;
 
-		s_Data.QuadVA->Bind();
-		RenderCommand::DrawIndexed(s_Data.QuadVA);
+		s_Data.QuadVertexBufferItr->Position = { position.x + size.x, position.y, 0.0f };
+		s_Data.QuadVertexBufferItr->Color = color;
+		s_Data.QuadVertexBufferItr->TexIndex = textureIndex;
+		s_Data.QuadVertexBufferItr->Scale = scale;
+		s_Data.QuadVertexBufferItr->TexCoord = { 1.0f, 0.0f };
+		s_Data.QuadVertexBufferItr++;
+
+		s_Data.QuadVertexBufferItr->Position = { position.x + size.x, position.y + size.y, 0.0f };
+		s_Data.QuadVertexBufferItr->Color = color;
+		s_Data.QuadVertexBufferItr->TexIndex = textureIndex;
+		s_Data.QuadVertexBufferItr->Scale = scale;
+		s_Data.QuadVertexBufferItr->TexCoord = { 1.0f, 1.0f };
+		s_Data.QuadVertexBufferItr++;
+
+		s_Data.QuadVertexBufferItr->Position = { position.x, position.y + size.y, 0.0f };
+		s_Data.QuadVertexBufferItr->Color = color;
+		s_Data.QuadVertexBufferItr->TexIndex = textureIndex;
+		s_Data.QuadVertexBufferItr->Scale = scale;
+		s_Data.QuadVertexBufferItr->TexCoord = { 0.0f, 1.0f };
+		s_Data.QuadVertexBufferItr++;
+
+		s_Data.QuadIndexCount += 6;
 	}
 
 
@@ -282,6 +349,8 @@ namespace Monsi {
 	{
 		drawQuadRotated({ position.x, position.y, 0.0f }, size, color, rotation);
 	}
+
+//TODO batch render rotated quad
 
 	void Renderer2D::drawQuadRotated(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color, float rotation)
 	{
@@ -301,7 +370,7 @@ namespace Monsi {
 
 	void Renderer2D::drawQuadRotated(const glm::vec2& position, const glm::vec2& size, const Reference<Texture2D>& texture, float rotation)
 	{
-
+		drawQuadRotated({ position.x, position.y, 0.0f }, size, texture, rotation);
 	}
 
 	void Renderer2D::drawQuadRotated(const glm::vec3& position, const glm::vec2& size, const Reference<Texture2D>& texture, float rotation)

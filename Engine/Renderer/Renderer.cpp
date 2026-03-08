@@ -1,6 +1,7 @@
 #include "MonsiPch.h"
 #include "Renderer.h"
 #include "Renderer2D.h"
+#include "Renderer3D.h"
 #include "Platform/OpenGL/OpenGLShader.h"
 
 namespace Monsi {
@@ -9,9 +10,9 @@ namespace Monsi {
 
 	void Renderer::Init() {
 		ENGINE_PROFILER_FUNCTION();
-
 		RenderCommand::Init();
-		Renderer2D::Init();
+		//Renderer2D::Init();
+		Renderer3D::Init();
 	}
 
 	void Renderer::onWindowResize(uint32_t width, uint32_t height)

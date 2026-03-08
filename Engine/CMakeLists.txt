@@ -66,11 +66,17 @@ add_library(Engine STATIC
     "Platform/OpenGL/OpenGLTexture.h" 
     "Platform/OpenGL/OpenGLTexture.cpp"
     "thirdparty/stb_image/stb_image.cpp"    
-    "include/OrthographicControl.h" 
-    "src/OrthographicControl.cpp" 
+    "Renderer/OrthographicControl.h" 
+    "Renderer/OrthographicControl.cpp" 
     "Renderer/Renderer2D.h" 
     "Renderer/Renderer2D.cpp"   
-    "debug/instrumentor.h")
+    "debug/instrumentor.h" 
+    "Renderer/Renderer3D.h" 
+    "Renderer/Renderer3D.cpp" 
+    "Renderer/PerspectiveCamera.h" 
+    "Renderer/PerspectiveCamera.cpp" 
+    "Renderer/PerspectiveControl.cpp" 
+)
 
 if(WIN32)
     target_compile_definitions(Engine PRIVATE GLFW_INCLUDE_NONE MONSI_BUILD_DEBUG ENGINE_PROFILER)
@@ -80,7 +86,6 @@ add_subdirectory(thirdparty)
 
 target_include_directories(Engine PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/Platform
     ${CMAKE_CURRENT_SOURCE_DIR}/Core
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer
@@ -109,3 +114,5 @@ if(MSVC)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Release>:Release>")
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
+
+list(REMOVE_ITEM Engine  ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Renderer3D.cpp)

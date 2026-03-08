@@ -11,6 +11,10 @@ namespace Monsi {
 
 		void Init() override;
 		void SwapBuffer() override;
+		void EnableCursor() override;
+		void DisableCursor() override;
+
+		int GetCursorStatus() override;
 
 	private:
 		GLFWwindow* m_WindowHandle;

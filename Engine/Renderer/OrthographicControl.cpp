@@ -5,8 +5,6 @@
 
 namespace Monsi {
 
-
-
 	OrthographicControl::OrthographicControl(float AspectRatio, bool cameraRotatoinFlag) 
 		: m_AspectRation(AspectRatio), m_Camera(-m_AspectRation * m_ZoomControl, m_AspectRation * m_ZoomControl, -m_ZoomControl, m_ZoomControl), m_CameraRotationFlag(cameraRotatoinFlag) {
 

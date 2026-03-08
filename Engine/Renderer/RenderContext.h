@@ -6,8 +6,10 @@ namespace Monsi {
 	public:
 		virtual void Init() = 0;
 		virtual void SwapBuffer() = 0;
-	private:
+		virtual void EnableCursor() = 0;
+		virtual void DisableCursor() = 0;
 
+		virtual int GetCursorStatus() = 0;
 	};
 
 }

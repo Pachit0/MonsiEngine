@@ -25,8 +25,6 @@ namespace Monsi {
 
 		static void drawQuad(const glm::vec2& position, const glm::vec2& size, const Reference<Texture2D>& texture, const glm::vec4& color, float scale);
 		static void drawQuad(const glm::vec3& position, const glm::vec2& size, const Reference<Texture2D>& texture, const glm::vec4& color, float scale);
-		//TODO
-		//Rotated quad, also the glsl file should handle that -- goodluck future Pachi
 
 		static void drawQuadRotated(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, float rotation);
 		static void drawQuadRotated(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color, float rotation);

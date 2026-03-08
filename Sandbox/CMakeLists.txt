@@ -3,7 +3,8 @@ project(Sandbox)
 add_executable( Sandbox
     "src/SandboxApp.cpp"
     "src/ExampleLayer.cpp"
- "src/Sandbox2D.cpp" "include/Sandbox2D.h")
+    "src/Sandbox2D.cpp"
+)
 
 target_include_directories(Sandbox PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include

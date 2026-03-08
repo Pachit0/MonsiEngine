@@ -19,8 +19,9 @@ namespace Monsi {
 		inline void SetEventCallbackFn(const CallbackFn& callback) override { m_Data.EventCallback = callback; }
 		void SetVSync(bool enabled) override;
 		bool IsVSync() const override;
+		int IsCursorOn() const override;
 	
-		inline virtual void* GetNativeWindow() const { return m_Window; }
+		inline void* GetNativeWindow() const override { return m_Window; }
 	private:
 		virtual void Init(const WindowInfo& info);
 		virtual void Shutdown();

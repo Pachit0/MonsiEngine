@@ -7,6 +7,9 @@
 
 #include "Platform/OpenGL/OpenGLContext.h"
 
+#include "Input.h"
+#include "MonsiKeyCodes.h"
+
 #include <glad/glad.h>
 
 namespace Monsi {
@@ -149,6 +152,13 @@ namespace Monsi {
 	void PlatformWindows::OnUpdate() {
 		ENGINE_PROFILER_FUNCTION();
 
+		if (Input::KeyPressed(MONSI_KEY_C)) {
+			m_Context->DisableCursor();
+		}
+		if (Input::KeyPressed(MONSI_KEY_V)) {
+			m_Context->EnableCursor();
+		}
+
 		glfwPollEvents();
 		m_Context->SwapBuffer();
 	}
@@ -168,6 +178,11 @@ namespace Monsi {
 
 	bool PlatformWindows::IsVSync() const {
 		return m_Data.VSync;
+	}
+
+	int PlatformWindows::IsCursorOn() const
+	{
+		return m_Context->GetCursorStatus();
 	}
 
 }

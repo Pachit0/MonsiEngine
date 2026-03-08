@@ -18,6 +18,9 @@
 #include "Renderer/VertexArray.h"
 #include "Renderer/Texture.h"
 #include "Renderer/OrthographicCamera.h"
+#include "Renderer/PerspectiveCamera.h"
 #include "Renderer/Renderer2D.h"
+#include "Renderer/Renderer3D.h"
 
-#include "include/OrthographicControl.h"
+#include "OrthographicControl.h"
+#include "PerspectiveControl.h"

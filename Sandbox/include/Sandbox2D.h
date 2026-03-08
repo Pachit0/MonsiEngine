@@ -15,9 +15,6 @@ public:
 private:
 	Monsi::OrthographicControl m_CameraControl;
 
-	Monsi::Reference<Monsi::VertexArray> m_SquareVertexArray;
-
-	Monsi::Reference<Monsi::Shader> m_FlatColorShader;
 	Monsi::Reference<Monsi::Texture2D> m_MonsiTest;
 
 	struct TimeProfilerResult {
@@ -26,6 +23,4 @@ private:
 	};
 
 	std::vector<TimeProfilerResult> m_TimeResults;
-
-	glm::vec4 m_SquareColor = {0.6f, 0.4f, 0.2f, 1.0f};
 };

@@ -178,7 +178,7 @@ namespace Monsi {
 	};
 
 }
-#define ENGINE_PROFILER
+
 #ifdef ENGINE_PROFILER
 #define  ENGINE_PROFILER_BEGIN(name, filepath) ::Monsi::Instrumentor::Get().BeginSession(name, filepath)
 #define  ENGINE_PROFILER_END() ::Monsi::Instrumentor::Get().EndSession()

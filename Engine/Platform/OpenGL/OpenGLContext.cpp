@@ -13,9 +13,10 @@ namespace Monsi {
 	void OpenGLContext::Init() {
 		ENGINE_PROFILER_FUNCTION();
 		glfwMakeContextCurrent(m_WindowHandle);
+
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		ENGINE_ASSERT(status, "Failed to initialize Glad!");
-
+			
 		ENGINE_LOG_INFO("OpenGL Info:");
 		ENGINE_LOG_INFO("	Vendor: {0} ", reinterpret_cast<const char*>(glGetString(GL_VENDOR)));
 		ENGINE_LOG_INFO("	Renderer: {0} ", reinterpret_cast<const char*>(glGetString(GL_RENDERER)));
@@ -25,6 +26,21 @@ namespace Monsi {
 	void OpenGLContext::SwapBuffer() {
 		ENGINE_PROFILER_FUNCTION();
 		glfwSwapBuffers(m_WindowHandle);
+	}
+
+	void OpenGLContext::EnableCursor()
+	{
+		glfwSetInputMode(m_WindowHandle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
+
+	void OpenGLContext::DisableCursor()
+	{
+		glfwSetInputMode(m_WindowHandle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	}
+
+	int OpenGLContext::GetCursorStatus()
+	{
+		return glfwGetInputMode(m_WindowHandle, GLFW_CURSOR);
 	}
 
 }
