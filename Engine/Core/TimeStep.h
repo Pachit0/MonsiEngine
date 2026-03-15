@@ -13,7 +13,6 @@ namespace Monsi {
 
 	private:
 		float m_Time;
-
 	};
 
 }

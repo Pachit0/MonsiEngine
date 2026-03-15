@@ -8,7 +8,7 @@ namespace Monsi {
 	class ENGINE_API Layer {
 	public:
 		Layer(const std::string& LayerName = "Default");
-		virtual ~Layer();
+		virtual ~Layer() = default;
 
 		virtual void OnLayerAttach() {}
 		virtual void OnLayerUpdate(TimeStep timestep) {}

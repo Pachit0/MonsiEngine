@@ -13,7 +13,7 @@ namespace Monsi {
     
     Application* Application::s_Instance = nullptr;
 
-    Application::Application() {
+    Application::Application() : m_PrevFrameTime(0.0f) {
         ENGINE_PROFILER_FUNCTION();
 
         ENGINE_ASSERT(!s_Instance, "Application object already exists!");

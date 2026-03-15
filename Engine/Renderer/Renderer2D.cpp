@@ -30,6 +30,9 @@ namespace Monsi {
 		Quad* QuadVertexBufferBegin = nullptr;
 		Quad* QuadVertexBufferItr = nullptr;
 
+		glm::vec4 QuadVertexPositions[4];
+		glm::vec2 QuadTextureCoords[4];
+
 		std::array<Reference<Texture2D>, MaxTextureSlots> TextureSlots;
 		uint32_t TextureSlotIndex = 1;// first slot is reserved for white
 	};
@@ -87,6 +90,16 @@ namespace Monsi {
 		s_Data.TextureShader->setIntArray("u_Textures", samplers2D, s_Data.MaxTextureSlots);
 
 		s_Data.TextureSlots[0] = s_Data.WhiteTexture;
+
+		s_Data.QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f };
+		s_Data.QuadVertexPositions[1] = { 0.5f, -0.5f, 0.0f, 1.0f };
+		s_Data.QuadVertexPositions[2] = { 0.5f, 0.5f, 0.0f, 1.0f };
+		s_Data.QuadVertexPositions[3] = { -0.5f, 0.5f, 0.0f, 1.0f };
+
+		s_Data.QuadTextureCoords[0] = { 0.0f, 0.0f };
+		s_Data.QuadTextureCoords[1] = { 1.0f, 0.0f };
+		s_Data.QuadTextureCoords[2] = { 1.0f, 1.0f };
+		s_Data.QuadTextureCoords[3] = { 0.0f, 1.0f };
 	}
 
 	void Renderer2D::Shutdown() {
@@ -131,33 +144,17 @@ namespace Monsi {
 		const float whiteTexIndex = 0.0f;
 		const float scale = 1.0f;
 
-		s_Data.QuadVertexBufferItr->Position = position;
-		s_Data.QuadVertexBufferItr->Color = color;
-		s_Data.QuadVertexBufferItr->TexIndex = whiteTexIndex;
-		s_Data.QuadVertexBufferItr->TexCoord = {0.0f, 0.0f};
-		s_Data.QuadVertexBufferItr->Scale = scale;
-		s_Data.QuadVertexBufferItr++;
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
 
-		s_Data.QuadVertexBufferItr->Position = { position.x + size.x, position.y, 0.0f };
-		s_Data.QuadVertexBufferItr->Color = color;
-		s_Data.QuadVertexBufferItr->TexIndex = whiteTexIndex;
-		s_Data.QuadVertexBufferItr->Scale = scale;
-		s_Data.QuadVertexBufferItr->TexCoord = {1.0f, 0.0f};
-		s_Data.QuadVertexBufferItr++;
-
-		s_Data.QuadVertexBufferItr->Position = { position.x + size.x, position.y + size.y, 0.0f };
-		s_Data.QuadVertexBufferItr->Color = color;
-		s_Data.QuadVertexBufferItr->TexIndex = whiteTexIndex;
-		s_Data.QuadVertexBufferItr->Scale = scale;
-		s_Data.QuadVertexBufferItr->TexCoord = {1.0f, 1.0f};
-		s_Data.QuadVertexBufferItr++;
-
-		s_Data.QuadVertexBufferItr->Position = { position.x, position.y + size.y, 0.0f };
-		s_Data.QuadVertexBufferItr->Color = color;
-		s_Data.QuadVertexBufferItr->TexIndex = whiteTexIndex;
-		s_Data.QuadVertexBufferItr->Scale = scale;
-		s_Data.QuadVertexBufferItr->TexCoord = {0.0f, 1.0f};
-		s_Data.QuadVertexBufferItr++;
+		for (uint32_t i = 0; i < 4; i++) {
+			s_Data.QuadVertexBufferItr->Position = transform * s_Data.QuadVertexPositions[i];
+			s_Data.QuadVertexBufferItr->Color = color;
+			s_Data.QuadVertexBufferItr->TexIndex = whiteTexIndex;
+			s_Data.QuadVertexBufferItr->Scale = scale;
+			s_Data.QuadVertexBufferItr->TexCoord = s_Data.QuadTextureCoords[i];
+			s_Data.QuadVertexBufferItr++;
+		}
 
 		s_Data.QuadIndexCount += 6;
 		
@@ -194,33 +191,17 @@ namespace Monsi {
 			s_Data.TextureSlotIndex++;
 		}
 
-		s_Data.QuadVertexBufferItr->Position = position;
-		s_Data.QuadVertexBufferItr->Color = color;
-		s_Data.QuadVertexBufferItr->TexIndex = textureIndex;
-		s_Data.QuadVertexBufferItr->Scale = scale;
-		s_Data.QuadVertexBufferItr->TexCoord = { 0.0f, 0.0f };
-		s_Data.QuadVertexBufferItr++;
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
 
-		s_Data.QuadVertexBufferItr->Position = { position.x + size.x, position.y, 0.0f };
-		s_Data.QuadVertexBufferItr->Color = color;
-		s_Data.QuadVertexBufferItr->TexIndex = textureIndex;
-		s_Data.QuadVertexBufferItr->Scale = scale;
-		s_Data.QuadVertexBufferItr->TexCoord = { 1.0f, 0.0f };
-		s_Data.QuadVertexBufferItr++;
-
-		s_Data.QuadVertexBufferItr->Position = { position.x + size.x, position.y + size.y, 0.0f };
-		s_Data.QuadVertexBufferItr->Color = color;
-		s_Data.QuadVertexBufferItr->TexIndex = textureIndex;
-		s_Data.QuadVertexBufferItr->Scale = scale;
-		s_Data.QuadVertexBufferItr->TexCoord = { 1.0f, 1.0f };
-		s_Data.QuadVertexBufferItr++;
-
-		s_Data.QuadVertexBufferItr->Position = { position.x, position.y + size.y, 0.0f };
-		s_Data.QuadVertexBufferItr->Color = color;
-		s_Data.QuadVertexBufferItr->TexIndex = textureIndex;
-		s_Data.QuadVertexBufferItr->Scale = scale;
-		s_Data.QuadVertexBufferItr->TexCoord = { 0.0f, 1.0f };
-		s_Data.QuadVertexBufferItr++;
+		for (uint32_t i = 0; i < 4; i++) {
+			s_Data.QuadVertexBufferItr->Position = transform * s_Data.QuadVertexPositions[i];
+			s_Data.QuadVertexBufferItr->Color = color;
+			s_Data.QuadVertexBufferItr->TexIndex = textureIndex;
+			s_Data.QuadVertexBufferItr->Scale = scale;
+			s_Data.QuadVertexBufferItr->TexCoord = s_Data.QuadTextureCoords[i];
+			s_Data.QuadVertexBufferItr++;
+		}
 
 		s_Data.QuadIndexCount += 6;
 
@@ -260,33 +241,17 @@ namespace Monsi {
 			s_Data.TextureSlotIndex++;
 		}
 
-		s_Data.QuadVertexBufferItr->Position = position;
-		s_Data.QuadVertexBufferItr->Color = color;
-		s_Data.QuadVertexBufferItr->TexIndex = textureIndex;
-		s_Data.QuadVertexBufferItr->Scale = scale;
-		s_Data.QuadVertexBufferItr->TexCoord = { 0.0f, 0.0f };
-		s_Data.QuadVertexBufferItr++;
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
 
-		s_Data.QuadVertexBufferItr->Position = { position.x + size.x, position.y, 0.0f };
-		s_Data.QuadVertexBufferItr->Color = color;
-		s_Data.QuadVertexBufferItr->TexIndex = textureIndex;
-		s_Data.QuadVertexBufferItr->Scale = scale;
-		s_Data.QuadVertexBufferItr->TexCoord = { 1.0f, 0.0f };
-		s_Data.QuadVertexBufferItr++;
-
-		s_Data.QuadVertexBufferItr->Position = { position.x + size.x, position.y + size.y, 0.0f };
-		s_Data.QuadVertexBufferItr->Color = color;
-		s_Data.QuadVertexBufferItr->TexIndex = textureIndex;
-		s_Data.QuadVertexBufferItr->Scale = scale;
-		s_Data.QuadVertexBufferItr->TexCoord = { 1.0f, 1.0f };
-		s_Data.QuadVertexBufferItr++;
-
-		s_Data.QuadVertexBufferItr->Position = { position.x, position.y + size.y, 0.0f };
-		s_Data.QuadVertexBufferItr->Color = color;
-		s_Data.QuadVertexBufferItr->TexIndex = textureIndex;
-		s_Data.QuadVertexBufferItr->Scale = scale;
-		s_Data.QuadVertexBufferItr->TexCoord = { 0.0f, 1.0f };
-		s_Data.QuadVertexBufferItr++;
+		for (uint32_t i = 0; i < 4; i++) {
+			s_Data.QuadVertexBufferItr->Position = transform * s_Data.QuadVertexPositions[i];
+			s_Data.QuadVertexBufferItr->Color = color;
+			s_Data.QuadVertexBufferItr->TexIndex = textureIndex;
+			s_Data.QuadVertexBufferItr->Scale = scale;
+			s_Data.QuadVertexBufferItr->TexCoord = s_Data.QuadTextureCoords[i];
+			s_Data.QuadVertexBufferItr++;
+		}
 
 		s_Data.QuadIndexCount += 6;
 	}
@@ -313,33 +278,17 @@ namespace Monsi {
 			s_Data.TextureSlotIndex++;
 		}
 
-		s_Data.QuadVertexBufferItr->Position = position;
-		s_Data.QuadVertexBufferItr->Color = color;
-		s_Data.QuadVertexBufferItr->TexIndex = textureIndex;
-		s_Data.QuadVertexBufferItr->Scale = scale;
-		s_Data.QuadVertexBufferItr->TexCoord = { 0.0f, 0.0f };
-		s_Data.QuadVertexBufferItr++;
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
 
-		s_Data.QuadVertexBufferItr->Position = { position.x + size.x, position.y, 0.0f };
-		s_Data.QuadVertexBufferItr->Color = color;
-		s_Data.QuadVertexBufferItr->TexIndex = textureIndex;
-		s_Data.QuadVertexBufferItr->Scale = scale;
-		s_Data.QuadVertexBufferItr->TexCoord = { 1.0f, 0.0f };
-		s_Data.QuadVertexBufferItr++;
-
-		s_Data.QuadVertexBufferItr->Position = { position.x + size.x, position.y + size.y, 0.0f };
-		s_Data.QuadVertexBufferItr->Color = color;
-		s_Data.QuadVertexBufferItr->TexIndex = textureIndex;
-		s_Data.QuadVertexBufferItr->Scale = scale;
-		s_Data.QuadVertexBufferItr->TexCoord = { 1.0f, 1.0f };
-		s_Data.QuadVertexBufferItr++;
-
-		s_Data.QuadVertexBufferItr->Position = { position.x, position.y + size.y, 0.0f };
-		s_Data.QuadVertexBufferItr->Color = color;
-		s_Data.QuadVertexBufferItr->TexIndex = textureIndex;
-		s_Data.QuadVertexBufferItr->Scale = scale;
-		s_Data.QuadVertexBufferItr->TexCoord = { 0.0f, 1.0f };
-		s_Data.QuadVertexBufferItr++;
+		for (uint32_t i = 0; i < 4; i++) {
+			s_Data.QuadVertexBufferItr->Position = transform * s_Data.QuadVertexPositions[i];
+			s_Data.QuadVertexBufferItr->Color = color;
+			s_Data.QuadVertexBufferItr->TexIndex = textureIndex;
+			s_Data.QuadVertexBufferItr->Scale = scale;
+			s_Data.QuadVertexBufferItr->TexCoord = s_Data.QuadTextureCoords[i];
+			s_Data.QuadVertexBufferItr++;
+		}
 
 		s_Data.QuadIndexCount += 6;
 	}
@@ -355,17 +304,23 @@ namespace Monsi {
 	void Renderer2D::drawQuadRotated(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color, float rotation)
 	{
 		ENGINE_PROFILER_FUNCTION();
-		s_Data.TextureShader->setFloat("u_Scale", 1.0f);
-		s_Data.TextureShader->setVec4("u_Color", color);
-		s_Data.WhiteTexture->Bind();
+		const float whiteTexIndex = 0.0f;
+		const float scale = 1.0f;
 
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
-			* glm::rotate(glm::mat4(1.0f), rotation, { 0.0f, 0.0f, 1.0f })
+			* glm::rotate(glm::mat4(1.0f), glm::radians(rotation), {0.0f, 0.0f, 1.0f})
 			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
-		s_Data.TextureShader->setMat4("u_Transform", transform);
 
-		s_Data.QuadVA->Bind();
-		RenderCommand::DrawIndexed(s_Data.QuadVA);
+		for (uint32_t i = 0; i < 4; i++) {
+			s_Data.QuadVertexBufferItr->Position = transform * s_Data.QuadVertexPositions[i];
+			s_Data.QuadVertexBufferItr->Color = color;
+			s_Data.QuadVertexBufferItr->TexIndex = whiteTexIndex;
+			s_Data.QuadVertexBufferItr->Scale = scale;
+			s_Data.QuadVertexBufferItr->TexCoord = s_Data.QuadTextureCoords[i];
+			s_Data.QuadVertexBufferItr++;
+		}
+
+		s_Data.QuadIndexCount += 6;
 	}
 
 	void Renderer2D::drawQuadRotated(const glm::vec2& position, const glm::vec2& size, const Reference<Texture2D>& texture, float rotation)
@@ -375,19 +330,36 @@ namespace Monsi {
 
 	void Renderer2D::drawQuadRotated(const glm::vec3& position, const glm::vec2& size, const Reference<Texture2D>& texture, float rotation)
 	{
-		ENGINE_PROFILER_FUNCTION();
-		s_Data.TextureShader->setFloat("u_Scale", 1.0f);
-		s_Data.TextureShader->setVec4("u_Color", glm::vec4(1.0f));
+		const float scale = 1.0f;
+		const glm::vec4 color = { 1.0f, 1.0f, 1.0f ,1.0f };
+		float textureIndex = 0.0f;
+		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++) {
+			if (*s_Data.TextureSlots[i].get() == *texture.get()) {
+				textureIndex = static_cast<float>(i);
+				break;
+			}
+		}
 
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) 
-			* glm::rotate(glm::mat4(1.0f), rotation, {0.0f, 0.0f, 1.0f})
+		if (textureIndex == 0.0f) {
+			textureIndex = static_cast<float>(s_Data.TextureSlotIndex);
+			s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;
+			s_Data.TextureSlotIndex++;
+		}
+
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+			* glm::rotate(glm::mat4(1.0f), glm::radians(rotation), { 0.0f,0.0f,1.0f })
 			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
-		s_Data.TextureShader->setMat4("u_Transform", transform);
 
-		texture->Bind();
+		for (uint32_t i = 0; i < 4; i++) {
+			s_Data.QuadVertexBufferItr->Position = transform * s_Data.QuadVertexPositions[i];
+			s_Data.QuadVertexBufferItr->Color = color;
+			s_Data.QuadVertexBufferItr->TexIndex = textureIndex;
+			s_Data.QuadVertexBufferItr->Scale = scale;
+			s_Data.QuadVertexBufferItr->TexCoord = s_Data.QuadTextureCoords[i];
+			s_Data.QuadVertexBufferItr++;
+		}
 
-		s_Data.QuadVA->Bind();
-		RenderCommand::DrawIndexed(s_Data.QuadVA);
+		s_Data.QuadIndexCount += 6;
 	}
 
 }

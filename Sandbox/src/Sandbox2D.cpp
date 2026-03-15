@@ -34,18 +34,20 @@ void Sandbox2D::OnLayerUpdate(Monsi::TimeStep timestep) {
 	m_CameraControl.OnLayerUpdate(timestep);
 	//ENGINE_PROFILER_SCOPE_LAMBDA("RenderCommand1");
 	{
-	ENGINE_PROFILER_SCOPE("RenderCommand");
-	Monsi::RenderCommand::SetClearColor({ 0.5f, 0.0f, 0.05f, 1.0f });
-	Monsi::RenderCommand::Clear();
+		ENGINE_PROFILER_SCOPE("RenderCommand");
+		Monsi::RenderCommand::SetClearColor({ 0.5f, 0.0f, 0.05f, 1.0f });
+		Monsi::RenderCommand::Clear();
 	}
 	//ENGINE_PROFILER_SCOPE_LAMBDA("Begin2D1");
 	{
-	ENGINE_PROFILER_SCOPE("Begin2D");
-	Monsi::Renderer2D::Begin2D(m_CameraControl.GetCamera());
-	Monsi::Renderer2D::drawQuad({ -1.0f,0.0f }, { 0.8f, 0.8f }, { 0.0f, 1.0f, 0.0f, 1.0f });
-	Monsi::Renderer2D::drawQuad({ 0.5f,-0.5f}, { 0.5f, 0.75f }, { 1.0f, 0.0f, 1.0f, 1.0f });
-	Monsi::Renderer2D::drawQuad({ -5.0f, -5.0f, -0.1f }, { 10.0f, 10.0f }, m_MonsiTest, glm::vec4({ 0.5f, 0.5f, 0.0f, 0.75f }), 5.0f);
-	Monsi::Renderer2D::End2D();
+		static float rotate = 0.0f;
+		rotate += timestep * 100.0f;
+		ENGINE_PROFILER_SCOPE("Begin2D");
+		Monsi::Renderer2D::Begin2D(m_CameraControl.GetCamera());
+		Monsi::Renderer2D::drawQuad({ -1.0f,0.0f }, { 0.8f, 0.8f }, { 0.0f, 1.0f, 0.0f, 1.0f });
+		Monsi::Renderer2D::drawQuadRotated({ 0.5f,-0.5f}, { 0.5f, 0.75f }, { 1.0f, 0.0f, 1.0f, 1.0f }, rotate);
+		Monsi::Renderer2D::drawQuad({ 0.0f, 0.0f, -0.1f }, { 10.0f, 10.0f }, m_MonsiTest);
+		Monsi::Renderer2D::End2D();
 	}
 }
 
