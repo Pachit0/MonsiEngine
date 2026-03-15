@@ -33,6 +33,9 @@ namespace Monsi {
 
 		std::array<Reference<Texture2D>, MaxTextureSlots> TextureSlots;
 		uint32_t TextureSlotIndex = 1;
+
+		glm::vec3 QuadVertexPositions[4];
+		glm::vec2 QuadTextureCoords[4];
     };
 
     static Renderer3DData s_Data;
@@ -92,6 +95,16 @@ namespace Monsi {
         s_Data.TextureShader->setIntArray("u_Textures", samplers, Renderer3DData::MaxTextureSlots);
 
         s_Data.TextureSlots[0] = s_Data.WhiteTexture;
+
+		s_Data.QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f };
+		s_Data.QuadVertexPositions[1] = { 0.5f, -0.5f, 0.0f };
+		s_Data.QuadVertexPositions[2] = { 0.5f, 0.5f, 0.0f };
+		s_Data.QuadVertexPositions[3] = { -0.5f, 0.5f, 0.0f };
+
+		s_Data.QuadTextureCoords[0] = { 0.0f,0.0f };
+		s_Data.QuadTextureCoords[1] = { 1.0f,0.0f };
+		s_Data.QuadTextureCoords[2] = { 1.0f,1.0f };
+		s_Data.QuadTextureCoords[3] = { 0.0f,1.0f };
     }
 
     void Renderer3D::Shutdown()
@@ -139,22 +152,12 @@ namespace Monsi {
 		model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0, 0, 1));
 		model = glm::scale(model, glm::vec3(size, 1.0f));
 
-		glm::vec3 verts[4] =
-		{
-			{ -0.5f, -0.5f, 0.0f },
-			{  0.5f, -0.5f, 0.0f },
-			{  0.5f,  0.5f, 0.0f },
-			{ -0.5f,  0.5f, 0.0f }
-		};
-
-		glm::vec2 tex[4] = { {0,0},{1,0},{1,1},{0,1} };
-
 		for (int i = 0; i < 4; i++)
 		{
-			glm::vec4 transformed = model * glm::vec4(verts[i], 1.0f);
+			glm::vec4 transformed = model * glm::vec4(s_Data.QuadVertexPositions[i], 1.0f);
 			s_Data.QuadVertexBufferItr->Position = glm::vec3(transformed);
 			s_Data.QuadVertexBufferItr->Color = color;
-			s_Data.QuadVertexBufferItr->TexCoord = tex[i];
+			s_Data.QuadVertexBufferItr->TexCoord = s_Data.QuadTextureCoords[i];
 			s_Data.QuadVertexBufferItr->TexIndex = WhiteIndex;
 			s_Data.QuadVertexBufferItr++;
 		}
@@ -168,7 +171,6 @@ namespace Monsi {
 		const glm::vec4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
 		float texIndex = 0.0f;
 
-		// Find or add texture slot
 		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++) {
 			if (*s_Data.TextureSlots[i].get() == *texture.get()) {
 				texIndex = static_cast<float>(i);
@@ -182,30 +184,18 @@ namespace Monsi {
 			s_Data.TextureSlotIndex++;
 		}
 
-		// Create model matrix: translate, rotate, scale
 		glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
 		model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1, 0, 0));
 		model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0, 1, 0));
 		model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0, 0, 1));
 		model = glm::scale(model, glm::vec3(size, 1.0f));
 
-		// Base quad in XY plane
-		glm::vec3 verts[4] =
-		{
-			{-0.5f, -0.5f, 0.0f},
-			{ 0.5f, -0.5f, 0.0f},
-			{ 0.5f,  0.5f, 0.0f},
-			{-0.5f,  0.5f, 0.0f}
-		};
-
-		glm::vec2 tex[4] = { {0,0},{1,0},{1,1},{0,1} };
-
 		for (int i = 0; i < 4; i++)
 		{
-			glm::vec4 transformed = model * glm::vec4(verts[i], 1.0f);
+			glm::vec4 transformed = model * glm::vec4(s_Data.QuadVertexPositions[i], 1.0f);
 			s_Data.QuadVertexBufferItr->Position = glm::vec3(transformed);
 			s_Data.QuadVertexBufferItr->Color = color;
-			s_Data.QuadVertexBufferItr->TexCoord = tex[i];
+			s_Data.QuadVertexBufferItr->TexCoord = s_Data.QuadTextureCoords[i];
 			s_Data.QuadVertexBufferItr->TexIndex = texIndex;
 			s_Data.QuadVertexBufferItr++;
 		}
@@ -213,38 +203,38 @@ namespace Monsi {
 		s_Data.QuadIndexCount += 6;
 	}
 
-	void Renderer3D::DrawCube(const glm::vec3& pos, const glm::vec3& size, const glm::vec4& color)
+	void Renderer3D::DrawCube(const glm::vec3& position, const glm::vec3& size, const glm::vec4& color)
 	{
 		glm::vec3 hs = size * 0.5f;
 
 		// front/back
-		DrawQuad(pos + glm::vec3(0, 0, hs.z), { size.x,size.y }, color, { 0,0,0 });
-		DrawQuad(pos + glm::vec3(0, 0, -hs.z), { size.x,size.y }, color, { 0,180,0 });
+		DrawQuad(position + glm::vec3(0, 0, hs.z), { size.x,size.y }, color, { 0,0,0 });
+		DrawQuad(position + glm::vec3(0, 0, -hs.z), { size.x,size.y }, color, { 0,180,0 });
 
 		// left/right
-		DrawQuad(pos + glm::vec3(-hs.x, 0, 0), { size.z,size.y }, color, { 0,90,0 });
-		DrawQuad(pos + glm::vec3(hs.x, 0, 0), { size.z,size.y }, color, { 0,-90,0 });
+		DrawQuad(position + glm::vec3(-hs.x, 0, 0), { size.z,size.y }, color, { 0,90,0 });
+		DrawQuad(position + glm::vec3(hs.x, 0, 0), { size.z,size.y }, color, { 0,-90,0 });
 
 		// top/bottom
-		DrawQuad(pos + glm::vec3(0, hs.y, 0), { size.x,size.z }, color, { -90,0,0 });
-		DrawQuad(pos + glm::vec3(0, -hs.y, 0), { size.x,size.z }, color, { 90,0,0 });
+		DrawQuad(position + glm::vec3(0, hs.y, 0), { size.x,size.z }, color, { -90,0,0 });
+		DrawQuad(position + glm::vec3(0, -hs.y, 0), { size.x,size.z }, color, { 90,0,0 });
 	}
 
-    void Renderer3D::DrawCube(const glm::vec3& pos, const glm::vec3& size, Reference<Texture2D> tex)
+    void Renderer3D::DrawCube(const glm::vec3& position, const glm::vec3& size, Reference<Texture2D> tex)
     {
         glm::vec3 hs = size * 0.5f;
 
         // front/back
-		DrawQuad(pos + glm::vec3(0, 0, hs.z), { size.x,size.y }, tex, {0,0,0});
-		DrawQuad(pos + glm::vec3(0, 0, -hs.z), { size.x,size.y }, tex, { 0,180,0 });
+		DrawQuad(position + glm::vec3(0, 0, hs.z), { size.x,size.y }, tex, {0,0,0});
+		DrawQuad(position + glm::vec3(0, 0, -hs.z), { size.x,size.y }, tex, { 0,180,0 });
 
         // left/right
-		DrawQuad(pos + glm::vec3(-hs.x, 0, 0), { size.z,size.y }, tex, { 0,90,0 });
-		DrawQuad(pos + glm::vec3(hs.x, 0, 0), { size.z,size.y }, tex, { 0,-90,0 });
+		DrawQuad(position + glm::vec3(-hs.x, 0, 0), { size.z,size.y }, tex, { 0,90,0 });
+		DrawQuad(position + glm::vec3(hs.x, 0, 0), { size.z,size.y }, tex, { 0,-90,0 });
 
         // top/bottom
-		DrawQuad(pos + glm::vec3(0, hs.y, 0), { size.x,size.z }, tex, { -90,0,0 });
-		DrawQuad(pos + glm::vec3(0, -hs.y, 0), { size.x,size.z }, tex, { 90,0,0 });
+		DrawQuad(position + glm::vec3(0, hs.y, 0), { size.x,size.z }, tex, { -90,0,0 });
+		DrawQuad(position + glm::vec3(0, -hs.y, 0), { size.x,size.z }, tex, { 90,0,0 });
     }
 
 }

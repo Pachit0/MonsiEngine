@@ -17,6 +17,9 @@ void ExampleLayer::OnLayerUpdate(Monsi::TimeStep timestep)
 
 	m_CameraControl.OnLayerUpdate(timestep);
 	
+	static float rotate = 0.0f;
+	rotate += timestep * 50.0f;
+
 	Monsi::Renderer3D::Begin3D(m_CameraControl);
 	Monsi::Renderer3D::DrawCube({ 0.0f,0.0f,0.0f }, { 1.0f,1.0f,1.0f }, m_MonsiTest);
 	Monsi::Renderer3D::End3D();

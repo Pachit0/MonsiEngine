@@ -18,24 +18,11 @@ namespace Monsi {
 
         static void Flush();
 
-        static void DrawQuad(const glm::vec3& position, const glm::vec2& size, 
-            const glm::vec4& color, const glm::vec3& rotation);
-
-        static void DrawQuad(
-            const glm::vec3& position,
-            const glm::vec2& size,
-            Reference<Texture2D> texture,
-            const glm::vec3& rotation);
-
-        static void DrawCube(
-            const glm::vec3& position,
-            const glm::vec3& size,
-            const glm::vec4& color);
-
-        static void DrawCube(
-            const glm::vec3& position,
-            const glm::vec3& size,
-            Reference<Texture2D> texture);
+        static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color, const glm::vec3& rotation);
+        static void DrawQuad(const glm::vec3& position,const glm::vec2& size,Reference<Texture2D> texture,const glm::vec3& rotation);
+        
+        static void DrawCube(const glm::vec3& position,const glm::vec3& size,const glm::vec4& color);
+        static void DrawCube(const glm::vec3& position,const glm::vec3& size,Reference<Texture2D> texture);
     };
 
 }
