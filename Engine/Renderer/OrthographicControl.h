@@ -12,6 +12,7 @@ namespace Monsi {
 
 	public:
 		OrthographicControl(float AspectRatio, bool cameraRotatoinFlag = false);
+		OrthographicControl(float AspectRatio, float Zoom ,bool cameraRotatoinFlag = false);
 
 		void OnLayerUpdate(TimeStep timestep);
 		void OnLayerEvent(Event& event);
@@ -19,7 +20,7 @@ namespace Monsi {
 		OrthographicCamera& GetCamera() { return m_Camera; }
 		const OrthographicCamera& GetCamera() const { return m_Camera; }
 
-		void SetZoom(float zoom) { m_ZoomControl = zoom; }
+		void SetZoom(float zoom);
 		float GetZoom() const { return m_ZoomControl; }
 
 	private:

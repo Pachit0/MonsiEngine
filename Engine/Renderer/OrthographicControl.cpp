@@ -6,7 +6,18 @@
 namespace Monsi {
 
 	OrthographicControl::OrthographicControl(float AspectRatio, bool cameraRotatoinFlag) 
-		: m_AspectRation(AspectRatio), m_Camera(-m_AspectRation * m_ZoomControl, m_AspectRation * m_ZoomControl, -m_ZoomControl, m_ZoomControl), m_CameraRotationFlag(cameraRotatoinFlag) {
+		: m_AspectRation(AspectRatio),
+		m_Camera(-m_AspectRation * m_ZoomControl, m_AspectRation * m_ZoomControl, -m_ZoomControl, m_ZoomControl),
+		m_CameraRotationFlag(cameraRotatoinFlag)
+	{
+
+	}
+
+	OrthographicControl::OrthographicControl(float AspectRatio, float Zoom, bool cameraRotatoinFlag)
+		: m_AspectRation(AspectRatio), m_ZoomControl(Zoom),
+		m_Camera(-m_AspectRation * m_ZoomControl, m_AspectRation * m_ZoomControl, -m_ZoomControl, m_ZoomControl),
+		m_CameraRotationFlag(cameraRotatoinFlag)
+	{
 
 	}
 
@@ -65,4 +76,9 @@ namespace Monsi {
 		return false;
 	}
 
+	void OrthographicControl::SetZoom(float zoom)
+	{ 
+		m_ZoomControl = zoom; 
+		m_Camera.SetProjection(-m_AspectRation * m_ZoomControl, m_AspectRation * m_ZoomControl, -m_ZoomControl, m_ZoomControl);
+	}
 }
