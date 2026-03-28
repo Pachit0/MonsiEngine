@@ -112,4 +112,9 @@ namespace Monsi {
     }
 
 
+	void Application::CloseApp()
+	{
+        m_Running = false;
+	}
+
 }
