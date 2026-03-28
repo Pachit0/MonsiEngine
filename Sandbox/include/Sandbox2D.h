@@ -16,6 +16,7 @@ private:
 	Monsi::OrthographicControl m_CameraControl;
 
 	Monsi::Reference<Monsi::Texture2D> m_MonsiTest;
+	Monsi::Reference<Monsi::SubTexture2D> m_Chair;
 
 	struct TimeProfilerResult {
 		const char* Name;
@@ -23,4 +24,6 @@ private:
 	};
 
 	std::vector<TimeProfilerResult> m_TimeResults;
+
+	std::unordered_map<char, Monsi::Reference<Monsi::SubTexture2D>> s_TextureMap;
 };

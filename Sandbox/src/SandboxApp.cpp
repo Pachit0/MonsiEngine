@@ -8,8 +8,8 @@ class Sandbox : public Monsi::Application {
 public:
 	Sandbox() {
 		//PushLayer(new ExampleLayer());
-		//PushLayer(new Sandbox2D());
-		PushLayer(new AStarSearch2D());
+		PushLayer(new Sandbox2D());
+		//PushLayer(new AStarSearch2D());
 	}
 
 	~Sandbox() override = default;

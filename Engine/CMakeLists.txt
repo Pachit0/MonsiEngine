@@ -76,7 +76,7 @@ add_library(Engine STATIC
     "Renderer/PerspectiveCamera.h" 
     "Renderer/PerspectiveCamera.cpp" 
     "Renderer/PerspectiveControl.cpp" 
-)
+ "Renderer/SubTexture2D.h" "Renderer/SubTexture2D.cpp")
 
 if(WIN32)
     target_compile_definitions(Engine PRIVATE GLFW_INCLUDE_NONE MONSI_BUILD_DEBUG ENGINE_PROFILER)
@@ -114,5 +114,3 @@ if(MSVC)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Release>:Release>")
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
-
-list(REMOVE_ITEM Engine  ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Renderer3D.cpp)

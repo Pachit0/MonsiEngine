@@ -16,7 +16,7 @@ namespace Monsi {
 	};
 
 	struct Renderer2DData {
-		static const uint32_t MaxQuadsPerDrawCall = 15000;
+		static const uint32_t MaxQuadsPerDrawCall = 30000;
 		static const uint32_t MaxVerticesPerDrawCall = MaxQuadsPerDrawCall * 4;
 		static const uint32_t MaxIndicesPerDrawCall = MaxQuadsPerDrawCall * 6;
 		static const uint32_t MaxTextureSlots = 32;
@@ -34,7 +34,9 @@ namespace Monsi {
 		glm::vec2 QuadTextureCoords[4];
 
 		std::array<Reference<Texture2D>, MaxTextureSlots> TextureSlots;
-		uint32_t TextureSlotIndex = 1;// first slot is reserved for white
+		uint32_t TextureSlotIndex = 1;// first slot is reserved for the white texture
+
+		Renderer2D::BatchStatistics batchStats;
 	};
 
 	static Renderer2DData s_Data;
@@ -106,7 +108,7 @@ namespace Monsi {
 		ENGINE_PROFILER_FUNCTION();
 	}
 
-	void Renderer2D::Begin2D(const OrthographicCamera& camera) {
+	void Renderer2D::BeginScene2D(const OrthographicCamera& camera) {
 		ENGINE_PROFILER_FUNCTION();
 		s_Data.TextureShader->Bind();
 		s_Data.TextureShader->setMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
@@ -116,7 +118,7 @@ namespace Monsi {
 		s_Data.TextureSlotIndex = 1;
 	}
 
-	void Renderer2D::End2D() {
+	void Renderer2D::EndScene2D() {
 		ENGINE_PROFILER_FUNCTION();
 
 		uint32_t sizeOfData = reinterpret_cast<uint8_t*>(s_Data.QuadVertexBufferItr) - reinterpret_cast<uint8_t*>(s_Data.QuadVertexBufferBegin);
@@ -132,6 +134,7 @@ namespace Monsi {
 		}
 
 		RenderCommand::DrawIndexed(s_Data.QuadVA, s_Data.QuadIndexCount);
+		s_Data.batchStats.DrawCalls++;
 	}
 
 	void Renderer2D::drawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color) {
@@ -140,6 +143,10 @@ namespace Monsi {
 	
 	void Renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color) {
 		ENGINE_PROFILER_FUNCTION();
+
+		if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndicesPerDrawCall) {
+			FlushResetBatch();
+		}
 
 		const float whiteTexIndex = 0.0f;
 		const float scale = 1.0f;
@@ -157,6 +164,7 @@ namespace Monsi {
 		}
 
 		s_Data.QuadIndexCount += 6;
+		s_Data.batchStats.QuadCount++;
 		
 		/*
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) // Translation * rotation(optinal) * scale
@@ -175,6 +183,12 @@ namespace Monsi {
 
 	void Renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size, const Reference<Texture2D>& texture)
 	{
+		ENGINE_PROFILER_FUNCTION();
+
+		if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndicesPerDrawCall) {
+			FlushResetBatch();
+		}
+
 		const float scale = 1.0f;
 		const glm::vec4 color = { 1.0f, 1.0f, 1.0f ,1.0f };
 		float textureIndex = 0.0f;
@@ -204,6 +218,7 @@ namespace Monsi {
 		}
 
 		s_Data.QuadIndexCount += 6;
+		s_Data.batchStats.QuadCount++;
 
 		/*ENGINE_PROFILER_FUNCTION();
 		s_Data.TextureShader->setFloat("u_Scale", 1.0f);
@@ -226,6 +241,11 @@ namespace Monsi {
 	void Renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size, const Reference<Texture2D>& texture, const glm::vec4& color)
 	{
 		ENGINE_PROFILER_FUNCTION();
+
+		if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndicesPerDrawCall) {
+			FlushResetBatch();
+		}
+
 		const float scale = 1.0f;
 		float textureIndex = 0.0f;
 		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++) {
@@ -236,6 +256,9 @@ namespace Monsi {
 		}
 
 		if (textureIndex == 0.0f) {
+			if (s_Data.TextureSlotIndex >= Renderer2DData::MaxTextureSlots) {
+				FlushResetBatch();
+			}
 			textureIndex = static_cast<float>(s_Data.TextureSlotIndex);
 			s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;
 			s_Data.TextureSlotIndex++;
@@ -254,6 +277,7 @@ namespace Monsi {
 		}
 
 		s_Data.QuadIndexCount += 6;
+		s_Data.batchStats.QuadCount++;
 	}
 
 	void Renderer2D::drawQuad(const glm::vec2& position, const glm::vec2& size, const Reference<Texture2D>& texture, const glm::vec4& color, float scale)
@@ -264,6 +288,11 @@ namespace Monsi {
 	void Renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size, const Reference<Texture2D>& texture, const glm::vec4& color, float scale)
 	{
 		ENGINE_PROFILER_FUNCTION();
+
+		if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndicesPerDrawCall) {
+			FlushResetBatch();
+		}
+
 		float textureIndex = 0.0f;
 		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++) {
 			if (*s_Data.TextureSlots[i].get() == *texture.get()) {
@@ -273,6 +302,9 @@ namespace Monsi {
 		}
 
 		if (textureIndex == 0.0f) {
+			if (s_Data.TextureSlotIndex >= Renderer2DData::MaxTextureSlots) {
+				FlushResetBatch();
+			}
 			textureIndex = static_cast<float>(s_Data.TextureSlotIndex);
 			s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;
 			s_Data.TextureSlotIndex++;
@@ -291,19 +323,173 @@ namespace Monsi {
 		}
 
 		s_Data.QuadIndexCount += 6;
+		s_Data.batchStats.QuadCount++;
 	}
 
+	void Renderer2D::drawQuad(const glm::vec2& position, const glm::vec2& size, const Reference<SubTexture2D>& subTexture)
+	{
+		drawQuad({ position.x, position.y, 0.0f }, size, subTexture);
+	}
+
+	void Renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size, const Reference<SubTexture2D>& subTexture)
+	{
+		ENGINE_PROFILER_FUNCTION();
+
+		if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndicesPerDrawCall) {
+			FlushResetBatch();
+		}
+
+		Reference<Texture2D> texture = subTexture->GetTexture();
+		const glm::vec2* textureCoords = subTexture->GetTextureCoords();
+
+		const float scale = 1.0f;
+		const glm::vec4 color = { 1.0f, 1.0f, 1.0f ,1.0f };
+		float textureIndex = 0.0f;
+
+		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++) {
+			if (*s_Data.TextureSlots[i].get() == *texture.get()) {
+				textureIndex = static_cast<float>(i);
+				break;
+			}
+		}
+
+		if (textureIndex == 0.0f) {
+			if (s_Data.TextureSlotIndex >= Renderer2DData::MaxTextureSlots) {
+				FlushResetBatch();
+			}
+			textureIndex = static_cast<float>(s_Data.TextureSlotIndex);
+			s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;
+			s_Data.TextureSlotIndex++;
+		}
+
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
+
+		for (uint32_t i = 0; i < 4; i++) {
+			s_Data.QuadVertexBufferItr->Position = transform * s_Data.QuadVertexPositions[i];
+			s_Data.QuadVertexBufferItr->Color = color;
+			s_Data.QuadVertexBufferItr->TexIndex = textureIndex;
+			s_Data.QuadVertexBufferItr->Scale = scale;
+			s_Data.QuadVertexBufferItr->TexCoord = textureCoords[i];
+			s_Data.QuadVertexBufferItr++;
+		}
+
+		s_Data.QuadIndexCount += 6;
+		s_Data.batchStats.QuadCount++;
+	}
+
+	void Renderer2D::drawQuad(const glm::vec2& position, const glm::vec2& size, const Reference<SubTexture2D>& subTexture, const glm::vec4& color)
+	{
+		drawQuad({ position.x, position.y, 0.0f }, size, subTexture, color);
+	}
+
+	void Renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size, const Reference<SubTexture2D>& subTexture, const glm::vec4& color)
+	{
+		ENGINE_PROFILER_FUNCTION();
+
+		if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndicesPerDrawCall) {
+			FlushResetBatch();
+		}
+
+		Reference<Texture2D> texture = subTexture->GetTexture();
+		const glm::vec2* textureCoords = subTexture->GetTextureCoords();
+
+		const float scale = 1.0f;
+		float textureIndex = 0.0f;
+		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++) {
+			if (*s_Data.TextureSlots[i].get() == *texture.get()) {
+				textureIndex = static_cast<float>(i);
+				break;
+			}
+		}
+
+		if (textureIndex == 0.0f) {
+			if (s_Data.TextureSlotIndex >= Renderer2DData::MaxTextureSlots) {
+				FlushResetBatch();
+			}
+			textureIndex = static_cast<float>(s_Data.TextureSlotIndex);
+			s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;
+			s_Data.TextureSlotIndex++;
+		}
+
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
+
+		for (uint32_t i = 0; i < 4; i++) {
+			s_Data.QuadVertexBufferItr->Position = transform * s_Data.QuadVertexPositions[i];
+			s_Data.QuadVertexBufferItr->Color = color;
+			s_Data.QuadVertexBufferItr->TexIndex = textureIndex;
+			s_Data.QuadVertexBufferItr->Scale = scale;
+			s_Data.QuadVertexBufferItr->TexCoord = textureCoords[i];
+			s_Data.QuadVertexBufferItr++;
+		}
+
+		s_Data.QuadIndexCount += 6;
+		s_Data.batchStats.QuadCount++;
+	}
+
+	void Renderer2D::drawQuad(const glm::vec2& position, const glm::vec2& size, const Reference<SubTexture2D>& subTexture, const glm::vec4& color, float scale)
+	{
+		drawQuad({ position.x, position.y, 0.0f }, size, subTexture, color, scale);
+	}
+
+	void Renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size, const Reference<SubTexture2D>& subTexture, const glm::vec4& color, float scale)
+	{
+		ENGINE_PROFILER_FUNCTION();
+
+		if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndicesPerDrawCall) {
+			FlushResetBatch();
+		}
+
+		Reference<Texture2D> texture = subTexture->GetTexture();
+		const glm::vec2* textureCoords = subTexture->GetTextureCoords();
+
+		float textureIndex = 0.0f;
+		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++) {
+			if (*s_Data.TextureSlots[i].get() == *texture.get()) {
+				textureIndex = static_cast<float>(i);
+				break;
+			}
+		}
+
+		if (textureIndex == 0.0f) {
+			if (s_Data.TextureSlotIndex >= Renderer2DData::MaxTextureSlots) {
+				FlushResetBatch();
+			}
+			textureIndex = static_cast<float>(s_Data.TextureSlotIndex);
+			s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;
+			s_Data.TextureSlotIndex++;
+		}
+
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
+
+		for (uint32_t i = 0; i < 4; i++) {
+			s_Data.QuadVertexBufferItr->Position = transform * s_Data.QuadVertexPositions[i];
+			s_Data.QuadVertexBufferItr->Color = color;
+			s_Data.QuadVertexBufferItr->TexIndex = textureIndex;
+			s_Data.QuadVertexBufferItr->Scale = scale;
+			s_Data.QuadVertexBufferItr->TexCoord = textureCoords[i];
+			s_Data.QuadVertexBufferItr++;
+		}
+
+		s_Data.QuadIndexCount += 6;
+		s_Data.batchStats.QuadCount++;
+	}
 
 	void Renderer2D::drawQuadRotated(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, float rotation)
 	{
 		drawQuadRotated({ position.x, position.y, 0.0f }, size, color, rotation);
 	}
 
-//TODO batch render rotated quad
-
 	void Renderer2D::drawQuadRotated(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color, float rotation)
 	{
 		ENGINE_PROFILER_FUNCTION();
+
+		if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndicesPerDrawCall) {
+			FlushResetBatch();
+		}
+
 		const float whiteTexIndex = 0.0f;
 		const float scale = 1.0f;
 
@@ -321,6 +507,7 @@ namespace Monsi {
 		}
 
 		s_Data.QuadIndexCount += 6;
+		s_Data.batchStats.QuadCount++;
 	}
 
 	void Renderer2D::drawQuadRotated(const glm::vec2& position, const glm::vec2& size, const Reference<Texture2D>& texture, float rotation)
@@ -330,6 +517,12 @@ namespace Monsi {
 
 	void Renderer2D::drawQuadRotated(const glm::vec3& position, const glm::vec2& size, const Reference<Texture2D>& texture, float rotation)
 	{
+		ENGINE_PROFILER_FUNCTION();
+
+		if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndicesPerDrawCall) {
+			FlushResetBatch();
+		}
+
 		const float scale = 1.0f;
 		const glm::vec4 color = { 1.0f, 1.0f, 1.0f ,1.0f };
 		float textureIndex = 0.0f;
@@ -341,6 +534,9 @@ namespace Monsi {
 		}
 
 		if (textureIndex == 0.0f) {
+			if (s_Data.TextureSlotIndex >= Renderer2DData::MaxTextureSlots) {
+				FlushResetBatch();
+			}
 			textureIndex = static_cast<float>(s_Data.TextureSlotIndex);
 			s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;
 			s_Data.TextureSlotIndex++;
@@ -360,6 +556,78 @@ namespace Monsi {
 		}
 
 		s_Data.QuadIndexCount += 6;
+		s_Data.batchStats.QuadCount++;
+	}
+
+	void Renderer2D::drawQuadRotated(const glm::vec2& position, const glm::vec2& size, const Reference<SubTexture2D>& subTexture, float rotation)
+	{
+		drawQuadRotated({ position.x, position.y, 0.0f }, size, subTexture, rotation);
+	}
+
+	void Renderer2D::drawQuadRotated(const glm::vec3& position, const glm::vec2& size, const Reference<SubTexture2D>& subTexture, float rotation)
+	{
+		ENGINE_PROFILER_FUNCTION();
+
+		if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndicesPerDrawCall) {
+			FlushResetBatch();
+		}
+
+		Reference<Texture2D> texture = subTexture->GetTexture();
+		const glm::vec2* textureCoords = subTexture->GetTextureCoords();
+
+		const float scale = 1.0f;
+		const glm::vec4 color = { 1.0f, 1.0f, 1.0f ,1.0f };
+		float textureIndex = 0.0f;
+		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++) {
+			if (*s_Data.TextureSlots[i].get() == *texture.get()) {
+				textureIndex = static_cast<float>(i);
+				break;
+			}
+		}
+
+		if (textureIndex == 0.0f) {
+			if (s_Data.TextureSlotIndex >= Renderer2DData::MaxTextureSlots) {
+				FlushResetBatch();
+			}
+			textureIndex = static_cast<float>(s_Data.TextureSlotIndex);
+			s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;
+			s_Data.TextureSlotIndex++;
+		}
+
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+			* glm::rotate(glm::mat4(1.0f), glm::radians(rotation), { 0.0f,0.0f,1.0f })
+			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
+
+		for (uint32_t i = 0; i < 4; i++) {
+			s_Data.QuadVertexBufferItr->Position = transform * s_Data.QuadVertexPositions[i];
+			s_Data.QuadVertexBufferItr->Color = color;
+			s_Data.QuadVertexBufferItr->TexIndex = textureIndex;
+			s_Data.QuadVertexBufferItr->Scale = scale;
+			s_Data.QuadVertexBufferItr->TexCoord = textureCoords[i];
+			s_Data.QuadVertexBufferItr++;
+		}
+
+		s_Data.QuadIndexCount += 6;
+		s_Data.batchStats.QuadCount++;
+	}
+
+	void Renderer2D::ResetBatchStatistics()
+	{
+		memset(&s_Data.batchStats, 0, sizeof(BatchStatistics));
+	}
+
+	Renderer2D::BatchStatistics Renderer2D::GetBatchStatistics()
+	{
+		return s_Data.batchStats;
+	}
+
+	void Renderer2D::FlushResetBatch()
+	{
+		EndScene2D();
+
+		s_Data.QuadVertexBufferItr = s_Data.QuadVertexBufferBegin;
+		s_Data.QuadIndexCount = 0;
+		s_Data.TextureSlotIndex = 1;
 	}
 
 }

@@ -4,7 +4,8 @@ add_executable( Sandbox
     "src/SandboxApp.cpp"
     "src/ExampleLayer.cpp"
     "src/Sandbox2D.cpp"
- "src/AStarSearch2D.cpp" "include/AStarSearch2D.h" )
+    "src/AStarSearch2D.cpp"
+)
 
 target_include_directories(Sandbox PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include

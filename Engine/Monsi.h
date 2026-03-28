@@ -17,6 +17,7 @@
 #include "Renderer/Shader.h"
 #include "Renderer/VertexArray.h"
 #include "Renderer/Texture.h"
+#include "Renderer/SubTexture2D.h"
 #include "Renderer/OrthographicCamera.h"
 #include "Renderer/PerspectiveCamera.h"
 #include "Renderer/Renderer2D.h"

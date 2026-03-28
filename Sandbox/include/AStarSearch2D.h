@@ -12,6 +12,7 @@ public:
 	void OnLayerUpdate(Monsi::TimeStep timestep) override;
 	void OnLayerDetach() override;
 	void OnLayerEvent(Monsi::Event& event) override;
+	void OnImGuiDraw() override;
 
 	int GetRow() const { return m_Row; }
 	int GetCol() const { return m_Col; }
@@ -27,6 +28,7 @@ private:
 		THIRD,
 		FOURTH,
 		FIFTH,
+		SIX,
 		COUNT
 	};
 
