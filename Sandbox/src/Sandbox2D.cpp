@@ -1,9 +1,9 @@
 #include "Sandbox2D.h"
-#include "imgui.h"
-#include "imgui_internal.h"
-#include "glm/gtc/type_ptr.hpp"
-#include "Platform/OpenGL/OpenGLShader.h"
-#include "debug/instrumentor.h"
+#include <imgui.h>
+#include <imgui_internal.h>
+#include <glm/gtc/type_ptr.hpp>
+#include <Platform/OpenGL/OpenGLShader.h>
+#include <debug/instrumentor.h>
 
 static const char* s_MapTiles = "CGGGCGGGC"
 								"GCGGGGGCG"
@@ -20,6 +20,7 @@ void Sandbox2D::OnLayerAttach() {
 
 	s_TextureMap['C'] = Monsi::SubTexture2D::CreateSubTexture(m_MonsiTest, { 0,8 }, { 48,48 });
 	s_TextureMap['G'] = Monsi::SubTexture2D::CreateSubTexture(m_MonsiTest, { 4,8 }, { 48,48 });
+
 }
 
 void Sandbox2D::OnLayerUpdate(Monsi::TimeStep timestep) {
@@ -67,46 +68,6 @@ void Sandbox2D::OnLayerDetach() {
 void Sandbox2D::OnImGuiDraw() {
 	ENGINE_PROFILER_FUNCTION();
 
-	ImGui::BeginMainMenuBar();
-	if (ImGui::BeginMenu("File"))
-	{
-		if (ImGui::MenuItem("Exit")) { Monsi::Application::Get().CloseApp(); }
-		ImGui::EndMenu();
-	}
-
-	ImGui::EndMainMenuBar();
-
-	ImGuiViewport* viewport = ImGui::GetMainViewport();
-
-	ImGuiID dockspace_id = ImGui::GetID("MyDockspace");
-
-	ImGui::DockSpaceOverViewport(dockspace_id,viewport,ImGuiDockNodeFlags_PassthruCentralNode);
-
-	static bool first_time = true;
-	if (first_time)
-	{
-		first_time = false;
-
-		ImGui::DockBuilderRemoveNode(dockspace_id);
-		ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace);
-		ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->Size);
-
-		ImGuiID dock_id_main = dockspace_id;
-		ImGuiID dock_id_left;
-
-		ImGui::DockBuilderSplitNode(dock_id_main,ImGuiDir_Left,0.20f,&dock_id_left,&dock_id_main);
-
-		ImGuiID dock_id_left_top;
-		ImGuiID dock_id_left_bottom;
-
-		ImGui::DockBuilderSplitNode(dock_id_left,ImGuiDir_Up,0.5f,&dock_id_left_top,&dock_id_left_bottom);
-
-		ImGui::DockBuilderDockWindow("Properties", dock_id_left_top);
-		ImGui::DockBuilderDockWindow("Scene", dock_id_left_bottom);
-
-		ImGui::DockBuilderFinish(dockspace_id);
-	}
-
 	ImGui::Begin("Properties");
 
 	auto batchStats = Monsi::Renderer2D::GetBatchStatistics();
@@ -116,14 +77,6 @@ void Sandbox2D::OnImGuiDraw() {
 	ImGui::Text("Quad Total Count: %d", batchStats.QuadCount);
 	ImGui::Text("Quad Vertices: %d", batchStats.GetVertexCount());
 	ImGui::Text("Quad Indices: %d", batchStats.GetIndexCount());
-	uint32_t textureID = m_MonsiTest->GetRendererID();
-	ImGui::Image((void*)textureID, ImVec2{ 2304.0f / 4, 768.0f / 4 });
-
-	ImGui::End();
-
-	ImGui::Begin("Scene");
-
-	ImGui::Text("Monsi example scene");
 
 	ImGui::End();
 }
