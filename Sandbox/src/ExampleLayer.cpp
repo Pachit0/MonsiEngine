@@ -22,6 +22,9 @@ void ExampleLayer::OnLayerUpdate(Monsi::TimeStep timestep)
 
 	Monsi::Renderer3D::Begin3D(m_CameraControl);
 	Monsi::Renderer3D::DrawCube({ 0.0f,0.0f,0.0f }, { 1.0f,1.0f,1.0f }, m_MonsiTest);
+
+	//Monsi::Renderer3D::DrawQuad({ 0.0f,0.0f,0.0f }, { 1.0f, 1.0f }, { 1.0f,1.0f,1.0f,1.0f }, glm::vec3(0.0f));
+
 	Monsi::Renderer3D::End3D();
 }
 

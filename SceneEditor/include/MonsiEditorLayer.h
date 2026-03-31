@@ -26,7 +26,9 @@ namespace Monsi {
 			float Time;
 		};
 
-		std::vector<TimeProfilerResult> m_TimeResults;
+		glm::vec2 m_ViewportSize;
+		bool m_ViewportFocused;
+		bool m_ViewportHovered;
 
 		std::unordered_map<char, Reference<SubTexture2D>> s_TextureMap;
 	};

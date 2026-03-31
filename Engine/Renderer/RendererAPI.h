@@ -12,6 +12,9 @@ namespace Monsi {
 			None = 0, OpenGL = 1
 
 		};
+
+		virtual ~RendererAPI() = default;
+
 		virtual void Init() = 0;
 		virtual void SetViewport(uint32_t x, uint32_t y, uint32_t widht, uint32_t height) = 0;
 		virtual void SetClearColor(const glm::vec4& color) = 0;

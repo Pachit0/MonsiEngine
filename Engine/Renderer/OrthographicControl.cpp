@@ -57,6 +57,13 @@ namespace Monsi {
 		dispatcher.Dispatch<WindowResizeEvent>(ENGINE_BIND_EVENT_FN(OrthographicControl::OnResizeEvent));
 	}
 
+	void OrthographicControl::OnWindowResize(float width, float height)
+	{
+		ENGINE_PROFILER_FUNCTION();
+		m_AspectRation = width / height;
+		m_Camera.SetProjection(-m_AspectRation * m_ZoomControl, m_AspectRation * m_ZoomControl, -m_ZoomControl, m_ZoomControl);
+	}
+
 	bool OrthographicControl::OnZoomEvent(MouseEventScrolled& event)
 	{
 		ENGINE_PROFILER_FUNCTION();
@@ -71,8 +78,7 @@ namespace Monsi {
 	bool OrthographicControl::OnResizeEvent(WindowResizeEvent& event)
 	{
 		ENGINE_PROFILER_FUNCTION();
-		m_AspectRation = static_cast<float>(event.GetWidth()) / static_cast<float>(event.GetHeight());
-		m_Camera.SetProjection(-m_AspectRation * m_ZoomControl, m_AspectRation * m_ZoomControl, -m_ZoomControl, m_ZoomControl);
+		OnWindowResize(static_cast<float>(event.GetWidth()), static_cast<float>(event.GetHeight()));
 		return false;
 	}
 

@@ -6,7 +6,8 @@
 
 class Sandbox : public Monsi::Application {
 public:
-	Sandbox() {
+	Sandbox() 
+		: Application({"Sandbox"}) {
 		//PushLayer(new ExampleLayer());
 		PushLayer(new Sandbox2D());
 		//PushLayer(new AStarSearch2D());

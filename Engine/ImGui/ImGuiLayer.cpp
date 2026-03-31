@@ -84,9 +84,19 @@ namespace Monsi {
             ImGui::RenderPlatformWindowsDefault();
             glfwMakeContextCurrent(backup_current_context);
         }
-    }
+    };
 
 	void ImGuiLayer::OnImGuiDraw() {
 
 	}
+
+	void ImGuiLayer::OnLayerEvent(Event& event)
+	{
+        if (m_BlockImGuiEvents) {
+			ImGuiIO& io = ImGui::GetIO();
+			event.Handled |= event.IsInCategory(CategoryMouse) & io.WantCaptureMouse;
+			event.Handled |= event.IsInCategory(CategoryKeyboard) & io.WantCaptureKeyboard;
+        }
+	}
+
 }

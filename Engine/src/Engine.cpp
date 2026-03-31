@@ -13,13 +13,15 @@ namespace Monsi {
     
     Application* Application::s_Instance = nullptr;
 
-    Application::Application() : m_PrevFrameTime(0.0f) {
+    Application::Application(const AppSpecification& spec) 
+        : m_Specification(spec), m_PrevFrameTime(0.0f) 
+    {
         ENGINE_PROFILER_FUNCTION();
 
         ENGINE_ASSERT(!s_Instance, "Application object already exists!");
         s_Instance = this;
 
-        m_Window = std::unique_ptr<Window>(Window::Create());
+        m_Window = Scope<Window>(Window::Create(spec.Name));
         m_Window->SetEventCallbackFn(BIND_EVENT_FN(OnEvent));
 
         Renderer::Init();

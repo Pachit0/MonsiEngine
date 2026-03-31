@@ -7,7 +7,8 @@ namespace Monsi {
 
 	class MonsiEditor : public Application {
 	public:
-		MonsiEditor() {
+		MonsiEditor() 
+			: Application({ "Monsi Editor" }) {
 			PushLayer(new EditorLayer());
 		}
 

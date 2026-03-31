@@ -1,46 +1,38 @@
 #include "MonsiPch.h"
-#include "WindowsInput.h"
+#include "Input.h"
 
 #include "GLFW/glfw3.h"
 #include "Engine.h"
 
 namespace Monsi {
-	 
-	Input* Input::s_Instance = new WindowsInput();
 
-	bool WindowsInput::KeyPressedImpl(int keycode) {
+	bool Input::KeyPressed(int keycode) {
 		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
 		auto state = glfwGetKey(window, keycode);
 		return state == GLFW_PRESS || state == GLFW_REPEAT;
 	}
 
-	bool WindowsInput::MouseButtonPressedImpl(int button)
+	bool Input::MouseButtonPressed(int button)
 	{
 		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
 		auto state = glfwGetMouseButton(window, button);
 		return state == GLFW_PRESS;
 	}
 
-	float WindowsInput::GetMouseXImpl()
+	float Input::GetMouseX()
 	{
-		/*auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
-		double xPos, yPos;
-		glfwGetCursorPos(window, &xPos, &yPos);*/
-		auto [x, y] = GetMousePosImpl();
-		return x; // c++17 feature! Doesn't need to use std::get<>
+		auto [x, y] = GetMousePos();
+		return x;
 	}
 
-	float WindowsInput::GetMouseYImpl()
+	float Input::GetMouseY()
 	{
-		/*auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
-		double xPos, yPos;
-		glfwGetCursorPos(window, &xPos, &yPos);*/
-		auto [x, y] = GetMousePosImpl();
+		auto [x, y] = GetMousePos();
 		return y;
 
 	}
 
-	std::pair<float, float> WindowsInput::GetMousePosImpl()
+	std::pair<float, float> Input::GetMousePos()
 	{
 		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
 		double xPos, yPos;

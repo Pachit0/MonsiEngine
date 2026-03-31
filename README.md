@@ -18,7 +18,7 @@
 
 ### Build Instructions
 ```bash
-git clone https://github.com/Pachit0/MonsiEngine.git
+git clone --recurse-submodules https://github.com/Pachit0/MonsiEngine.git
 cd MonsiEngine
 mkdir build && cd build
 cmake ..

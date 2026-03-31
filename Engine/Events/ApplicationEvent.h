@@ -20,7 +20,7 @@ namespace Monsi {
 			return ss.str();
 		}
 
-		EVENT_CLASS_CATEGORY(CategoryApplication)
+		EVENT_CLASS_CATEGORY(CategoryApplication);
 		EVENT_CLASS_TYPE(WindowResize)
 
 	private:

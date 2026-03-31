@@ -15,9 +15,13 @@
 
 namespace Monsi {
 
+    struct AppSpecification {
+        std::string Name = "Monsi Application";
+    };
+
     class ENGINE_API Application {
     public:
-        Application();
+        Application(const AppSpecification& spec);
         virtual ~Application();
 
         void Run();
@@ -29,11 +33,15 @@ namespace Monsi {
 
         void CloseApp();
 
+        ImGuiLayer* GetImGuiLayer() { return m_ImGuiLayer; }
+
         inline Window& GetWindow() { return *m_Window; }
         inline static Application& Get() { return *s_Instance; }
     private:
         bool OnWindowClose(WindowCloseEvent& event);
         bool onWindowResize(WindowResizeEvent& event);
+
+        AppSpecification m_Specification;
 
         Reference<Window> m_Window;
         ImGuiLayer* m_ImGuiLayer;
