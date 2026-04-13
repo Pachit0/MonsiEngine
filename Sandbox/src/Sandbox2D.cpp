@@ -56,7 +56,6 @@ void Sandbox2D::OnLayerUpdate(Monsi::TimeStep timestep) {
 			}
 		}
 
-
 		Monsi::Renderer2D::EndScene2D();
 	}
 }

@@ -477,6 +477,37 @@ namespace Monsi {
 		s_Data.batchStats.QuadCount++;
 	}
 
+	void Renderer2D::drawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, float scale)
+	{
+		drawQuad({ position.x, position.y, 0.0f }, size, color, scale);
+	}
+
+	void Renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color, float scale)
+	{
+		ENGINE_PROFILER_FUNCTION();
+
+		if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndicesPerDrawCall) {
+			FlushResetBatch();
+		}
+
+		const float whiteTexIndex = 0.0f;
+
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
+
+		for (uint32_t i = 0; i < 4; i++) {
+			s_Data.QuadVertexBufferItr->Position = transform * s_Data.QuadVertexPositions[i];
+			s_Data.QuadVertexBufferItr->Color = color;
+			s_Data.QuadVertexBufferItr->TexIndex = whiteTexIndex;
+			s_Data.QuadVertexBufferItr->Scale = scale;
+			s_Data.QuadVertexBufferItr->TexCoord = s_Data.QuadTextureCoords[i];
+			s_Data.QuadVertexBufferItr++;
+		}
+
+		s_Data.QuadIndexCount += 6;
+		s_Data.batchStats.QuadCount++;
+	}
+
 	void Renderer2D::drawQuadRotated(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, float rotation)
 	{
 		drawQuadRotated({ position.x, position.y, 0.0f }, size, color, rotation);
