@@ -14,3 +14,4 @@ if(MSVC)
     add_compile_options(/arch:AVX2) #make sure SIMD optimizations take place
 endif()
 
+option(PRODUCTION_BUILD "Make this a production build" OFF)

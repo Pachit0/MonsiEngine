@@ -7,7 +7,7 @@ ExampleLayer::ExampleLayer() : Layer("Sandbox3D"), m_CameraControl(1280.0f / 720
 
 void ExampleLayer::OnLayerAttach()
 {
-	m_MonsiTest = Monsi::Texture2D::Create("D:/Monsi Engine/Sandbox/assets/Textures/background.png");
+	m_MonsiTest = Monsi::Texture2D::Create( TEXTURE_PATH "background.png");
 }
 
 void ExampleLayer::OnLayerUpdate(Monsi::TimeStep timestep)

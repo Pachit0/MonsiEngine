@@ -15,7 +15,7 @@ Sandbox2D::Sandbox2D() : Layer("Sandbox2D"), m_CameraControl(1280.0f / 720.0f, 7
 
 void Sandbox2D::OnLayerAttach() {
 	ENGINE_PROFILER_FUNCTION();
-	m_MonsiTest = Monsi::Texture2D::Create("D:/Monsi Engine/Sandbox/assets/Textures/atlas_48x.png");
+	m_MonsiTest = Monsi::Texture2D::Create(TEXTURE_PATH "atlas_48x.png");
 	m_Chair = Monsi::SubTexture2D::CreateSubTexture(m_MonsiTest, { 8, 8 }, { 48.0f, 48.0f });
 
 	s_TextureMap['C'] = Monsi::SubTexture2D::CreateSubTexture(m_MonsiTest, { 0,8 }, { 48,48 });

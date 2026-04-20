@@ -87,7 +87,7 @@ namespace Monsi {
 			samplers2D[i] = i;
 		}
 
-		s_Data.TextureShader = Shader::Create("D:/Monsi Engine/Sandbox/assets/Shader/Textures.glsl");
+		s_Data.TextureShader = Shader::Create( SHADER_PATH "Textures.glsl");
 		s_Data.TextureShader->Bind();
 		s_Data.TextureShader->setIntArray("u_Textures", samplers2D, s_Data.MaxTextureSlots);
 

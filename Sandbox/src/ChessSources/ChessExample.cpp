@@ -17,7 +17,7 @@ Chess::Chess() : Layer("Chess Game"), m_CameraControl(1280.0f / 720.0f, 7.0f)
 
 void Chess::OnLayerAttach()
 {
-	m_Pieces = Monsi::Texture2D::Create("D:/Monsi Engine/Sandbox/assets/Textures/Chess_Pieces_Sprite.png");
+	m_Pieces = Monsi::Texture2D::Create(TEXTURE_PATH "Chess_Pieces_Sprite.png");
 	m_BalckPawn = Monsi::SubTexture2D::CreateSubTexture(m_Pieces, { 5,0 }, { 90.0f,90.0f });
 	m_WhitePawn = Monsi::SubTexture2D::CreateSubTexture(m_Pieces, { 5,1 }, { 90.0f,90.0f });
 
