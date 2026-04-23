@@ -2,6 +2,15 @@
 
 **Monsi Engine** is a lightweight, modular, and high-performance engine built in C++ for game and graphics development.
 
+## Features In Development
+
+- Render Instancing (currently using batching)
+- Better 3D rendering interface
+- ECS
+- File dialogs
+- Gizmos
+- Play Button
+
 ## Features
 
 - High-performance rendering using modern C++ and GLSL.
