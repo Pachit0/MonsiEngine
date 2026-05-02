@@ -8,7 +8,6 @@
 #include "Pieces.h"
 #include "Board.h"
 #include "Game.h"
-using namespace std;
 extern Board *boardPtr;
 
 

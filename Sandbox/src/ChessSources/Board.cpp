@@ -64,13 +64,15 @@ bool Board::move(const char *x1, const char *y1, const char *x2, const char *y2)
 		return false;
 	}
 	
-	if(getIsOccupied(newCoordinateX, newCoordinateY) != nullptr) {
-		cout << "Invalid command! Occupied square! You can only move to squares that have no figures of your color" << endl;
+	if (board[initialCoordinateX - 1 + (initialCoordinateY - 1)*8] == nullptr) {
+		std::cout << "Invalid command! No piece! No piece on the initial square" << std::endl;		
 		return false;
 	}
-}
-
-Figure *Board::getIsOccupied(int newCoordinateX, int newCoordinateY) {
-  Figure &temp = board[newCoordinateX - 1 + (newCoordinateY - 1)*8];
-	//we need temp.color to know if its our color
+	
+	if (board[newCoordinateX - 1 + (newCoordinateY - 1)*8] != nullptr)
+    if (board[newCoordinateX - 1 + (newCoordinateY - 1)*8]->color == 
+	      board[initialCoordinateX - 1 + (initialCoordinateY - 1)*8]->color) {
+		  std::cout << "Invalid command! Occupied space! Same color piece on the new square" << std::endl;	
+	    return false;
+	}
 }
