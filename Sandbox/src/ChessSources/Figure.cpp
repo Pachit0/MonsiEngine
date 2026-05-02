@@ -1,10 +1,23 @@
-#include "ChessStdafx.h"
+#include "ChessModules/ChessCore.h"
+#include "ChessModules/Figure.h"
 
-Figure::Figure(bool color) {
-		this->color = color;
+Figure::Figure()
+{
+	m_Color = NULL_COLOR;
+	m_IsUnderPin = false;
+	m_IsUnderCheck = false;
 }
 
+Figure::Figure(FigureColor color) {
+		m_Color = color;
+		m_IsUnderPin = false;
+		m_IsUnderCheck = false;
+}
 
+void Figure::printStats()
+{
+
+}
 
 bool Figure::move(char *x, char *y) {//to be cleaned
 	if (strlen(x) != 2 || strlen(y) != 2) {
@@ -21,8 +34,18 @@ bool Figure::move(char *x, char *y) {//to be cleaned
     << " to " << MAX_COORD << endl;
 		return false;
 	}
-	if (getIsUnderCheck() == 1)
-		
+	if (getIsUnderCheck() == 1);
 	
+	return true;
+}
+
+bool Figure::getIsUnderCheck()
+{
+	return false;
+}
+
+bool Figure::getIsUnderPin()
+{
+	return false;
 }
 
