@@ -4,6 +4,7 @@
 
 class Chess : public Monsi::Layer {
 public:
+
 	Chess();
 	virtual ~Chess() = default;
 
