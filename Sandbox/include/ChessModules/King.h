@@ -6,7 +6,8 @@ class King : public Figure {
 
 public:
 	King(FigureColor Color);
-private:
 
+private:
+	bool m_IsUnderCheck;
 
 };

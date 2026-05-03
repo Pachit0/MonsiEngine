@@ -26,6 +26,8 @@ namespace Monsi {
 			float Time;
 		};
 
+		Reference<Scene> m_ActiveScene;
+
 		glm::vec2 m_ViewportSize;
 		bool m_ViewportFocused;
 		bool m_ViewportHovered;

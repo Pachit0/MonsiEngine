@@ -15,11 +15,16 @@ namespace Monsi {
 		static void EndScene2D();
 		static void Flush();
 
+		static void drawQuad(const glm::mat4& transform, const glm::vec4& color);
+		static void drawQuad(const glm::mat4& transform, const Reference<Texture2D>& texture, const glm::vec4& color, float scale);
+
+
+		// I use glm::vec3 here for Z ordering!
 		static void drawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color);
 		static void drawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color);
 
 		static void drawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, float scale);
-		static void drawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color, float scale); //glm::vec3 for z indexing
+		static void drawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color, float scale);
 
 		static void drawQuad(const glm::vec2& position, const glm::vec2& size, const Reference<Texture2D>& texture);
 		static void drawQuad(const glm::vec3& position, const glm::vec2& size, const Reference<Texture2D>& texture);

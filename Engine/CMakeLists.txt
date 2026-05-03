@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/Platform/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Scene/*.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/Renderer/*.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/ImGui/*.cpp"
 )
@@ -20,6 +21,7 @@ set(ALL_SOURCES ${SOURCES} ${THIRD_PARTY_SOURCES})
 file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/Core/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/Platform/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Scene/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/Renderer/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/ImGui/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/debug/*.h"
@@ -27,6 +29,7 @@ file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS
 
 file(GLOB THIRD_PARTY_HEADERS
     "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/stb_image/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/entt/entt.hpp"
 )
 
 set(ALL_HEADERS ${HEADERS} ${THIRD_PARTY_HEADERS})
@@ -42,6 +45,7 @@ add_subdirectory(thirdparty)
 target_include_directories(Engine PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/Platform
+    ${CMAKE_CURRENT_SOURCE_DIR}/Scene
     ${CMAKE_CURRENT_SOURCE_DIR}/Core
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer
     ${CMAKE_CURRENT_SOURCE_DIR}/Events
@@ -58,6 +62,7 @@ target_link_libraries(Engine
            imgui
            glfw
            stb_image
+           entt
            implot
 )
 

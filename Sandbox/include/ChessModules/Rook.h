@@ -6,6 +6,7 @@ class Rook : public Figure {
 
 public:
 	Rook(FigureColor Color);
+	int **move (int coordinateX, int coordinateY) override;
 private:
 
 
