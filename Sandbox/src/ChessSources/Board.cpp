@@ -10,12 +10,12 @@
 #include "ChessModules/Rook.h"
 	
 Board::Board() {
-//standart game - standart starting squares, no additional pieces, no handicaps
+//standard game - standard starting squares, no additional pieces, no handicaps
   board[0] = new Rook(FigureColor::WHITE); //x1 y1 //1(this is y) + (1(this is y)-1*8)-1 formula for coordinates
   board[1] = new Knight(FigureColor::WHITE); // x2 y1
   board[2] = new Bishop(FigureColor::WHITE); // x3 y1
   board[3] = new Queen(FigureColor::WHITE);
-  board[4] = new King(FigureColor::WHITE);
+  board[4] = new King(FigureColor::WHITE); whiteKingSquare = board[4];
   board[5] = new Bishop(FigureColor::WHITE);
   board[6] = new Knight(FigureColor::WHITE);
   board[7] = new Rook(FigureColor::WHITE);
@@ -33,12 +33,12 @@ Board::Board() {
   board[57] = new Knight(FigureColor::BLACK);
   board[58] = new Bishop(FigureColor::BLACK);
   board[59] = new Queen(FigureColor::BLACK);
-  board[60] = new King(FigureColor::BLACK);
+  board[60] = new King(FigureColor::BLACK); whiteKingSquare = board[60];
   board[61] = new Bishop(FigureColor::BLACK);
   board[62] = new Knight(FigureColor::BLACK);
   board[63] = new Rook(FigureColor::BLACK);
 }
-//add aditional constructors for non-standart games
+//add aditional constructors for non-standard games
 
 
 /////////////////////////////////////////////
@@ -50,11 +50,11 @@ Board::Board() {
 /////////////////////////////////////////////
 bool Board::move(const char *x1, const char *y1, const char *x2, const char *y2) {
 	if (strlen(x1) != 2 || strlen(y1) != 2 || strlen(x2) != 2 || strlen(y2) != 2) {
-		cout << "Invalid command! Too long or too short! Example: x1" << endl;
+		std::cout << "Invalid command! Too long or too short! Example: x1" << std::endl;
 	  return false;
 	}
   if (x1[0] != 'x' || y1[0] != 'y' || x2[0] != 'x' || y2[0] != 'y') {
-		cout << "Invalid command! Used different coordinates! You can only use x and y" << endl;
+	  std::cout << "Invalid command! Used different coordinates! You can only use x and y" << std::endl;
 		return false;
 	}
 	int initialCoordinateX = x1[1]-'0';
@@ -65,22 +65,39 @@ bool Board::move(const char *x1, const char *y1, const char *x2, const char *y2)
 	    initialCoordinateY > MAX_COORD || initialCoordinateY < MIN_COORD ||
 	    newCoordinateX > MAX_COORD || newCoordinateX < MIN_COORD ||
 			newCoordinateY > MAX_COORD || newCoordinateY < MIN_COORD) {
-    cout << "Invalid command! Too big, too small or negative coordinates used! "
+    std::cout << "Invalid command! Too big, too small or negative coordinates used! "
     << "You can only type from " << MIN_COORD
-    << " to " << MAX_COORD << endl;
+    << " to " << MAX_COORD << std::endl;
 		return false;
 	}
 	
-	if(getIsOccupied(newCoordinateX, newCoordinateY) != nullptr) {
-		cout << "Invalid command! Occupied square! You can only move to squares that have no figures of your color" << endl;
+	int **possibleMoves;
+	if (board[initialCoordinateX - 1 + (initialCoordinateY - 1)*8] == nullptr) {
+		std::cout << "Invalid command! No piece! No piece on the initial square" << std::endl;		
 		return false;
 	}
+	else {
+		possibleMoves = board[initialCoordinateX - 1 + (initialCoordinateY - 1) * 8]->move(initialCoordinateX, initialCoordinateX);//return int array of possible moves
+		//int* possibleMoves[count];
+
+	}
+
+	//with the array with possible moves we begin checking for 2 things:
+	//Is there an opposite color king in them(we raise king's flag underCheck to 1)
+	//and is there only 1 opposite color piece(therefore we raise this piece's underPin flag to 1)
+	//Its done with 2 dimensional array because this way we can represent the directions of the move(rook will have 2 directions if its in the left 
+	//bellow corner square, this way if coordinate in front of rook is blocked, the rest of the array are moves that are not possbile)
+	//Knights will have only 1 element per row, therefore cannot be blocked by another piece
+
+	//to be continued
+
+	if (board[newCoordinateX - 1 + (newCoordinateY - 1)*8] != nullptr)
+    if (board[newCoordinateX - 1 + (newCoordinateY - 1)*8]->getColor() ==
+	      board[initialCoordinateX - 1 + (initialCoordinateY - 1)*8]->getColor()) {
+		  std::cout << "Invalid command! Occupied space! Same color piece on the new square" << std::endl;	
+	    return false;
+	}
+
 
 	return true;
-}
-
-Figure* Board::getIsOccupied(int newCoordinateX, int newCoordinateY) {
-	Figure* temp = board[newCoordinateX - 1 + (newCoordinateY - 1)*8];
-	//we need temp.color to know if its our color
-	return temp;
 }
