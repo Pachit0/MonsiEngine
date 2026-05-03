@@ -35,12 +35,17 @@ target_include_directories(glm INTERFACE glm)
 # spdlog
 add_subdirectory(spdlog)
 
-# stb_image
+# stb_image - single header
 add_library(stb_image INTERFACE)
 
-target_include_directories(stb_image
-    INTERFACE
-        ${CMAKE_CURRENT_LIST_DIR}/stb_image
+target_include_directories(stb_image INTERFACE
+    ${CMAKE_CURRENT_LIST_DIR}/stb_image
+)
+
+#entt - single header
+add_library(entt INTERFACE)
+target_include_directories(entt INTERFACE
+    ${CMAKE_CURRENT_LIST_DIR}/entt
 )
 
 # ImPlot

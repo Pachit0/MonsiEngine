@@ -17,6 +17,7 @@ target_include_directories( Editor PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}../Engine
     ${CMAKE_CURRENT_SOURCE_DIR}../Engine/thirdparty
+    ${CMAKE_CURRENT_SOURCE_DIR}../Engine/thirdparty/entt
     ${CMAKE_CURRENT_SOURCE_DIR}../Engine/thirdparty/spdlog/include
 )
 
