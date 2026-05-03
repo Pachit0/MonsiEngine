@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Engine.h"
-#include "Logger.h"
-#include "Layer.h"
 
 //	Core
+#include "Core/Engine.h"
+#include "Core/Logger.h"
+#include "Core/Layer.h"
 #include "Core/MonsiKeyCodes.h"
 #include "Core/MonsiMouseButtonCodes.h"
 #include "Core/Input.h"
@@ -12,6 +12,10 @@
 
 //	ImGui
 #include "ImGui/ImGuiLayer.h"
+
+// Scene
+#include "Scene/Scene.h"
+#include "Scene/Components.h"
 
 //	Renderer
 #include "Renderer/Renderer.h"

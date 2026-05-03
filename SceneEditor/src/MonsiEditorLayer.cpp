@@ -16,7 +16,6 @@ namespace Monsi {
 	EditorLayer::EditorLayer() 
 		: Layer("EditorLayer"), m_CameraControl(1280.0f / 720.0f, 7.0f), m_ViewportSize{ 0.0f,0.0f }, m_ViewportFocused(false)
 	{
-	
 	}
 
 	void EditorLayer::OnLayerAttach() {
@@ -24,17 +23,23 @@ namespace Monsi {
 		m_MonsiTest = Texture2D::Create( TEXTURE_PATH "atlas_48x.png");
 		m_Chair = SubTexture2D::CreateSubTexture(m_MonsiTest, { 8, 8 }, { 48.0f, 48.0f });
 
-		s_TextureMap['C'] = Monsi::SubTexture2D::CreateSubTexture(m_MonsiTest, { 0,8 }, { 48,48 });
-		s_TextureMap['G'] = Monsi::SubTexture2D::CreateSubTexture(m_MonsiTest, { 4,8 }, { 48,48 });
+		s_TextureMap['C'] = SubTexture2D::CreateSubTexture(m_MonsiTest, { 0,8 }, { 48,48 });
+		s_TextureMap['G'] = SubTexture2D::CreateSubTexture(m_MonsiTest, { 4,8 }, { 48,48 });
 
-		Monsi::FrameBufferSpec spec;
+		FrameBufferSpec spec;
 		spec.Width = 1280;
 		spec.Height = 720;
-		m_FrameBuffer = Monsi::FrameBuffer::Create(spec);
+		m_FrameBuffer = FrameBuffer::Create(spec);
+
+		m_ActiveScene = CreateReference<Scene>();
+
+		auto entity = m_ActiveScene->CreateEntity();
+		m_ActiveScene->Reg().emplace<TransformComponent>(entity);
+		m_ActiveScene->Reg().emplace<SpriteRendererComponent>(entity, glm::vec4({ 0.0f,0.0f,1.0f,1.0f }));
 
 	}
 
-	void EditorLayer::OnLayerUpdate(Monsi::TimeStep timestep) {
+	void EditorLayer::OnLayerUpdate(TimeStep timestep) {
 
 		ENGINE_PROFILER_FUNCTION();
 
@@ -42,38 +47,19 @@ namespace Monsi {
 			m_CameraControl.OnLayerUpdate(timestep);
 		}
 
-		Monsi::Renderer2D::ResetBatchStatistics();
-		{
-			ENGINE_PROFILER_SCOPE("RenderCommand");
-			m_FrameBuffer->Bind();
-			Monsi::RenderCommand::SetClearColor({ 0.5f, 0.0f, 0.05f, 1.0f });
-			Monsi::RenderCommand::Clear();
-		}
-
-		{
-			static float rotate = 0.0f;
-			rotate += timestep * 100.0f;
-			ENGINE_PROFILER_SCOPE("Begin2D");
-			Monsi::Renderer2D::BeginScene2D(m_CameraControl.GetCamera());
-
-			for (uint32_t y = 0; y < 5; y++) {
-				for (uint32_t x = 0; x < 9; x++) {
-					char tileType = s_MapTiles[x + y * 9];
-					Monsi::Reference<Monsi::SubTexture2D> texture;
-					if (s_TextureMap.find(tileType) != s_TextureMap.end()) {
-						texture = s_TextureMap[tileType];
-					}
-					else {
-						texture = m_Chair;
-					}
-					Monsi::Renderer2D::drawQuad({ x - 5.0f, y - 2.5f }, { 1.0f, 1.0f }, texture);
-				}
-			}
+		Renderer2D::ResetBatchStatistics();
+		m_FrameBuffer->Bind();
+		RenderCommand::SetClearColor({ 0.5f, 0.0f, 0.05f, 1.0f });
+		RenderCommand::Clear();
 
 
-			Monsi::Renderer2D::EndScene2D();
-			m_FrameBuffer->Unbind();
-		}
+		Renderer2D::BeginScene2D(m_CameraControl.GetCamera());
+
+		m_ActiveScene->OnUpdate(timestep);
+
+		Renderer2D::EndScene2D();
+
+		m_FrameBuffer->Unbind();
 	}
 
 	void EditorLayer::OnLayerDetach() {
@@ -86,7 +72,7 @@ namespace Monsi {
 		ImGui::BeginMainMenuBar();
 		if (ImGui::BeginMenu("File"))
 		{
-			if (ImGui::MenuItem("Exit")) { Monsi::Application::Get().CloseApp(); }
+			if (ImGui::MenuItem("Exit")) { Application::Get().CloseApp(); }
 			ImGui::EndMenu();
 		}
 
@@ -126,7 +112,7 @@ namespace Monsi {
 
 		ImGui::Begin("Properties");
 
-		auto batchStats = Monsi::Renderer2D::GetBatchStatistics();
+		auto batchStats = Renderer2D::GetBatchStatistics();
 
 		ImGui::Text("Renderer2D stats:");
 		ImGui::Text("Draw Calls: %d", batchStats.DrawCalls);
@@ -162,7 +148,7 @@ namespace Monsi {
 		ImGui::End();
 	}
 
-	void EditorLayer::OnLayerEvent(Monsi::Event& event) {
+	void EditorLayer::OnLayerEvent(Event& event) {
 		m_CameraControl.OnLayerEvent(event);
 	}
 
