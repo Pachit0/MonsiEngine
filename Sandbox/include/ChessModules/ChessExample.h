@@ -19,4 +19,5 @@ private:
 	Monsi::Reference<Monsi::SubTexture2D> m_BalckPawn;
 	Monsi::Reference<Monsi::SubTexture2D> m_WhitePawn;
 	Monsi::OrthographicControl m_CameraControl;
+
 };

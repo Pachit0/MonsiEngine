@@ -1,6 +1,5 @@
-#include "ChessStdafx.h"
+#include "ChessModules/King.h"
 
-bool King::getIsUnderCheck() override {
-	
-  return false;
+King::King(FigureColor Color) {
+
 }
