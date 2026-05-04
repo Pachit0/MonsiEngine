@@ -49,6 +49,8 @@ target_include_directories(Engine PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/Core
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer
     ${CMAKE_CURRENT_SOURCE_DIR}/Events
+    ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/entt
+    ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/spdlog/include
     ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glfw/include
 )
 
