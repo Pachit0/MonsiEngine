@@ -11,8 +11,9 @@ namespace Monsi {
 	class OrthographicControl {
 
 	public:
-		OrthographicControl(float AspectRatio, bool cameraRotatoinFlag = false);
-		OrthographicControl(float AspectRatio, float Zoom ,bool cameraRotatoinFlag = false);
+		OrthographicControl(float AspectRatio, bool cameraRotatoinFlag = false, bool cameraMovementFlag = true, bool cameraZoomFlag = true);
+		OrthographicControl(float AspectRatio, float Zoom, bool cameraRotatoinFlag = false, bool cameraMovementFlag = true, bool cameraZoomFlag = true);
+		OrthographicControl(float AspectRatio, float Zoom, const glm::vec2& cameraPosition,bool cameraRotatoinFlag = false, bool cameraMovementFlag = true, bool cameraZoomFlag = true);
 
 		void OnLayerUpdate(TimeStep timestep);
 		void OnLayerEvent(Event& event);
@@ -25,6 +26,8 @@ namespace Monsi {
 		float GetZoom() const { return m_ZoomControl; }
 
 	private:
+		bool m_CameraZoomFlag;
+		bool m_CameraMovementFlag;
 		bool m_CameraRotationFlag;
 		float m_ZoomControl = 1.0f;
 		float m_AspectRation;

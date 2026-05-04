@@ -1,0 +1,2 @@
+add_subdirectory(AStarSearch2D)
+add_subdirectory(ChessGame)

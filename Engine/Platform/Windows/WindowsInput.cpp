@@ -19,6 +19,13 @@ namespace Monsi {
 		return state == GLFW_PRESS;
 	}
 
+	bool Input::MouseButtonReleased(int button)
+	{
+		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
+		auto state = glfwGetMouseButton(window, button);
+		return state == GLFW_RELEASE;
+	}
+
 	float Input::GetMouseX()
 	{
 		auto [x, y] = GetMousePos();

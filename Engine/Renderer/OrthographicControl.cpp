@@ -5,35 +5,52 @@
 
 namespace Monsi {
 
-	OrthographicControl::OrthographicControl(float AspectRatio, bool cameraRotatoinFlag) 
+	OrthographicControl::OrthographicControl(float AspectRatio, bool cameraRotatoinFlag, bool cameraMovementFlag, bool cameraZoomFlag)
 		: m_AspectRation(AspectRatio),
 		m_Camera(-m_AspectRation * m_ZoomControl, m_AspectRation * m_ZoomControl, -m_ZoomControl, m_ZoomControl),
-		m_CameraRotationFlag(cameraRotatoinFlag)
+		m_CameraRotationFlag(cameraRotatoinFlag),
+		m_CameraMovementFlag(cameraMovementFlag),
+		m_CameraZoomFlag(cameraZoomFlag)
 	{
 
 	}
 
-	OrthographicControl::OrthographicControl(float AspectRatio, float Zoom, bool cameraRotatoinFlag)
+	OrthographicControl::OrthographicControl(float AspectRatio, float Zoom, bool cameraRotatoinFlag, bool cameraMovementFlag, bool cameraZoomFlag)
 		: m_AspectRation(AspectRatio), m_ZoomControl(Zoom),
 		m_Camera(-m_AspectRation * m_ZoomControl, m_AspectRation * m_ZoomControl, -m_ZoomControl, m_ZoomControl),
-		m_CameraRotationFlag(cameraRotatoinFlag)
+		m_CameraRotationFlag(cameraRotatoinFlag),
+		m_CameraMovementFlag(cameraMovementFlag),
+		m_CameraZoomFlag(cameraZoomFlag)
+	{
+
+	}
+
+	OrthographicControl::OrthographicControl(float AspectRatio, float Zoom, const glm::vec2& cameraPosition, bool cameraRotatoinFlag, bool cameraMovementFlag, bool cameraZoomFlag)
+		: m_AspectRation(AspectRatio), m_ZoomControl(Zoom),
+		m_Camera(-m_AspectRation * m_ZoomControl, m_AspectRation* m_ZoomControl, -m_ZoomControl, m_ZoomControl),
+		m_CameraPosition({ cameraPosition.x, cameraPosition.y, 0.0f }),
+		m_CameraRotationFlag(cameraRotatoinFlag),
+		m_CameraMovementFlag(cameraMovementFlag),
+		m_CameraZoomFlag(cameraZoomFlag)
 	{
 
 	}
 
 	void OrthographicControl::OnLayerUpdate(TimeStep timeStep) {
 		ENGINE_PROFILER_FUNCTION();
-		if (Input::KeyPressed(MONSI_KEY_D)) {
-			m_CameraPosition.x += m_CameraTranslationSpeed * timeStep;
-		}
-		else if (Input::KeyPressed(MONSI_KEY_A)) {
-			m_CameraPosition.x -= m_CameraTranslationSpeed * timeStep;
-		}
-		if (Input::KeyPressed(MONSI_KEY_S)) {
-			m_CameraPosition.y -= m_CameraTranslationSpeed * timeStep;
-		}
-		else if (Input::KeyPressed(MONSI_KEY_W)) {
-			m_CameraPosition.y += m_CameraTranslationSpeed * timeStep;
+		if(m_CameraMovementFlag){
+			if (Input::KeyPressed(MONSI_KEY_D)) {
+				m_CameraPosition.x += m_CameraTranslationSpeed * timeStep;
+			}
+			else if (Input::KeyPressed(MONSI_KEY_A)) {
+				m_CameraPosition.x -= m_CameraTranslationSpeed * timeStep;
+			}
+			if (Input::KeyPressed(MONSI_KEY_S)) {
+				m_CameraPosition.y -= m_CameraTranslationSpeed * timeStep;
+			}
+			else if (Input::KeyPressed(MONSI_KEY_W)) {
+				m_CameraPosition.y += m_CameraTranslationSpeed * timeStep;
+			}
 		}
 
 		if (m_CameraRotationFlag) {
@@ -67,11 +84,17 @@ namespace Monsi {
 	bool OrthographicControl::OnZoomEvent(MouseEventScrolled& event)
 	{
 		ENGINE_PROFILER_FUNCTION();
-		m_ZoomControl -= event.GetYOffset() * 0.15f;
-		if (m_ZoomControl < 0.25f) {
-			m_ZoomControl = 0.25f;
+		if (m_CameraZoomFlag) {
+			m_ZoomControl -= event.GetYOffset() * 0.15f;
+
+			if (m_ZoomControl < 0.25f) {
+				m_ZoomControl = 0.25f;
+			}
+
+			m_Camera.SetProjection(-m_AspectRation * m_ZoomControl, m_AspectRation * m_ZoomControl, -m_ZoomControl, m_ZoomControl);
+			
+			return true;
 		}
-		m_Camera.SetProjection(-m_AspectRation * m_ZoomControl, m_AspectRation * m_ZoomControl, -m_ZoomControl, m_ZoomControl);
 		return false;
 	}
 
@@ -83,8 +106,8 @@ namespace Monsi {
 	}
 
 	void OrthographicControl::SetZoom(float zoom)
-	{ 
-		m_ZoomControl = zoom; 
+	{
+		m_ZoomControl = zoom;
 		m_Camera.SetProjection(-m_AspectRation * m_ZoomControl, m_AspectRation * m_ZoomControl, -m_ZoomControl, m_ZoomControl);
 	}
 }

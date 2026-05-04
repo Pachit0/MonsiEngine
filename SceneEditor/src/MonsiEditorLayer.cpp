@@ -1,8 +1,6 @@
 #include "MonsiEditorLayer.h"
 #include <imgui.h>
 #include <imgui_internal.h>
-#include <glm/gtc/type_ptr.hpp>
-#include <Platform/OpenGL/OpenGLShader.h>
 #include <debug/instrumentor.h>
 
 namespace Monsi {
