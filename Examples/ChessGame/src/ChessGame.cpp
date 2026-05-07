@@ -35,14 +35,14 @@ static Pos WorldToBoard(const glm::vec2& world)
 }
 
 static const char* s_MapTiles =
-"WBWBWBWB"
 "BWBWBWBW"
 "WBWBWBWB"
 "BWBWBWBW"
 "WBWBWBWB"
 "BWBWBWBW"
 "WBWBWBWB"
-"BWBWBWBW";
+"BWBWBWBW"
+"WBWBWBWB";
 
 Chess::Chess() : Layer("Chess Game"),
 	m_CameraControl(1280.0f / 720.0f, 4.5f, {-0.5f,1.5f}, false, false, false),

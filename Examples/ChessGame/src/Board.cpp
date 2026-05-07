@@ -40,6 +40,18 @@ Board::Board()
 	m_Board[7][7] = new Rook(BLACK);
 }
 
+Board::~Board()
+{
+	for (int y = 0; y < 8; y++)
+	{
+		for (int x = 0; x < 8; x++)
+		{
+			delete m_Board[y][x];
+			m_Board[y][x] = nullptr;
+		}
+	}
+}
+
 bool Board::move(Pos from, Pos to)
 {
 	if (from.x < 0 || from.x > 7 || from.y < 0 || from.y > 7)

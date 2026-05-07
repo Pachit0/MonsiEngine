@@ -12,7 +12,7 @@ std::vector<MovePoint> Pawn::move(int x, int y, Figure* board[8][8]) {
 	if (!board[y + dir][x])
 		moves.push_back({ x, y + dir });
 
-	if (!board[y + dir + dir][x] && m_FirstMove) {
+	if (!board[y + dir + dir][x] && !board[y + dir][x] && m_FirstMove) {
 		moves.push_back({ x, y + dir + dir });
 	}
 
