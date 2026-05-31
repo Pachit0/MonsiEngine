@@ -24,6 +24,11 @@ namespace Monsi {
 		inline static void DrawIndexed(const Reference<VertexArray>& vertexArray, uint32_t count = 0) {
 			s_RendererAPI->DrawIndexed(vertexArray, count);
 		}
+
+		inline static void DrawIndexedInstanced(const Reference<VertexArray>& vertexArray, uint32_t indexCount, uint32_t instanceCount) {
+			s_RendererAPI->DrawIndexedInstanced(vertexArray, indexCount, instanceCount);
+		}
+
 	private:
 		static RendererAPI* s_RendererAPI;
 	};

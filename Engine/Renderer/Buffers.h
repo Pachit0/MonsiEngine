@@ -32,10 +32,11 @@ namespace Monsi {
 		uint32_t Offset;
 		std::string Name;
 		ShaderDataType Type;
+		bool IsInstanced;
 
 		BufferElement() {}
 
-		BufferElement(ShaderDataType type, const std::string& name, bool normalized = false) : Normalized(normalized), Size(ShaderDataTypeSize(type)), Offset(0), Type(type), Name(name) {
+		BufferElement(ShaderDataType type, const std::string& name, bool isInstanced = false, bool normalized = false) : IsInstanced(isInstanced), Normalized(normalized), Size(ShaderDataTypeSize(type)), Offset(0), Type(type), Name(name) {
 		
 		}
 

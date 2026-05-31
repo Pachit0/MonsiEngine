@@ -16,6 +16,8 @@ namespace Monsi {
         void OnLayerUpdate(TimeStep timestep);
         void OnLayerEvent(Event& event);
 
+        void OnWindowResize(float width, float height);
+
         PerspectiveCamera& GetCamera() { return m_Camera; }
         const PerspectiveCamera& GetCamera() const { return m_Camera; }
 

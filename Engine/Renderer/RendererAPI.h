@@ -21,6 +21,7 @@ namespace Monsi {
 		virtual void Clear() = 0;
 
 		virtual void DrawIndexed(const Reference<VertexArray>& vertexArray, uint32_t indexCount = 0) = 0;
+		virtual void DrawIndexedInstanced(const Reference<VertexArray>& vertexArray, uint32_t indexCount, uint32_t instanceCount) = 0;
 
 		inline static API GetAPI() { return s_API; }
 	private:

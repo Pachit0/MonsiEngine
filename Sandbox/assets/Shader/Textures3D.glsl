@@ -1,25 +1,27 @@
 #shadertype vertex
 #version 330 core
 
-layout(location=0) in vec3 aPos;
-layout(location=1) in vec4 aColor;
-layout(location=2) in vec2 aTexCoord;
-layout(location=3) in float aTexIndex;
+layout(location = 0) in vec3 a_Position;
+layout(location = 1) in vec2 a_TexCoord;
 
-uniform mat4 projection;
-uniform mat4 view;
+layout(location = 2) in mat4 a_Transform; // this takes up the slots up to 5
 
-out vec4 vColor;
+layout(location = 6) in vec4 a_Color;
+layout(location = 7) in float a_TexIndex;
+
+uniform mat4 u_ViewProjection;
+
+out vec4 v_Color;
 out vec2 v_TexCoord;
-out float v_TexIndex;
+flat out float v_TexIndex;
 
 void main()
 {
-    vColor = aColor;
-    v_TexCoord = aTexCoord;
-    v_TexIndex = aTexIndex;
-
-    gl_Position = projection * view * vec4(aPos,1.0);
+    v_Color = a_Color;
+    v_TexCoord = a_TexCoord;
+    v_TexIndex = a_TexIndex;
+    
+    gl_Position = u_ViewProjection * a_Transform * vec4(a_Position, 1.0);
 }
 
 #shadertype fragment
@@ -27,9 +29,9 @@ void main()
 
 layout(location=0) out vec4 color;
 
-in vec4 vColor;
+in vec4 v_Color;
 in vec2 v_TexCoord;
-in float v_TexIndex;
+flat in float v_TexIndex;
 
 uniform sampler2D u_Textures[32];
 
@@ -74,5 +76,5 @@ void main()
         default: l_Texture = vec4(1.0f);
     }
 
-    color = vColor * l_Texture;
+    color = v_Color * l_Texture;
 }

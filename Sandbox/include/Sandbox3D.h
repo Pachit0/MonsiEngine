@@ -14,6 +14,11 @@ public:
 	void OnLayerEvent(Monsi::Event& event) override;
 
 private:
+	glm::vec2 m_ViewportSize;
+	bool m_ViewportFocused;
+	bool m_ViewportHovered;
+
+	Monsi::Reference<Monsi::FrameBuffer> m_FrameBuffer;
 
 	Monsi::PerspectiveControl m_CameraControl;
 	Monsi::Reference<Monsi::Texture2D> m_MonsiTest;

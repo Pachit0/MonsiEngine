@@ -56,7 +56,15 @@ namespace Monsi {
 			glEnableVertexAttribArray(m_VBIndex);
 			glVertexAttribPointer(m_VBIndex, element.GetComponentCount(),
 				ShaderDataTypeToOpenGLBaseType(element.Type), element.Normalized ? GL_TRUE : GL_FALSE,
-				layout.GetStride(), (const void*)element.Offset);
+				layout.GetStride(), (const void*)(uintptr_t)element.Offset);
+
+			if (element.IsInstanced) {
+				glVertexAttribDivisor(m_VBIndex, 1);
+			}
+			else {
+				glVertexAttribDivisor(m_VBIndex, 0);
+			}
+
 			m_VBIndex++;
 		}
 		m_VertexBuffers.push_back(vertexBuffer);
