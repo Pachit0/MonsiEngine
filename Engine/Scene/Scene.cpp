@@ -4,6 +4,7 @@
 #include "Renderer2D.h"
 #include "Scene.h"
 #include "Components.h"
+#include "Entity.h"
 
 namespace Monsi {
 
@@ -13,7 +14,6 @@ namespace Monsi {
 
 	Scene::Scene()
 	{
-
 		entt::entity entity = m_Registry.create();
 		m_Registry.emplace<TransformComponent>(entity, glm::mat4(1.0f));
 
@@ -41,19 +41,70 @@ namespace Monsi {
 
 	}
 
-
-	entt::entity Scene::CreateEntity()
+	Entity Scene::CreateEntity(const std::string& name)
 	{
-		return m_Registry.create();
+		Entity e{ m_Registry.create(), this };
+		e.AddComponent<TransformComponent>();
+
+		auto& tag = e.AddComponent<TagComponent>();
+		tag.Tag = name.empty() ? "Entity" : name;
+
+		return e;
 	}
+
+	Entity Scene::CreateEntityEmpty()
+	{
+		return { m_Registry.create(), this };
+	}
+
 
 	void Scene::OnUpdate(TimeStep timeStep)
 	{
-		auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
-		for (auto entity : group) {
-			auto& [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+		Camera* mainCamera = nullptr;
+		glm::mat4* cameraTransform = nullptr;
 
-			Renderer2D::drawQuad(transform, sprite.Color);
+		{
+			auto group = m_Registry.view<TransformComponent, CameraComponent>();
+			for (auto entity : group)
+			{
+				auto& [transform, camera] = group.get<TransformComponent, CameraComponent>(entity);
+
+				if (camera.Primary)
+				{
+					mainCamera = &camera.Camera;
+					cameraTransform = &transform.Transform;
+					break;
+				}
+			}
+		}
+
+
+		if(mainCamera)
+		{
+			Renderer2D::BeginScene2D(mainCamera->GetProjectionMatrix(), *cameraTransform);
+
+			auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
+			for (auto entity : group) {
+				auto& [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+
+				Renderer2D::drawQuad(transform, sprite.Color);
+			}
+
+			Renderer2D::EndScene2D();
+		}
+	}
+
+	void Scene::OnViewportResize(uint32_t width, uint32_t height)
+	{
+		m_ViewportWidth = width;
+		m_ViewportHeight = height;
+
+		auto view = m_Registry.view<TransformComponent, CameraComponent>();
+		for (auto entity : view) {
+			auto& cameraComponent = view.get<CameraComponent>(entity);
+			if (!cameraComponent.FixedAspectRatio) {
+				cameraComponent.Camera.SetViewportSize(width, height);
+			}
 		}
 	}
 

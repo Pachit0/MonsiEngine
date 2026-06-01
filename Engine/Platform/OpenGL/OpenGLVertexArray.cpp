@@ -19,6 +19,7 @@ namespace Monsi {
 		case Monsi::ShaderDataType::Int3:   return GL_INT;
 		case Monsi::ShaderDataType::Int4:   return GL_INT;
 		case Monsi::ShaderDataType::Bool:   return GL_BOOL;
+		default: return GL_FALSE;
 		}
 	}
 

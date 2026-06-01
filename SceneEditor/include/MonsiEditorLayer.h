@@ -27,10 +27,14 @@ namespace Monsi {
 		};
 
 		Reference<Scene> m_ActiveScene;
+		Entity m_SquareEntity;
+		Entity m_CameraEntity;
+		Entity m_SecondCameraEntity;
 
 		glm::vec2 m_ViewportSize;
 		bool m_ViewportFocused;
 		bool m_ViewportHovered;
+		bool m_PrimaryCamera = false;
 
 		std::unordered_map<char, Reference<SubTexture2D>> s_TextureMap;
 	};

@@ -26,7 +26,7 @@
 
 #define BIT(x) (1 << x)
 
-#define ENGINE_BIND_EVENT_FN(fn) std::bind(&fn, this, std::placeholders::_1)
+#define ENGINE_BIND_EVENT_FN(fn) [this](auto&&... args) -> decltype(auto) {return this->fn(std::forward<decltype(args)>(args)...); }
 #define ENGINE_CONCAT_INTERNAL(x, y) x##y
 #define ENGINE_CONCAT(x, y) ENGINE_CONCAT_INTERNAL(x, y)
 
@@ -45,6 +45,14 @@ namespace Monsi{
 	constexpr Reference<T> CreateReference(Args&& ... args)
 	{
 		return std::make_shared<T>(std::forward<Args>(args)...);
+	}
+
+	template<typename T>
+	using Weak_Reference = std::weak_ptr<T>;
+	template<typename T>
+	constexpr Weak_Reference<T> CreateWeakReference(const Reference<T>& sharedRef)
+	{
+		return Weak_Reference<T>(sharedRef);
 	}
 }
 

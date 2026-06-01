@@ -4,12 +4,13 @@
 
 ## Features In Development
 
-- Render Instancing (currently using batching)
-- Better 3D rendering interface
-- ECS
+- ECS (currently developing)
 - File dialogs
 - Gizmos
 - Play Button
+- Quaternions for camera rotation
+- Indirect instancing
+- Bindless rendering
 
 ## Features
 

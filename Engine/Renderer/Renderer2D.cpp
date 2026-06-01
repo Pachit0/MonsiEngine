@@ -118,6 +118,20 @@ namespace Monsi {
 		s_Data.TextureSlotIndex = 1;
 	}
 
+	void Renderer2D::BeginScene2D(const Camera& camera, const glm::mat4& transform)
+	{
+		ENGINE_PROFILER_FUNCTION();
+
+		glm::mat4 viewProjection = camera.GetProjectionMatrix() * glm::inverse(transform);
+
+		s_Data.TextureShader->Bind();
+		s_Data.TextureShader->setMat4("u_ViewProjection", viewProjection);
+
+		s_Data.QuadVertexBufferItr = s_Data.QuadVertexBufferBegin;
+		s_Data.QuadIndexCount = 0;
+		s_Data.TextureSlotIndex = 1;
+	}
+
 	void Renderer2D::EndScene2D() {
 		ENGINE_PROFILER_FUNCTION();
 

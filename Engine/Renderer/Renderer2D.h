@@ -1,6 +1,7 @@
 #pragma once
 
 #include "OrthographicCamera.h"
+#include "Camera.h"
 #include "Texture.h"
 #include "SubTexture2D.h"
 
@@ -11,6 +12,7 @@ namespace Monsi {
 		static void Init();
 		static void Shutdown();
 		
+		static void BeginScene2D(const Camera& camera, const glm::mat4& transform);
 		static void BeginScene2D(const OrthographicCamera& camera);
 		static void EndScene2D();
 		static void Flush();

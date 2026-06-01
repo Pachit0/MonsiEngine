@@ -1,7 +1,9 @@
 #include "MonsiEditorLayer.h"
+#include <glm/gtc/type_ptr.hpp>
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <debug/instrumentor.h>
+#include <Entity.h>
 
 namespace Monsi {
 	
@@ -31,15 +33,31 @@ namespace Monsi {
 
 		m_ActiveScene = CreateReference<Scene>();
 
-		auto entity = m_ActiveScene->CreateEntity();
-		m_ActiveScene->Reg().emplace<TransformComponent>(entity);
-		m_ActiveScene->Reg().emplace<SpriteRendererComponent>(entity, glm::vec4({ 0.0f,0.0f,1.0f,1.0f }));
+		auto entity = m_ActiveScene->CreateEntity("Square");
+		entity.AddComponent<SpriteRendererComponent>(glm::vec4{ 0.5f, 1.0f, 1.0f, 1.0f });
+		m_SquareEntity = entity;
 
+		m_CameraEntity = m_ActiveScene->CreateEntity("Camera Entity");
+		m_CameraEntity.AddComponent<CameraComponent>();
+
+		m_SecondCameraEntity = m_ActiveScene->CreateEntity("Camera Entity Second");
+		auto& cc = m_SecondCameraEntity.AddComponent<CameraComponent>();
+		cc.Primary = false;
 	}
 
 	void EditorLayer::OnLayerUpdate(TimeStep timestep) {
 
 		ENGINE_PROFILER_FUNCTION();
+
+		if (FrameBufferSpec spec = m_FrameBuffer->GetSpecification();
+			m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f &&
+			(spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
+		{
+			m_FrameBuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_CameraControl.OnWindowResize(m_ViewportSize.x, m_ViewportSize.y);
+
+			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		}
 
 		if (m_ViewportFocused) {
 			m_CameraControl.OnLayerUpdate(timestep);
@@ -50,12 +68,7 @@ namespace Monsi {
 		RenderCommand::SetClearColor({ 0.5f, 0.0f, 0.05f, 1.0f });
 		RenderCommand::Clear();
 
-
-		Renderer2D::BeginScene2D(m_CameraControl.GetCamera());
-
 		m_ActiveScene->OnUpdate(timestep);
-
-		Renderer2D::EndScene2D();
 
 		m_FrameBuffer->Unbind();
 	}
@@ -117,22 +130,33 @@ namespace Monsi {
 		ImGui::Text("Quad Total Count: %d", batchStats.QuadCount);
 		ImGui::Text("Quad Vertices: %d", batchStats.GetVertexCount());
 		ImGui::Text("Quad Indices: %d", batchStats.GetIndexCount());
+		
+
+		if (m_SquareEntity) {
+			ImGui::Separator();
+			ImGui::Text("%s", m_SquareEntity.GetComponent<TagComponent>().Tag.c_str());
+
+			auto& sqColor = m_SquareEntity.GetComponent<SpriteRendererComponent>().Color;
+			ImGui::ColorEdit4("Square Color", glm::value_ptr(sqColor));
+		}
+
+		ImGui::DragFloat3("Camera Transform", glm::value_ptr(m_CameraEntity.GetComponent<TransformComponent>().Transform[3]));
+		if (ImGui::Checkbox("Camera Switch", &m_PrimaryCamera)) {
+			m_CameraEntity.GetComponent<CameraComponent>().Primary = m_PrimaryCamera;
+			m_SecondCameraEntity.GetComponent<CameraComponent>().Primary = !m_PrimaryCamera;
+		}
 
 		ImGui::End();
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0.0f,0.0f });
 		ImGui::Begin("Viewport");
+
 		m_ViewportFocused = ImGui::IsWindowFocused();
 		m_ViewportHovered = ImGui::IsWindowHovered();
 		Application::Get().GetImGuiLayer()->SetImGuiEventState(!m_ViewportFocused || !m_ViewportHovered);
 
-		ImVec2 VpSize = ImGui::GetContentRegionAvail();
-		if (m_ViewportSize != *(glm::vec2*)&VpSize) {
-			m_ViewportSize = { VpSize.x, VpSize.y };
-			m_FrameBuffer->Resize(static_cast<uint32_t>(m_ViewportSize.x), static_cast<uint32_t>(m_ViewportSize.y));
-
-			m_CameraControl.OnWindowResize(m_ViewportSize.x, m_ViewportSize.y);
-		}
+		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
+		m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
 
 		uint32_t textureID = m_FrameBuffer->GetColorAttachmentID();
 		ImGui::Image((void*)textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });

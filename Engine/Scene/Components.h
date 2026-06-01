@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 
+#include "SceneCamera.h"
 
 namespace Monsi {
 
@@ -31,4 +32,20 @@ namespace Monsi {
 
 	};
 
+	struct TagComponent {
+		std::string Tag;
+
+		TagComponent() = default;
+		TagComponent(const TagComponent& other) = default;
+		TagComponent(const std::string& tag) : Tag(tag) {}
+	};
+
+	struct CameraComponent {
+		SceneCamera Camera;
+		bool Primary = true;
+		bool FixedAspectRatio = false;
+
+		CameraComponent() = default;
+		CameraComponent(const CameraComponent& other) = default;
+	};
 }
