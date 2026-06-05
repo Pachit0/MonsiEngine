@@ -10,3 +10,6 @@
 [submodule "Engine/thirdparty/imgui-docking"]
 	path = Engine/thirdparty/imgui-docking
 	url = https://github.com/ocornut/imgui.git
+[submodule "Engine/thirdparty/assimp"]
+	path = Engine/thirdparty/assimp
+	url = https://github.com/assimp/assimp.git
