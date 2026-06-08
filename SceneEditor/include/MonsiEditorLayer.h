@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Monsi.h>
+#include "SceneHierarchyUnit.h"
 
 namespace Monsi {
 
@@ -20,6 +21,8 @@ namespace Monsi {
 		Reference<Texture2D> m_MonsiTest;
 		Reference<SubTexture2D> m_Chair;
 		Reference<FrameBuffer> m_FrameBuffer;
+
+		SceneHierarchyUnit m_Unit;
 
 		struct TimeProfilerResult {
 			const char* Name;

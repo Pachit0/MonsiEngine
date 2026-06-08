@@ -43,6 +43,8 @@ namespace Monsi {
 		m_SecondCameraEntity = m_ActiveScene->CreateEntity("Camera Entity Second");
 		auto& cc = m_SecondCameraEntity.AddComponent<CameraComponent>();
 		cc.Primary = false;
+
+		m_Unit.SetContext(m_ActiveScene);
 	}
 
 	void EditorLayer::OnLayerUpdate(TimeStep timestep) {
@@ -147,6 +149,8 @@ namespace Monsi {
 		}
 
 		ImGui::End();
+
+		m_Unit.OnImGuiRender();
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0.0f,0.0f });
 		ImGui::Begin("Viewport");

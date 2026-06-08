@@ -2,8 +2,6 @@
 #include "OpenGLTexture.h"
 #include <stb_image.h>
 
-
-
 namespace Monsi {
 
 	OpenGLTexture2D::OpenGLTexture2D(const std::string& ResourcePath) : m_ResourcePath(ResourcePath) {
@@ -33,7 +31,7 @@ namespace Monsi {
 		m_DataFormat = dataFormat;
 		m_OpenGLFormat = OpenGLFormat;
 
-		ENGINE_ASSERT(OpenGLFormat & dataFormat, "Format isn't supported!");
+		ENGINE_ASSERT(OpenGLFormat != 0 && dataFormat != 0, "Format isn't supported!");
 
 		glCreateTextures(GL_TEXTURE_2D, 1, &m_ID);
 		glTextureStorage2D(m_ID, 1, OpenGLFormat, m_Width, m_Height);

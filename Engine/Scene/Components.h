@@ -3,14 +3,24 @@
 #include <glm/glm.hpp>
 
 #include "SceneCamera.h"
+#include "Mesh.h"
+#include "ModelLoader.h"
 
 namespace Monsi {
-
-	struct MeshComponent {
-		// TODO for 3D renderer
-		MeshComponent() = default;
-	};
-
+// 
+// 	struct MeshComponent {
+// 
+// 
+// 		MeshComponent() = default;
+// 		MeshComponent(const MeshComponent& other) = default;
+// 	};
+// 
+// 	struct ModelComponent {
+// 		Reference<Model> ModelAsset;
+// 
+// 		ModelComponent() = default;
+// 		ModelComponent(const ModelComponent& other) = default;
+// 	};
 
 	struct TransformComponent {
 		glm::mat4 Transform = glm::mat4(1.0f);

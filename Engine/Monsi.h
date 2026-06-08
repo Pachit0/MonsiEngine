@@ -18,6 +18,9 @@
 #include "Scene/Entity.h"
 #include "Scene/Components.h"
 
+// Model
+#include "ModelLoader.h"
+
 //	Renderer
 #include "Renderer/Renderer.h"
 #include "Renderer/RenderCommand.h"

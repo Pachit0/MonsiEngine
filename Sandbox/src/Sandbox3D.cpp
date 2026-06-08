@@ -2,7 +2,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
-ExampleLayer::ExampleLayer() : Layer("Sandbox3D"), m_CameraControl(1280.0f / 720.0f), m_ViewportSize{ 0.0f,0.0f }, m_ViewportFocused(false)
+ExampleLayer::ExampleLayer() : Layer("Sandbox3D"), m_CameraControl(1280.0f / 720.0f), m_ViewportSize{ 0.0f,0.0f }, m_ViewportFocused(false), m_ViewportHovered(false)
 {
 
 }
@@ -14,6 +14,8 @@ void ExampleLayer::OnLayerAttach()
 	spec.Height = 720;
 	m_FrameBuffer = Monsi::FrameBuffer::Create(spec);
 	m_MonsiTest = Monsi::Texture2D::Create( TEXTURE_PATH "background.png");
+	m_Model = Monsi::CreateReference<Monsi::Model>( MODEL_PATH "backpack/backpack.obj");
+	m_ModelTwo = Monsi::CreateReference<Monsi::Model>( MODEL_PATH "wall_cabinet/wall_cabinet.obj");
 }
 
 void ExampleLayer::OnLayerUpdate(Monsi::TimeStep timestep)
@@ -25,30 +27,21 @@ void ExampleLayer::OnLayerUpdate(Monsi::TimeStep timestep)
 
 	m_CameraControl.OnLayerUpdate(timestep);
 
-// 	static float rotate = 0.0f;
-// 	rotate += timestep * 50.0f;
-
 	Monsi::Renderer3D::Begin3D(m_CameraControl);
 
-	float spacing = 2.5f;
-	glm::vec3 noRotation = glm::vec3(0.0f, 0.0f, 0.0f);
+	static float rotationStep = 0;
+	rotationStep += timestep * 50.0f;
 
-	for (int x = 0; x < 10; x++)
-	{
-		for (int y = 0; y < 10; y++)
-		{
-			for (int z = 0; z < 10; z++)
-			{
-				glm::vec3 position = glm::vec3(
-					(x - 5.0f) * spacing,
-					(y - 5.0f) * spacing,
-					(z - 5.0f) * spacing
-				);
-
-				Monsi::Renderer3D::DrawCube(position, { 1.0f, 1.0f, 1.0f }, m_MonsiTest, noRotation);
-			}
-		}
+	if (rotationStep >= 360.0f) {
+		rotationStep -= 360.0f;
 	}
+
+	glm::vec3 rotation = { 0.0f, -90.0f,0.0f };
+
+	Monsi::Renderer3D::DrawCube({0.0f,0.0f,-5.0f}, {1.0f, 1.0f, 1.0f}, m_MonsiTest, rotation);
+	Monsi::Renderer3D::DrawModel(m_Model, { 4.0f,0.0f,-5.0f }, { 0.5f, 0.5f, 0.5f }, { 1.0f,1.0f,1.0f,1.0f }, { 0.0f,rotationStep,0.0f });
+	Monsi::Renderer3D::DrawModel(m_ModelTwo, {1.5f,0.0f,-5.0f}, {0.5f, 0.5f, 0.5f}, {1.0f,1.0f,1.0f,1.0f}, rotation);
+
 
 	Monsi::Renderer3D::End3D();
 	

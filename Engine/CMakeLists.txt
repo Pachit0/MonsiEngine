@@ -52,6 +52,7 @@ target_include_directories(Engine PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/entt
     ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/spdlog/include
     ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glfw/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/assimp/include
 )
 
 target_precompile_headers(Engine PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/MonsiPch.h")
@@ -66,6 +67,7 @@ target_link_libraries(Engine
            stb_image
            entt
            implot
+           assimp
 )
 
 if(WIN32)
@@ -74,13 +76,15 @@ endif()
 
 if(PRODUCTION_BUILD)	
 
-    target_compile_definitions(Engine PUBLIC SHADER_PATH="./assets/Shader") 
-    target_compile_definitions(Engine PUBLIC TEXTURE_PATH="./assets/Textures") 
+    target_compile_definitions(Engine PUBLIC SHADER_PATH="./assets/Shader")
+    target_compile_definitions(Engine PUBLIC TEXTURE_PATH="./assets/Textures")
+    target_compile_definitions(Engine PUBLIC MODEL_PATH="./assets/Models")
     target_compile_definitions(Engine PUBLIC PRODUCTION_BUILD=1) 
 
 else()
 
     target_compile_definitions(Engine PUBLIC SHADER_PATH="${CMAKE_CURRENT_SOURCE_DIR}/../Sandbox/assets/Shader/")
     target_compile_definitions(Engine PUBLIC TEXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/../Sandbox/assets/Textures/")
+    target_compile_definitions(Engine PUBLIC MODEL_PATH="${CMAKE_CURRENT_SOURCE_DIR}/../Sandbox/assets/Models/")
 
 endif()

@@ -42,12 +42,19 @@ target_include_directories(stb_image INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/stb_image
 )
 
-#entt - single header
+# entt - single header
 add_library(entt INTERFACE)
 
 target_include_directories(entt INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/entt
 )
+
+# assimp
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_INJECT_DEBUG_POSTFIX OFF CACHE BOOL "" FORCE)
+set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
+
+add_subdirectory(assimp)
 
 # ImPlot
 file(GLOB IMPLOT_SRC
