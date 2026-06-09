@@ -10,6 +10,7 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/Scene/*.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/Renderer/*.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/ImGui/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ModelLoader/*.cpp"
 )
 
 file(GLOB THIRD_PARTY_SOURCES
@@ -25,6 +26,7 @@ file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/Renderer/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/ImGui/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/debug/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ModelLoader/*.h"
 )
 
 file(GLOB THIRD_PARTY_HEADERS
@@ -45,6 +47,7 @@ add_subdirectory(thirdparty)
 target_include_directories(Engine PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/Platform
+    ${CMAKE_CURRENT_SOURCE_DIR}/ModelLoader
     ${CMAKE_CURRENT_SOURCE_DIR}/Scene
     ${CMAKE_CURRENT_SOURCE_DIR}/Core
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer

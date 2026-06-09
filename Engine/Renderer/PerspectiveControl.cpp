@@ -1,8 +1,10 @@
 #include "MonsiPch.h"
 #include "PerspectiveControl.h"
 #include "MonsiKeyCodes.h"
+#include "Engine.h"
 
 #include "Input.h"
+#include <GLFW/glfw3.h>
 
 namespace Monsi {
 
@@ -19,25 +21,52 @@ namespace Monsi {
 		m_Camera.SetPosition(m_CameraPosition);
 	}
 
-    void PerspectiveControl::OnLayerUpdate(TimeStep ts)
-    {
-        float velocity = m_CameraTranslationSpeed * ts;
+	void PerspectiveControl::OnLayerUpdate(TimeStep ts)
+	{
+		static bool cPressedLastFrame = false;
+		bool cPressedThisFrame = Input::KeyPressed(MONSI_KEY_C);
 
-        if (Input::KeyPressed(MONSI_KEY_W))
-            m_CameraPosition += m_CameraFront * velocity;
+		if (cPressedThisFrame && !cPressedLastFrame)
+		{
+			m_MouseCaptured = !m_MouseCaptured;
 
-        if (Input::KeyPressed(MONSI_KEY_S))
-            m_CameraPosition -= m_CameraFront * velocity;
+			GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
 
-        if (Input::KeyPressed(MONSI_KEY_A))
-            m_CameraPosition -= m_CameraRight * velocity;
+			if (m_MouseCaptured)
+			{
+				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+				m_FirstMouse = true;
+				ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
+			}
+			else
+			{
+				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
-        if (Input::KeyPressed(MONSI_KEY_D))
-            m_CameraPosition += m_CameraRight * velocity;
+				ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
+			}
+		}
+		cPressedLastFrame = cPressedThisFrame;
+
+		if (m_MouseCaptured)
+		{
+			float velocity = m_CameraTranslationSpeed * ts;
+
+			if (Input::KeyPressed(MONSI_KEY_W))
+				m_CameraPosition += m_CameraFront * velocity;
+
+			if (Input::KeyPressed(MONSI_KEY_S))
+				m_CameraPosition -= m_CameraFront * velocity;
+
+			if (Input::KeyPressed(MONSI_KEY_A))
+				m_CameraPosition -= m_CameraRight * velocity;
+
+			if (Input::KeyPressed(MONSI_KEY_D))
+				m_CameraPosition += m_CameraRight * velocity;
+		}
 
 		m_Camera.SetPosition(m_CameraPosition);
 		m_Camera.SetDirection(m_CameraFront, m_CameraUp);
-    }
+	}
 
 	void PerspectiveControl::OnLayerEvent(Event& event)
 	{
@@ -71,55 +100,62 @@ namespace Monsi {
 
 		m_CameraRight = glm::normalize(glm::cross(m_CameraFront, worldUp));
 		m_CameraUp = glm::normalize(glm::cross(m_CameraRight, m_CameraFront));
-// 		ENGINE_LOG_TRACE("FRONT: {0}, {1}, {2}", m_CameraFront.x, m_CameraFront.y, m_CameraFront.z);
-// 		ENGINE_LOG_TRACE("RIGHT: {0}, {1}, {2}", m_CameraRight.x, m_CameraRight.y, m_CameraRight.z);
-// 		ENGINE_LOG_TRACE("UP: {0}, {1}, {2}", m_CameraUp.x, m_CameraUp.y, m_CameraUp.z);
 	}
 
-    bool PerspectiveControl::OnZoomEvent(MouseEventScrolled& event)
-    {
-        m_FOV -= event.GetYOffset();
+	bool PerspectiveControl::OnZoomEvent(MouseEventScrolled& event)
+	{
+		m_FOV -= event.GetYOffset();
 
-        if (m_FOV < 1.0f)
-            m_FOV = 1.0f;
-        if (m_FOV > 90.0f)
-            m_FOV = 90.0f;
+		if (m_FOV < 1.0f)
+			m_FOV = 1.0f;
+		if (m_FOV > 90.0f)
+			m_FOV = 90.0f;
 
-        m_Camera.SetProjection(m_FOV, m_AspectRatio, m_NearClip, m_FarClip);
+		m_Camera.SetProjection(m_FOV, m_AspectRatio, m_NearClip, m_FarClip);
 
-        return false;
-    }
+		return false;
+	}
 
-    bool PerspectiveControl::OnResizeEvent(WindowResizeEvent& event)
-    {
-        m_AspectRatio = (float)event.GetWidth() / (float)event.GetHeight();
+	bool PerspectiveControl::OnResizeEvent(WindowResizeEvent& event)
+	{
+		m_AspectRatio = (float)event.GetWidth() / (float)event.GetHeight();
 
-        m_Camera.SetProjection(m_FOV, m_AspectRatio, m_NearClip, m_FarClip);
+		m_Camera.SetProjection(m_FOV, m_AspectRatio, m_NearClip, m_FarClip);
 
-        return false;
-    }
-	
+		return false;
+	}
+
 	bool PerspectiveControl::OnMouseMoved(MouseEventMoved& event)
 	{
-		static float lastX = event.GetMouseX();
-		static float lastY = event.GetMouseY();
+		if (!m_MouseCaptured)
+		{
+			m_LastMouseX = event.GetMouseX();
+			m_LastMouseY = event.GetMouseY();
+			return false;
+		}
 
-		float xoffset = event.GetMouseX() - lastX;
-		float yoffset = lastY - event.GetMouseY();
+		if (m_FirstMouse)
+		{
+			m_LastMouseX = event.GetMouseX();
+			m_LastMouseY = event.GetMouseY();
+			m_FirstMouse = false;
+		}
 
-		lastX = event.GetMouseX();
-		lastY = event.GetMouseY();
+		float xoffset = event.GetMouseX() - m_LastMouseX;
+		float yoffset = m_LastMouseY - event.GetMouseY();
 
-		float sensitivity = 0.1f;
-		xoffset *= sensitivity;
-		yoffset *= sensitivity;
+		m_LastMouseX = event.GetMouseX();
+		m_LastMouseY = event.GetMouseY();
+
+		xoffset *= m_MouseSensitivity;
+		yoffset *= m_MouseSensitivity;
 
 		m_Yaw += xoffset;
 		m_Pitch += yoffset;
 
-        UpdateCameraVectors();
+		UpdateCameraVectors();
 
-        return false;
+		return false;
 	}
 
 }

@@ -1,6 +1,7 @@
 #include "MonsiPch.h"
 #include "ModelPass.h"
 #include "RenderCommand.h"
+#include "Lighting.h"
 #include <glm/ext/matrix_transform.hpp>
 
 namespace Monsi {
@@ -40,9 +41,18 @@ namespace Monsi {
 		m_RegisteredModels.insert(model.get());
 	}
 
-	void ModelPass::BeginScene(const glm::mat4& viewProjection)
+	void ModelPass::BeginScene(const glm::mat4& viewProj, const glm::vec3& viewPos, const Reference<LightingBuffer>& lighting)
 	{
-		m_ViewProjection = viewProjection;
+		m_ViewProjection = viewProj;
+		m_Shader->Bind();
+		m_Shader->setMat4("u_ViewProjection", m_ViewProjection);
+		m_Shader->setVec3("u_ViewPos", viewPos);
+
+		if (lighting)
+		{
+			lighting->Bind(m_Shader);
+		}
+		
 		m_MeshBatches.clear();
 		m_BufferCursor = m_InstanceBuffer;
 	}

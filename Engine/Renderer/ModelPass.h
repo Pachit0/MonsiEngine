@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ModelLoader.h"
+#include "Lighting.h"
 #include "VertexArray.h"
 #include "Shader.h"
 #include "Texture.h"
@@ -13,7 +14,7 @@ namespace Monsi {
 		void Init();
 		void Shutdown();
 
-		void BeginScene(const glm::mat4& viewProjection);
+		void BeginScene(const glm::mat4& viewProj, const glm::vec3& viewPos, const Reference<LightingBuffer>& lighting);
 		void EndScene();
 
 		void DrawModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color);

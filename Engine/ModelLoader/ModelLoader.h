@@ -25,7 +25,7 @@ namespace Monsi {
 
 	private:
 		std::vector<Mesh> m_Meshes;
-		std::vector<Texture_t> m_TexturesLoaded;
+		std::unordered_map<std::string, Texture_t> m_TextureCache;
 		std::string m_Directory;
 	};
 

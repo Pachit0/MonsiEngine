@@ -3,17 +3,18 @@
 
 layout(location = 0) in vec3 a_Position;
 layout(location = 1) in vec2 a_TexCoord;
-
-layout(location = 2) in mat4 a_Transform; // this takes up the slots up to 5
-
+layout(location = 2) in mat4 a_Transform; 
 layout(location = 6) in vec4 a_Color;
 layout(location = 7) in float a_TexIndex;
+layout(location = 8) in vec3 a_Normal; 
 
 uniform mat4 u_ViewProjection;
 
 out vec4 v_Color;
 out vec2 v_TexCoord;
 flat out float v_TexIndex;
+out vec3 v_FragPos;
+out vec3 v_Normal;
 
 void main()
 {
@@ -21,7 +22,11 @@ void main()
     v_TexCoord = a_TexCoord;
     v_TexIndex = a_TexIndex;
     
-    gl_Position = u_ViewProjection * a_Transform * vec4(a_Position, 1.0);
+    vec4 worldPos = a_Transform * vec4(a_Position, 1.0);
+    v_FragPos = vec3(worldPos);
+    v_Normal = mat3(transpose(inverse(a_Transform))) * a_Normal;
+    
+    gl_Position = u_ViewProjection * worldPos;
 }
 
 #shadertype fragment
@@ -29,11 +34,47 @@ void main()
 
 layout(location=0) out vec4 color;
 
+struct DirectionalLight {
+    vec3 Direction;
+    vec3 Color;
+    float Intensity;
+};
+
+struct PointLight {
+    vec3 Position;
+    vec3 Color;
+    float Intensity;
+    float Radius;
+};
+
+uniform DirectionalLight u_MainLight;
+uniform int u_PointLightCount;
+uniform PointLight u_PointLights[32];
+uniform vec3 u_ViewPos;
+uniform sampler2D u_Textures[32];
+
 in vec4 v_Color;
 in vec2 v_TexCoord;
 flat in float v_TexIndex;
+in vec3 v_FragPos;
+in vec3 v_Normal;
 
-uniform sampler2D u_Textures[32];
+vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir) {
+    if (length(light.Direction) == 0.0) return vec3(0.0);
+    vec3 lightDir = normalize(-light.Direction);
+    float diff = max(dot(normal, lightDir), 0.0);
+    return light.Color * light.Intensity * diff;
+}
+
+vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 fragPos) {
+    vec3 ToLight = light.Position - fragPos;
+    if (length(ToLight) == 0.0) return vec3(0.0);
+    vec3 lightDir = normalize(ToLight);
+    float diff = max(dot(normal, lightDir), 0.0);
+    float distance = length(ToLight);
+    float attenuation = clamp(1.0 - (distance / light.Radius), 0.0, 1.0);
+    return light.Color * light.Intensity * diff * attenuation;
+}
 
 void main()
 {
@@ -76,5 +117,16 @@ void main()
         default: l_Texture = vec4(1.0f);
     }
 
-    color = v_Color * l_Texture;
+    vec3 norm = normalize(v_Normal);
+    vec3 viewDir = normalize(u_ViewPos - v_FragPos);
+    
+    vec3 lightResult = vec3(0.1);
+    lightResult += CalculateDirectionalLight(u_MainLight, norm, viewDir);
+    
+    for(int i = 0; i < u_PointLightCount; i++) {
+        lightResult += CalculatePointLight(u_PointLights[i], norm, v_FragPos);
+    }
+
+    vec4 texColor = v_Color * l_Texture;
+    color = vec4(texColor.rgb * lightResult, texColor.a);
 }

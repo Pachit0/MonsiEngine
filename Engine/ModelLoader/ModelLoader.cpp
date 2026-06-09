@@ -26,6 +26,9 @@ namespace Monsi {
 
 		m_Directory = filepath.substr(0, filepath.find_last_of("/\\"));
 
+		m_TextureCache.reserve(scene->mNumMaterials * 4);
+		m_Meshes.reserve(scene->mNumMeshes);
+
 		processNode(scene->mRootNode, scene);
 	}
 
@@ -47,7 +50,15 @@ namespace Monsi {
 	Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 	{
 		std::vector<Vertex_t> vertices;
+		vertices.reserve(mesh->mNumVertices);
+
+		size_t totalIndices = 0;
+		for (uint32_t i = 0; i < mesh->mNumFaces; i++)
+			totalIndices += mesh->mFaces[i].mNumIndices;
+
 		std::vector<unsigned int> indices;
+		indices.reserve(totalIndices);
+
 		std::vector<Texture_t> textures;
 
 		for (uint32_t i = 0; i < mesh->mNumVertices; i++)
@@ -115,42 +126,39 @@ namespace Monsi {
 		aiTextureType type,
 		const std::string& typeName)
 	{
-		std::vector<Texture_t> textures;
+		const uint32_t textureCount = mat->GetTextureCount(type);
 
-		for (uint32_t i = 0; i < mat->GetTextureCount(type); i++)
+		std::vector<Texture_t> textures;
+		textures.reserve(textureCount);
+
+		for (uint32_t i = 0; i < textureCount; i++)
 		{
 			aiString str;
 
 			mat->GetTexture(type, i, &str);
 
-			bool skip = false;
+			const std::string path = str.C_Str();
 
-			for (auto& loaded : m_TexturesLoaded)
+			auto it = m_TextureCache.find(path);
+
+			if (it != m_TextureCache.end())
 			{
-				if (loaded.path == str.C_Str())
-				{
-					textures.push_back(loaded);
-					skip = true;
-					break;
-				}
+				textures.emplace_back(it->second);
 			}
-
-			if (!skip)
+			else
 			{
 				Texture_t texture;
 
-				std::string filename = m_Directory + "/" + str.C_Str();
+				std::string filename = m_Directory + "/" + path;
 
 				texture.texture = Texture2D::Create(filename);
-
 				texture.type = typeName;
-				texture.path = str.C_Str();
+				texture.path = path;
 
 				textures.push_back(texture);
-				m_TexturesLoaded.push_back(texture);
+				m_TextureCache.emplace(path, texture);
 			}
 		}
-
 		return textures;
 	}
 

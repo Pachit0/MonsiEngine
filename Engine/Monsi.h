@@ -19,7 +19,7 @@
 #include "Scene/Components.h"
 
 // Model
-#include "ModelLoader.h"
+#include "ModelLoader/ModelLoader.h"
 
 //	Renderer
 #include "Renderer/Renderer.h"
@@ -34,6 +34,7 @@
 #include "Renderer/Renderer2D.h"
 #include "Renderer/Renderer3D.h"
 #include "Renderer/FrameBuffer.h"
+#include "Renderer/Lighting.h"
 
 //	CameraControls
 #include "OrthographicControl.h"

@@ -13,8 +13,7 @@ namespace Monsi {
 
 	void CubePass::Init()
 	{
-
-		CubeVA = VertexArray::Create();
+		m_CubeVA = VertexArray::Create();
 
 		CubeVertex vertices[24] =
 		{
@@ -49,6 +48,16 @@ namespace Monsi {
 			{{-0.5f,-0.5f, 0.5f}, {0.0f,1.0f}}
 		};
 
+		glm::vec3 normals[24] =
+		{
+			{ 0.0f,  0.0f,  1.0f}, { 0.0f,  0.0f,  1.0f}, { 0.0f,  0.0f,  1.0f}, { 0.0f,  0.0f,  1.0f},
+			{ 1.0f,  0.0f,  0.0f}, { 1.0f,  0.0f,  0.0f}, { 1.0f,  0.0f,  0.0f}, { 1.0f,  0.0f,  0.0f},
+			{ 0.0f,  0.0f, -1.0f}, { 0.0f,  0.0f, -1.0f}, { 0.0f,  0.0f, -1.0f}, { 0.0f,  0.0f, -1.0f},
+			{-1.0f,  0.0f,  0.0f}, {-1.0f,  0.0f,  0.0f}, {-1.0f,  0.0f,  0.0f}, {-1.0f,  0.0f,  0.0f},
+			{ 0.0f,  1.0f,  0.0f}, { 0.0f,  1.0f,  0.0f}, { 0.0f,  1.0f,  0.0f}, { 0.0f,  1.0f,  0.0f},
+			{ 0.0f, -1.0f,  0.0f}, { 0.0f, -1.0f,  0.0f}, { 0.0f, -1.0f,  0.0f}, { 0.0f, -1.0f,  0.0f}
+		};
+
 		uint32_t indices[36] =
 		{
 			 0,  1,  2,  2,  3,  0,
@@ -59,18 +68,15 @@ namespace Monsi {
 			20, 21, 22, 22, 23, 20
 		};
 
-		CubeVertexBuffer = VertexBuffer::Create((float*)vertices, sizeof(vertices));
-
-		CubeVertexBuffer->SetLayout({
+		m_CubeVertexBuffer = VertexBuffer::Create((float*)vertices, sizeof(vertices));
+		m_CubeVertexBuffer->SetLayout({
 			{ ShaderDataType::Float3, "a_Position" },
 			{ ShaderDataType::Float2, "a_TexCoord" }
 			});
+		m_CubeVA->AddVertexBuffer(m_CubeVertexBuffer);
 
-		CubeVA->AddVertexBuffer(CubeVertexBuffer);
-
-		InstanceVertexBuffer = VertexBuffer::Create(MaxCubes * sizeof(CubeInstanceData));
-
-		InstanceVertexBuffer->SetLayout({
+		m_InstanceVertexBuffer = VertexBuffer::Create(MaxCubes * sizeof(CubeInstanceData));
+		m_InstanceVertexBuffer->SetLayout({
 			{ ShaderDataType::Float4, "a_MtxRow0",  true },
 			{ ShaderDataType::Float4, "a_MtxRow1",  true },
 			{ ShaderDataType::Float4, "a_MtxRow2",  true },
@@ -78,48 +84,59 @@ namespace Monsi {
 			{ ShaderDataType::Float4, "a_Color",    true },
 			{ ShaderDataType::Float,  "a_TexIndex", true }
 			});
+		m_CubeVA->AddVertexBuffer(m_InstanceVertexBuffer);
 
-		CubeVA->AddVertexBuffer(InstanceVertexBuffer);
+		Reference<VertexBuffer> normalBuffer = VertexBuffer::Create((float*)normals, sizeof(normals));
+		normalBuffer->SetLayout({
+			{ ShaderDataType::Float3, "a_Normal" }
+			});
+		m_CubeVA->AddVertexBuffer(normalBuffer);
 
-		CubeIB = IndexBuffer::Create(indices, 36);
-		CubeVA->SetIndexBuffer(CubeIB);
+		m_CubeIB = IndexBuffer::Create(indices, 36);
+		m_CubeVA->SetIndexBuffer(m_CubeIB);
 
-		InstanceBufferBegin = new CubeInstanceData[MaxCubes];
-		InstanceBufferItr = InstanceBufferBegin;
+		m_InstanceBufferBegin = new CubeInstanceData[MaxCubes];
+		m_InstanceBufferItr = m_InstanceBufferBegin;
 
-		WhiteTexture = Texture2D::Create(1, 1);
-
+		m_WhiteTexture = Texture2D::Create(1, 1);
 		uint32_t whitePixel = 0xffffffff;
-		WhiteTexture->modifyData(&whitePixel, sizeof(uint32_t));
+		m_WhiteTexture->modifyData(&whitePixel, sizeof(uint32_t));
 
-		TextureSlots[0] = WhiteTexture;
-		TextureSlotIndex = 1;
+		m_TextureSlots[0] = m_WhiteTexture;
+		m_TextureSlotIndex = 1;
 
-		TextureShader = Shader::Create(SHADER_PATH "Textures3D.glsl");
+		m_TextureShader = Shader::Create(SHADER_PATH "ObjectShader.glsl");
 
 		int samplers[MaxTextureSlots];
-
 		for (uint32_t i = 0; i < MaxTextureSlots; i++)
 			samplers[i] = i;
 
-		TextureShader->Bind();
-		TextureShader->setIntArray("u_Textures", samplers, MaxTextureSlots);
+		m_TextureShader->Bind();
+		m_TextureShader->setIntArray("u_Textures", samplers, MaxTextureSlots);
 	}
 
 	void CubePass::Shutdown()
 	{
-
+		delete[] m_InstanceBufferBegin;
+		m_InstanceBufferBegin = nullptr;
+		m_InstanceBufferItr = nullptr;
 	}
 
-	void CubePass::BeginScene(const glm::mat4& viewProjection)
+	void CubePass::BeginScene(const glm::mat4& viewProj, const glm::vec3& viewPos, const Reference<LightingBuffer>& lighting)
 	{
-		m_ViewProjection = viewProjection;
+		m_ViewProjection = viewProj;
 
-		TextureShader->Bind();
-		TextureShader->setMat4("u_ViewProjection", m_ViewProjection);
+		m_TextureShader->Bind();
+		m_TextureShader->setMat4("u_ViewProjection", m_ViewProjection);
+		m_TextureShader->setVec3("u_ViewPos", viewPos);
 
-		InstanceBufferItr = InstanceBufferBegin;
-		TextureSlotIndex = 1;
+		if (lighting)
+		{
+			lighting->Bind(m_TextureShader);
+		}
+
+		m_InstanceBufferItr = m_InstanceBufferBegin;
+		m_TextureSlotIndex = 1;
 	}
 
 	void CubePass::EndScene()
@@ -129,93 +146,89 @@ namespace Monsi {
 
 	void CubePass::DrawCube(const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation)
 	{
-		uint32_t currentInstances = InstanceBufferItr - InstanceBufferBegin;
+		uint32_t currentInstances = m_InstanceBufferItr - m_InstanceBufferBegin;
 		if (currentInstances >= MaxCubes)
 		{
 			Flush();
-			InstanceBufferItr = InstanceBufferBegin;
+			m_InstanceBufferItr = m_InstanceBufferBegin;
 		}
 
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position);
-		transform = glm::rotate(transform, glm::radians(rotation.x), glm::vec3(1, 0, 0));
-		transform = glm::rotate(transform, glm::radians(rotation.y), glm::vec3(0, 1, 0));
-		transform = glm::rotate(transform, glm::radians(rotation.z), glm::vec3(0, 0, 1));
+		if (rotation.x != 0.0f) transform = glm::rotate(transform, glm::radians(rotation.x), glm::vec3(1, 0, 0));
+		if (rotation.y != 0.0f) transform = glm::rotate(transform, glm::radians(rotation.y), glm::vec3(0, 1, 0));
+		if (rotation.z != 0.0f) transform = glm::rotate(transform, glm::radians(rotation.z), glm::vec3(0, 0, 1));
 		transform = glm::scale(transform, size);
 
 		float texIndex = 0.0f;
 
-		InstanceBufferItr->Transform = transform;
-		InstanceBufferItr->Color = color;
-		InstanceBufferItr->TexIndex = texIndex;
+		m_InstanceBufferItr->Transform = transform;
+		m_InstanceBufferItr->Color = color;
+		m_InstanceBufferItr->TexIndex = texIndex;
 
-		InstanceBufferItr++;
+		m_InstanceBufferItr++;
 	}
 
 	void CubePass::DrawCube(const glm::vec3& position, const glm::vec3& size, Reference<Texture2D> texture, const glm::vec3& rotation)
 	{
-		const glm::vec4 color = { 1.0f, 1.0f, 1.0f ,1.0f };
+		const glm::vec4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-		uint32_t currentInstances = InstanceBufferItr - InstanceBufferBegin;
-
+		uint32_t currentInstances = m_InstanceBufferItr - m_InstanceBufferBegin;
 		if (currentInstances >= MaxCubes)
 		{
 			Flush();
-			InstanceBufferItr = InstanceBufferBegin;
+			m_InstanceBufferItr = m_InstanceBufferBegin;
 		}
 
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position);
-		transform = glm::rotate(transform, glm::radians(rotation.x), glm::vec3(1, 0, 0));
-		transform = glm::rotate(transform, glm::radians(rotation.y), glm::vec3(0, 1, 0));
-		transform = glm::rotate(transform, glm::radians(rotation.z), glm::vec3(0, 0, 1));
+		if (rotation.x != 0.0f) transform = glm::rotate(transform, glm::radians(rotation.x), glm::vec3(1, 0, 0));
+		if (rotation.y != 0.0f) transform = glm::rotate(transform, glm::radians(rotation.y), glm::vec3(0, 1, 0));
+		if (rotation.z != 0.0f) transform = glm::rotate(transform, glm::radians(rotation.z), glm::vec3(0, 0, 1));
 		transform = glm::scale(transform, size);
 
 		float texIndex = 0.0f;
-		for (uint32_t i = 1; i < TextureSlotIndex; i++) {
-			if (*TextureSlots[i].get() == *texture.get()) {
+		for (uint32_t i = 1; i < m_TextureSlotIndex; i++) {
+			if (*m_TextureSlots[i].get() == *texture.get()) {
 				texIndex = static_cast<float>(i);
 				break;
 			}
 		}
 
 		if (texIndex == 0.0f) {
-			if (TextureSlotIndex >= MaxTextureSlots)
+			if (m_TextureSlotIndex >= MaxTextureSlots)
 			{
 				Flush();
-				InstanceBufferItr = InstanceBufferBegin;
-				TextureSlotIndex = 1;
+				m_InstanceBufferItr = m_InstanceBufferBegin;
+				m_TextureSlotIndex = 1;
 			}
 
-			texIndex = static_cast<float>(TextureSlotIndex);
-			TextureSlots[TextureSlotIndex] = texture;
-			TextureSlotIndex++;
+			texIndex = static_cast<float>(m_TextureSlotIndex);
+			m_TextureSlots[m_TextureSlotIndex] = texture;
+			m_TextureSlotIndex++;
 		}
 
-		InstanceBufferItr->Transform = transform;
-		InstanceBufferItr->Color = color;
-		InstanceBufferItr->TexIndex = texIndex;
+		m_InstanceBufferItr->Transform = transform;
+		m_InstanceBufferItr->Color = color;
+		m_InstanceBufferItr->TexIndex = texIndex;
 
-		InstanceBufferItr++;
+		m_InstanceBufferItr++;
 	}
 
 	void CubePass::Flush()
 	{
-		uint32_t instanceCount = InstanceBufferItr - InstanceBufferBegin;
-
+		uint32_t instanceCount = m_InstanceBufferItr - m_InstanceBufferBegin;
 		if (instanceCount == 0)
 			return;
 
 		uint32_t dataSize = instanceCount * sizeof(CubeInstanceData);
+		m_InstanceVertexBuffer->SetData(m_InstanceBufferBegin, dataSize);
 
-		InstanceVertexBuffer->SetData(InstanceBufferBegin, dataSize);
+		m_TextureShader->Bind();
 
-		TextureShader->Bind();
+		for (uint32_t i = 0; i < m_TextureSlotIndex; i++)
+			m_TextureSlots[i]->Bind(i);
 
-		for (uint32_t i = 0; i < TextureSlotIndex; i++)
-			TextureSlots[i]->Bind(i);
-
-		CubeVA->Bind();
-
-		RenderCommand::DrawIndexedInstanced(CubeVA, 36, instanceCount);
+		m_CubeVA->Bind();
+		RenderCommand::DrawIndexedInstanced(m_CubeVA, 36, instanceCount);
 	}
 
 }

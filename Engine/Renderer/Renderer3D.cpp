@@ -3,13 +3,15 @@
 #include "CubePass.h"
 #include "ModelPass.h"
 
+
 namespace Monsi {
 
 	struct Renderer3DData {
 
 		Reference<CubePass> Cube;
 		Reference<ModelPass> Model;
-
+		Reference<LightingBuffer> Lighting;
+		SceneLighting SceneLight;
 	};
 
 	static Renderer3DData s_Data;
@@ -20,6 +22,7 @@ namespace Monsi {
 		s_Data.Cube->Init();
 		s_Data.Model = CreateReference<ModelPass>();
 		s_Data.Model->Init();
+		s_Data.Lighting = CreateReference<LightingBuffer>();
 	}
 
 	void Renderer3D::Shutdown()
@@ -31,10 +34,11 @@ namespace Monsi {
 		s_Data.Cube.reset();
 	}
 
-	void Renderer3D::Begin3D(const PerspectiveControl& camera)
+	void Renderer3D::Begin3D(const PerspectiveControl& camera, const SceneLighting& lighting)
 	{
-		s_Data.Cube->BeginScene(camera.GetCamera().GetViewProjectionMatrix());
-		s_Data.Model->BeginScene(camera.GetCamera().GetViewProjectionMatrix());
+		s_Data.Lighting->SetLighting(lighting);
+		s_Data.Cube->BeginScene(camera.GetCamera().GetViewProjectionMatrix(), camera.GetCamera().GetPosition(), s_Data.Lighting);
+		s_Data.Model->BeginScene(camera.GetCamera().GetViewProjectionMatrix(), camera.GetCamera().GetPosition(), s_Data.Lighting);
 	}
 
 	void Renderer3D::End3D()
@@ -63,4 +67,9 @@ namespace Monsi {
 		s_Data.Model->DrawModel(model, position, size, color, rotation);
 	}
 
+	void Renderer3D::SetLighting(const SceneLighting& lighting)
+	{
+		s_Data.SceneLight = lighting;
+		s_Data.Lighting->SetLighting(lighting);
+	}
 }

@@ -21,6 +21,7 @@ private:
 	Monsi::Reference<Monsi::FrameBuffer> m_FrameBuffer;
 	Monsi::Reference<Monsi::Model> m_Model;
 	Monsi::Reference<Monsi::Model> m_ModelTwo;
+	Monsi::SceneLighting currentFrameLighting;
 
 	Monsi::PerspectiveControl m_CameraControl;
 	Monsi::Reference<Monsi::Texture2D> m_MonsiTest;

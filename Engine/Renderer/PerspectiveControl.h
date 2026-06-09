@@ -20,11 +20,16 @@ namespace Monsi {
 
         PerspectiveCamera& GetCamera() { return m_Camera; }
         const PerspectiveCamera& GetCamera() const { return m_Camera; }
+        bool IsMouseCaptured() const { return m_MouseCaptured; }
 
         void SetFOV(float fov) { m_FOV = fov; }
         float GetFOV() const { return m_FOV; }
 
     private:
+		bool m_MouseCaptured = false;
+		float m_LastMouseX = 0.0f;
+		float m_LastMouseY = 0.0f;
+		bool m_FirstMouse = true;
 
         bool m_CameraRotationFlag;
 

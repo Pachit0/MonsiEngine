@@ -28,12 +28,12 @@ namespace Monsi {
 			TransformComponent& transform = m_Registry.get<TransformComponent>(entity);
 		}
 
-// 		auto group = m_Registry.group<TransformComponent>(entt::get<MeshComponent>);
-// 		for (auto entity : group) {
-// 			auto& [transform, mesh] = m_Registry.get<MeshComponent>(entity);
-// 
-// 
-// 		}
+		// 		auto group = m_Registry.group<TransformComponent>(entt::get<MeshComponent>);
+		// 		for (auto entity : group) {
+		// 			auto& [transform, mesh] = m_Registry.get<MeshComponent>(entity);
+		// 
+		// 
+		// 		}
 	}
 
 	Scene::~Scene()
@@ -79,7 +79,7 @@ namespace Monsi {
 		}
 
 
-		if(mainCamera)
+		if (mainCamera)
 		{
 			Renderer2D::BeginScene2D(mainCamera->GetProjectionMatrix(), *cameraTransform);
 

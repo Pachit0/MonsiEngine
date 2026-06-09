@@ -7,19 +7,35 @@
 #include "ModelLoader.h"
 
 namespace Monsi {
-// 
+
 // 	struct MeshComponent {
+// 		enum class Primitive { None = 0, Cube, Sphere, Capsule, Quad };
 // 
+// 		Reference<Model> ModelAsset;
+// 		Primitive Type = Primitive::None;
 // 
 // 		MeshComponent() = default;
 // 		MeshComponent(const MeshComponent& other) = default;
+// 		MeshComponent(const std::string& filepath) : ModelAsset(CreateReference<Model>(filepath)) {}
+// 		MeshComponent(Primitive primitiveType) : Type(primitiveType) {}
 // 	};
 // 
-// 	struct ModelComponent {
-// 		Reference<Model> ModelAsset;
+// 	struct MaterialComponent {
+// 		Reference<Texture2D> Texture;
+// 		glm::vec4 TintColor = glm::vec4(1.0f);
 // 
-// 		ModelComponent() = default;
-// 		ModelComponent(const ModelComponent& other) = default;
+// 		MaterialComponent() = default;
+// 		MaterialComponent(const MaterialComponent& other) = default;
+// 		MaterialComponent(const Reference<Texture2D>& texture) : Texture(texture) {}
+// 	};
+// 
+// 	struct LightComponent {
+// 		glm::vec3 Direction = { 0.0f, -1.0f, 0.0f };
+// 		glm::vec3 Color = { 1.0f, 1.0f, 1.0f };
+// 		float Intensity = 1.0f;
+// 
+// 		LightComponent() = default;
+// 		LightComponent(const LightComponent& other) = default;
 // 	};
 
 	struct TransformComponent {
