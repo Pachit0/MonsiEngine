@@ -168,7 +168,7 @@ namespace Monsi {
 		m_InstanceBufferItr++;
 	}
 
-	void CubePass::DrawCube(const glm::vec3& position, const glm::vec3& size, Reference<Texture2D> texture, const glm::vec3& rotation)
+	void CubePass::DrawCube(const glm::vec3& position, const glm::vec3& size, const Reference<Texture2D>& texture, const glm::vec3& rotation)
 	{
 		const glm::vec4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
 

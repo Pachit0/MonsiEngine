@@ -25,4 +25,5 @@ private:
 
 	Monsi::PerspectiveControl m_CameraControl;
 	Monsi::Reference<Monsi::Texture2D> m_MonsiTest;
+	Monsi::Reference<Monsi::CubeMapTexture> m_SkyBoxTest;
 };

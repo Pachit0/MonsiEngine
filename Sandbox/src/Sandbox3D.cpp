@@ -17,6 +17,17 @@ void ExampleLayer::OnLayerAttach()
 	m_Model = Monsi::CreateReference<Monsi::Model>( MODEL_PATH "backpack/backpack.obj");
 	m_ModelTwo = Monsi::CreateReference<Monsi::Model>( MODEL_PATH "wall_cabinet/wall_cabinet.obj");
 
+	std::array<std::string, 6> skyboxTextures = {
+		TEXTURE_PATH "right.png",
+		TEXTURE_PATH "left.png",
+		TEXTURE_PATH "top.png",
+		TEXTURE_PATH "bottom.png",
+		TEXTURE_PATH "front.png",
+		TEXTURE_PATH "back.png"
+	};
+
+	m_SkyBoxTest = Monsi::CubeMapTexture::Create(skyboxTextures);
+
 	currentFrameLighting.MainLight.Direction = glm::vec3(-0.2f, -1.0f, -0.3f);
 	currentFrameLighting.MainLight.Color = glm::vec3(1.0f, 0.95f, 0.9f);
 	currentFrameLighting.MainLight.Intensity = 1.0f;
@@ -44,8 +55,16 @@ void ExampleLayer::OnLayerUpdate(Monsi::TimeStep timestep)
 	glm::vec3 lightVisualizerPos = -currentFrameLighting.MainLight.Direction * 10.0f;
 	Monsi::Renderer3D::DrawCube({0.0f,0.0f,-5.0f}, {1.0f, 1.0f, 1.0f}, m_MonsiTest, rotation);
 	Monsi::Renderer3D::DrawCube(lightVisualizerPos, { 0.3f, 0.3f, 0.3f }, glm::vec4(currentFrameLighting.MainLight.Color, 1.0f), { 0.0f, 0.0f, 0.0f });
-	Monsi::Renderer3D::DrawModel(m_Model, { 4.0f,0.0f,-5.0f }, { 0.5f, 0.5f, 0.5f }, { 1.0f,1.0f,1.0f,1.0f }, { 0.0f,rotationStep,0.0f });
+
+	for (int x = 0; x < 5; x++) {
+		for (int y = 0; y < 5; y++) {
+			for (int z = 0; z < 5; z++) {
+				Monsi::Renderer3D::DrawModel(m_Model, { x + 5,y + 5, z + 5 }, { 0.5f, 0.5f, 0.5f }, { 1.0f,1.0f,1.0f,1.0f }, { 0.0f,rotationStep,0.0f });
+			}
+		}
+	}
 	Monsi::Renderer3D::DrawModel(m_ModelTwo, {1.5f,0.0f,-5.0f}, {0.5f, 0.5f, 0.5f}, {1.0f,1.0f,1.0f,1.0f}, rotation);
+	Monsi::Renderer3D::DrawSkyBox(m_CameraControl.GetCamera().GetViewMatrix(), m_CameraControl.GetCamera().GetProjectionMatrix(), m_SkyBoxTest);
 
 	Monsi::Renderer3D::End3D();
 	

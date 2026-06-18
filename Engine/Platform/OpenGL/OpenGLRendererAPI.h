@@ -11,6 +11,8 @@ namespace Monsi {
 		void SetClearColor(const glm::vec4& color) override;
 		void Clear() override;
 
+		void SetDepthFunc(DepthComp comp) override;
+
 		void DrawIndexed(const Reference<VertexArray>& vertexArray, uint32_t indexCount = 0) override;
 		void OpenGLRendererAPI::DrawIndexedInstanced(const Reference<VertexArray>& vertexArray, uint32_t indexCount, uint32_t instanceCount) override;
 	private:

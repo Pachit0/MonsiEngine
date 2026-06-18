@@ -32,6 +32,6 @@ else()
 
     target_compile_definitions(Sandbox PUBLIC SHADER_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/Shader/")
     target_compile_definitions(Sandbox PUBLIC TEXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/Textures/")
-    target_compile_definitions(Engine PUBLIC MODEL_PATH="${CMAKE_CURRENT_SOURCE_DIR}/../Sandbox/assets/Models/")
+    target_compile_definitions(Sandbox PUBLIC MODEL_PATH="${CMAKE_CURRENT_SOURCE_DIR}/../Sandbox/assets/Models/")
 
 endif()

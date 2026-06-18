@@ -25,6 +25,17 @@ namespace Monsi {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
+	void OpenGLRendererAPI::SetDepthFunc(DepthComp comp)
+	{
+		ENGINE_PROFILER_FUNCTION();
+
+		switch (comp)
+		{
+		case DepthComp::LESS:   glDepthFunc(GL_LESS); break;
+		case DepthComp::LEQUAL: glDepthFunc(GL_LEQUAL); break;
+		}
+	}
+
 	void OpenGLRendererAPI::DrawIndexed(const Reference<VertexArray>& vertexArray, uint32_t indexCount) {
 		uint32_t count = indexCount ? indexCount : vertexArray->GetIndexBuffer()->GetCount();
 		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);

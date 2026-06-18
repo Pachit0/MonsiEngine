@@ -69,7 +69,7 @@ namespace Monsi {
 		glDeleteTextures(1, &m_ID);
 	}
 
-	void OpenGLTexture2D::modifyData(void* data, uint32_t size)
+	void OpenGLTexture2D::modifyData(void* data, uint32_t size, uint32_t faceIndex)
 	{
 		ENGINE_PROFILER_FUNCTION();
 		uint32_t bytesPerPixel = m_DataFormat == GL_RGBA ? 4 : 3;

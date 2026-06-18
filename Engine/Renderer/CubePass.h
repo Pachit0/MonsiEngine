@@ -25,7 +25,7 @@ namespace Monsi {
 		void EndScene();
 
 		void DrawCube(const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation);
-		void DrawCube(const glm::vec3& position, const glm::vec3& size, Reference<Texture2D> texture, const glm::vec3& rotation);
+		void DrawCube(const glm::vec3& position, const glm::vec3& size, const Reference<Texture2D>& texture, const glm::vec3& rotation);
 
 	private:
 		void Flush();

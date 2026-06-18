@@ -13,7 +13,7 @@ namespace Monsi {
 
 		static void Begin(OrthographicCamera& camera);
 		static void End();
-		static void Sumbit(const Reference<VertexArray>& vertexArray, const Reference<Shader>& shader, const glm::mat4 transform = glm::mat4(1.0f));
+		static void Sumbit(const Reference<VertexArray>& vertexArray, const Reference<Shader>& shader, const glm::mat4& transform = glm::mat4(1.0f));
 
 		inline static RendererAPI::API GetRendererAPI() { return RendererAPI::GetAPI(); }
 	private:

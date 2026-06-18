@@ -28,7 +28,7 @@ namespace Monsi {
 
 	}
 
-	void Renderer::Sumbit(const Reference<VertexArray>& vertexArray, const Reference<Shader>& shader, const glm::mat4 transform) {
+	void Renderer::Sumbit(const Reference<VertexArray>& vertexArray, const Reference<Shader>& shader, const glm::mat4& transform) {
 		shader->Bind();
 		std::dynamic_pointer_cast<OpenGLShader>(shader)->setMat4("u_ViewProjection", m_Scene->ViewProjectionMatrix);
 		std::dynamic_pointer_cast<OpenGLShader>(shader)->setMat4("u_Transform", transform);

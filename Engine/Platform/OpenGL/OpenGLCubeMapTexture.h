@@ -5,26 +5,25 @@
 
 namespace Monsi {
 
-	class OpenGLTexture2D : public Texture2D {
+	class OpenGLCubeMapTexture : public CubeMapTexture {
 	public:
-		OpenGLTexture2D(const std::string& ResourcePath);
-		OpenGLTexture2D(uint32_t width, uint32_t height);
-		virtual ~OpenGLTexture2D();
+		OpenGLCubeMapTexture(const std::array<std::string, 6>& ResourcePaths);
+		virtual ~OpenGLCubeMapTexture();
 
 		uint32_t GetWidth() const override { return m_Width; }
 		uint32_t GetHeight() const override { return m_Height; }
 		uint32_t GetRendererID() const override { return m_ID; };
 
-		void modifyData(void* data, uint32_t size, uint32_t faceIndex = 0) override;
+		void modifyData(void* data, uint32_t size, uint32_t faceIndex) override;
 
 		void Bind(uint32_t slot) const override;
 
-		bool operator==(const Texture& other) const override 
-		{ 
-			return m_ID == ((OpenGLTexture2D&)other).m_ID;
+		bool operator==(const Texture& other) const override
+		{
+			return m_ID == ((OpenGLCubeMapTexture&)other).m_ID;
 		}
+
 	private:
-		std::string m_ResourcePath;
 		uint32_t m_Width, m_Height;
 		uint32_t m_ID;
 		GLenum	m_DataFormat, m_OpenGLFormat;

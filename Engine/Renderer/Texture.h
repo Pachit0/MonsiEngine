@@ -11,7 +11,7 @@ namespace Monsi {
 		virtual uint32_t GetHeight() const = 0;
 		virtual uint32_t GetRendererID() const = 0;
 
-		virtual void modifyData(void* data, uint32_t size) = 0;
+		virtual void modifyData(void* data, uint32_t size, uint32_t faceIndex = 0) = 0;
 
 		virtual void Bind(uint32_t slot = 0) const = 0;
 
@@ -22,5 +22,10 @@ namespace Monsi {
 	public:
 		static Reference<Texture2D> Create(const std::string& ResourcePath);
 		static Reference<Texture2D> Create(uint32_t width, uint32_t height);
+	};
+
+	class CubeMapTexture : public Texture {
+	public:
+		static Reference<CubeMapTexture> Create(const std::array<std::string, 6>& ResourcePaths);
 	};
 }

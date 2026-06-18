@@ -3,6 +3,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <array>
 #include <algorithm>
 #include <type_traits>
 #include <string>

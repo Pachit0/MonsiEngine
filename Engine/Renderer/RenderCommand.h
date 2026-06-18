@@ -17,6 +17,11 @@ namespace Monsi {
 		inline static void SetClearColor(const glm::vec4& color) {
 			s_RendererAPI->SetClearColor(color);
 		}
+
+		inline static void SetDepthFunc(DepthComp comp) {
+			s_RendererAPI->SetDepthFunc(comp);
+		}
+
 		inline static void Clear() {
 			s_RendererAPI->Clear();
 		}
@@ -28,7 +33,6 @@ namespace Monsi {
 		inline static void DrawIndexedInstanced(const Reference<VertexArray>& vertexArray, uint32_t indexCount, uint32_t instanceCount) {
 			s_RendererAPI->DrawIndexedInstanced(vertexArray, indexCount, instanceCount);
 		}
-
 	private:
 		static RendererAPI* s_RendererAPI;
 	};

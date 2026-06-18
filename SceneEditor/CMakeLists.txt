@@ -33,13 +33,13 @@ if(PRODUCTION_BUILD)
 
     target_compile_definitions(Editor PUBLIC SHADER_PATH="./assets/Shader")
     target_compile_definitions(Editor PUBLIC TEXTURE_PATH="./assets/Textures")
-    target_compile_definitions(Sandbox PUBLIC MODEL_PATH="./assets/Models") 
+    target_compile_definitions(Editor PUBLIC MODEL_PATH="./assets/Models") 
     target_compile_definitions(Editor PUBLIC PRODUCTION_BUILD=1) 
 
 else()
 
     target_compile_definitions(Editor PUBLIC SHADER_PATH="${CMAKE_CURRENT_SOURCE_DIR}/../Sandbox/assets/Shader/")
     target_compile_definitions(Editor PUBLIC TEXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/../Sandbox/assets/Textures/")
-    target_compile_definitions(Engine PUBLIC MODEL_PATH="${CMAKE_CURRENT_SOURCE_DIR}/../Sandbox/assets/Models/")
+    target_compile_definitions(Editor PUBLIC MODEL_PATH="${CMAKE_CURRENT_SOURCE_DIR}/../Sandbox/assets/Models/")
 
 endif()
