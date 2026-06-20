@@ -27,7 +27,7 @@ void ExampleLayer::OnLayerAttach()
 	};
 
 	m_SkyBoxTest = Monsi::CubeMapTexture::Create(skyboxTextures);
-
+	
 	currentFrameLighting.MainLight.Direction = glm::vec3(-0.2f, -1.0f, -0.3f);
 	currentFrameLighting.MainLight.Color = glm::vec3(1.0f, 0.95f, 0.9f);
 	currentFrameLighting.MainLight.Intensity = 1.0f;
@@ -42,7 +42,11 @@ void ExampleLayer::OnLayerUpdate(Monsi::TimeStep timestep)
 
 	m_CameraControl.OnLayerUpdate(timestep);
 
-	Monsi::Renderer3D::Begin3D(m_CameraControl, currentFrameLighting);
+	Monsi::Renderer3D::SetLighting(currentFrameLighting);
+
+	Monsi::Renderer3D::AddPointLight({ 0.5f, 0.5f, 0.5f }, { 1.0f,1.0f,1.0f }, 1.0f, 100.0f);
+
+	Monsi::Renderer3D::Begin3D(m_CameraControl);
 
 	static float rotationStep = 0;
 	rotationStep += timestep * 50.0f;

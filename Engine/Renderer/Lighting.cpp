@@ -5,16 +5,15 @@ namespace Monsi {
 
 	void LightingBuffer::SetLighting(const SceneLighting& lighting)
 	{
-
 		m_Lighting = lighting;
 	}
 
+	void LightingBuffer::AddPointLighting(const glm::vec3& position, const glm::vec3& color, float intensity, float radius)
+	{
+		m_Lighting.PointLights.emplace_back(PointLight{position, color, intensity, radius});
+	}
+
 // 	void LightingBuffer::SetLighting(const DirectionalLight& lighting)
-// 	{
-// 
-// 	}
-// 
-// 	void LightingBuffer::SetLighting(const PointLight& lighting)
 // 	{
 // 
 // 	}
@@ -31,6 +30,7 @@ namespace Monsi {
 		uint32_t count = std::min((uint32_t)m_Lighting.PointLights.size(), MaxPointLights);
 		shader->setInt("u_PointLightCount", (int)count);
 
+		//probably the worst way to go around the problem :)
 		for (uint32_t i = 0; i < count; i++)
 		{
 			const auto& light = m_Lighting.PointLights[i];

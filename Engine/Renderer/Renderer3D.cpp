@@ -27,6 +27,7 @@ namespace Monsi {
 		s_Data.Lighting = CreateReference<LightingBuffer>();
 		s_Data.SkyBox = CreateReference<SkyBoxPass>();
 		s_Data.SkyBox->Init();
+		s_Data.Lighting->SetLighting(s_Data.SceneLight);
 	}
 
 	void Renderer3D::Shutdown()
@@ -41,9 +42,8 @@ namespace Monsi {
 		s_Data.SkyBox.reset();
 	}
 
-	void Renderer3D::Begin3D(const PerspectiveControl& camera, const SceneLighting& lighting) //begin3D shouldn't have lighting passed here | I should consider adding a default
-	{																						  //lighting so that it's placed here instead!!!!!!!!!!
-		s_Data.Lighting->SetLighting(lighting);
+	void Renderer3D::Begin3D(const PerspectiveControl& camera)
+	{
 		s_Data.Cube->BeginScene(camera.GetCamera().GetViewProjectionMatrix(), camera.GetCamera().GetPosition(), s_Data.Lighting);
 		s_Data.Model->BeginScene(camera.GetCamera().GetViewProjectionMatrix(), camera.GetCamera().GetPosition(), s_Data.Lighting);
 	}
@@ -84,4 +84,10 @@ namespace Monsi {
 		s_Data.SceneLight = lighting;
 		s_Data.Lighting->SetLighting(lighting);
 	}
+
+	void Renderer3D::AddPointLight(const glm::vec3& position, const glm::vec3& color, float intensity, float radius)
+	{
+		s_Data.Lighting->AddPointLighting(position, color, intensity, radius);
+	}
+
 }

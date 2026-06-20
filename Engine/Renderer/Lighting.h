@@ -9,8 +9,9 @@ namespace Monsi {
 
 	struct DirectionalLight
 	{
-		glm::vec3 Direction;
-		glm::vec3 Color;
+		//default values for the default lighting source of the 3D scene
+		glm::vec3 Direction = glm::vec3(-0.2f, -1.0f, -0.3f);
+		glm::vec3 Color = glm::vec3(1.0f, 0.95f, 0.9f);
 		float Intensity = 1.0f;
 	};
 
@@ -32,13 +33,13 @@ namespace Monsi {
 	class LightingBuffer
 	{
 	public:
-		static constexpr uint32_t MaxPointLights = 32;
 
 		void SetLighting(const SceneLighting& lighting);
 // 		void SetLighting(const DirectionalLight& lighting);
-// 		void SetLighting(const PointLight& lighting);
+		void AddPointLighting(const glm::vec3& position, const glm::vec3& color, float intensity, float radius);
 		void Bind(const Reference<Shader>& shader) const;
 
+		static constexpr uint32_t MaxPointLights = 32;
 	private:
 		SceneLighting m_Lighting;
 		std::vector<PointLight> m_VisiblePointLights;

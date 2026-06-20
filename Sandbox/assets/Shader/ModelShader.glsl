@@ -42,6 +42,7 @@ struct PointLight {
     float Radius;
 };
 
+
 uniform DirectionalLight u_MainLight;
 uniform int u_PointLightCount;
 uniform PointLight u_PointLights[32];
