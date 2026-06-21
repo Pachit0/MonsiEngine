@@ -20,6 +20,7 @@
 
 // Model
 #include "ModelLoader/ModelLoader.h"
+#include "ModelLoader/MeshBuilder.h"
 
 //	Renderer
 #include "Renderer/Renderer.h"

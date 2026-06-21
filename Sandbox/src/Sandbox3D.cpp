@@ -3,9 +3,7 @@
 #include <imgui_internal.h>
 
 ExampleLayer::ExampleLayer() : Layer("Sandbox3D"), m_CameraControl(1280.0f / 720.0f), m_ViewportSize{ 0.0f,0.0f }, m_ViewportFocused(false), m_ViewportHovered(false)
-{
-
-}
+{}
 
 void ExampleLayer::OnLayerAttach()
 {
@@ -31,10 +29,34 @@ void ExampleLayer::OnLayerAttach()
 	currentFrameLighting.MainLight.Direction = glm::vec3(-0.2f, -1.0f, -0.3f);
 	currentFrameLighting.MainLight.Color = glm::vec3(1.0f, 0.95f, 0.9f);
 	currentFrameLighting.MainLight.Intensity = 1.0f;
+
+	auto shpereMaterial = Monsi::CreateReference<Monsi::Material>();
+	shpereMaterial->SpecularColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
+	m_SphereTest = Monsi::MeshBuilder::CreateSphere(1.0f, 32, 32, shpereMaterial);
 }
 
 void ExampleLayer::OnLayerUpdate(Monsi::TimeStep timestep)
 {
+	m_FrameTimeAccumulator += timestep;
+	m_FrameCount++;
+
+	if (m_FrameTimeAccumulator >= m_UpdateInterval)
+	{
+		m_FPS = (float)m_FrameCount / m_FrameTimeAccumulator;
+		m_FrameCount = 0;
+		m_FrameTimeAccumulator = 0.0f;
+	}
+
+	if (Monsi::FrameBufferSpec spec = m_FrameBuffer->GetSpecification();
+		m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f &&
+		(spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
+	{
+		m_FrameBuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		m_CameraControl.OnWindowResize(m_ViewportSize.x, m_ViewportSize.y);
+		m_CameraControl.GetCamera();
+	}
+
 	m_FrameBuffer->Bind();
 
 	Monsi::RenderCommand::SetClearColor({ 0.5f, 0.0f, 0.05f, 1.0f });
@@ -44,7 +66,7 @@ void ExampleLayer::OnLayerUpdate(Monsi::TimeStep timestep)
 
 	Monsi::Renderer3D::SetLighting(currentFrameLighting);
 
-	Monsi::Renderer3D::AddPointLight({ 0.5f, 0.5f, 0.5f }, { 1.0f,1.0f,1.0f }, 1.0f, 100.0f);
+	//Monsi::Renderer3D::AddPointLight({ 0.5f, 0.5f, 0.5f }, { 1.0f,1.0f,1.0f }, 1.0f, 100.0f);
 
 	Monsi::Renderer3D::Begin3D(m_CameraControl);
 
@@ -67,7 +89,8 @@ void ExampleLayer::OnLayerUpdate(Monsi::TimeStep timestep)
 			}
 		}
 	}
-	Monsi::Renderer3D::DrawModel(m_ModelTwo, {1.5f,0.0f,-5.0f}, {0.5f, 0.5f, 0.5f}, {1.0f,1.0f,1.0f,1.0f}, rotation);
+	Monsi::Renderer3D::DrawModel(m_ModelTwo, { 1.5f,0.0f,-5.0f }, { 0.5f, 0.5f, 0.5f }, { 1.0f,1.0f,1.0f,1.0f });
+	Monsi::Renderer3D::DrawMesh(m_SphereTest.get(), { 0.0f, 3.0f, -10.0f }, { 1.0f, 1.0f, 1.0f }, { 1.0f,1.0f,1.0f,1.0f }, { 0.0f,0.0f,0.0f });
 	Monsi::Renderer3D::DrawSkyBox(m_CameraControl.GetCamera().GetViewMatrix(), m_CameraControl.GetCamera().GetProjectionMatrix(), m_SkyBoxTest);
 
 	Monsi::Renderer3D::End3D();
@@ -128,8 +151,13 @@ void ExampleLayer::OnImGuiDraw() {
 	auto batchStats = Monsi::Renderer2D::GetBatchStatistics();
 
 	ImGui::Text("Renderer3D stats:");
-	ImGui::Text("TODO");
 
+	ImGui::Text("FPS: %.1f", m_FPS);
+	ImGui::Text("Frame Time: %.3f ms", (1.0f / m_FPS) * 1000.0f);
+
+	ImGui::Separator();
+
+	ImGui::Text("Scene light parameters");
 	ImGui::SliderFloat("Intensity", &currentFrameLighting.MainLight.Intensity, 0.0f, 1.0f);
 	ImGui::SliderFloat3("Color", (float*)&currentFrameLighting.MainLight.Color, 0.0f, 1.0f);
 	ImGui::SliderFloat3("Direction", (float*)&currentFrameLighting.MainLight.Direction, -1.0f, 1.0f);
@@ -159,7 +187,7 @@ void ExampleLayer::OnImGuiDraw() {
 	ImGui::Begin("Scene");
 
 	ImGui::Text("Monsi example scene");
-	ImGui::Text("Press C when focused on the viewport window to move the camera with WASD");
+	ImGui::Text("Press C when focused on the viewport \n window to move the camera with WASD");
 
 	ImGui::End();
 }

@@ -3,20 +3,43 @@
 
 namespace Monsi {
 
-	Material::Material(const Reference<Texture>& diffuse, const glm::vec3& specular, float shininess)
-		: m_DiffuseTexture(diffuse), m_SpecularColor(specular), m_Shininess(shininess)
+	void Material::Bind(const Reference<Shader>& shader)
 	{
-	}
+		shader->setVec4("u_Material.DiffuseColor", DiffuseColor);
+		shader->setVec3("u_Material.SpecularColor", SpecularColor);
+		shader->setFloat("u_Material.Shininess", Shininess);
 
-	void Material::Bind(const Reference<Shader> shader)
-	{
-		shader->setVec3("u_Material.SpecularColor", m_SpecularColor);
-		shader->setFloat("u_Material.Shininess", m_Shininess);
-
-		if (m_DiffuseTexture)
+		if (DiffuseMap)
 		{
-			m_DiffuseTexture->Bind(0);
+			DiffuseMap->Bind(0);
 			shader->setInt("u_Material.DiffuseMap", 0);
+			shader->setFloat("u_Material.HasDiffuseMap", 1.0f);
+		}
+		else
+		{
+			shader->setFloat("u_Material.HasDiffuseMap", 0.0f);
+		}
+
+		if (SpecularMap)
+		{
+			SpecularMap->Bind(1);
+			shader->setInt("u_Material.SpecularMap", 1);
+			shader->setFloat("u_Material.HasSpecularMap", 1.0f);
+		}
+		else
+		{
+			shader->setFloat("u_Material.HasSpecularMap", 0.0f);
+		}
+
+		if (NormalMap)
+		{
+			NormalMap->Bind(2);
+			shader->setInt("u_Material.NormalMap", 2);
+			shader->setFloat("u_Material.HasNormalMap", 1.0f);
+		}
+		else
+		{
+			shader->setFloat("u_Material.HasNormalMap", 0.0f);
 		}
 	}
 

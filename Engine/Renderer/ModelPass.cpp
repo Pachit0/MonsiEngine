@@ -2,6 +2,7 @@
 #include "ModelPass.h"
 #include "RenderCommand.h"
 #include "Lighting.h"
+#include "Material.h"
 #include <glm/ext/matrix_transform.hpp>
 
 namespace Monsi {
@@ -21,24 +22,28 @@ namespace Monsi {
 			{ ShaderDataType::Float4, "a_InstanceTransform_row3", true },
 			{ ShaderDataType::Float4, "a_InstanceColor",         true }
 			});
+
+		m_WhiteTexture = Texture2D::Create(1, 1);
+		uint32_t whitePixel = 0xffffffff;
+		m_WhiteTexture->modifyData(&whitePixel, sizeof(uint32_t));
+
+		m_Shader->Bind();
+		m_Shader->setInt("texture_diffuse1", 0);
 	}
 
 	void ModelPass::Shutdown()
 	{
 		delete[] m_InstanceBuffer;
 		m_InstanceBuffer = nullptr;
-		m_RegisteredModels.clear();
+		m_RegisteredMeshes.clear();
 	}
 
-	void ModelPass::RegisterModel(const Reference<Model>& model)
+	void ModelPass::RegisterMesh(const Mesh* mesh)
 	{
-		for (size_t i = 0; i < model->GetMeshes().size(); i++)
-		{
-			auto& vao = model->GetMeshes()[i].GetVertexArray();
-			vao->Bind();
-			vao->AddVertexBuffer(m_InstanceVBO);
-		}
-		m_RegisteredModels.insert(model.get());
+		auto& vao = mesh->GetVertexArray();
+		vao->Bind();
+		vao->AddVertexBuffer(m_InstanceVBO);
+		m_RegisteredMeshes.insert(mesh);
 	}
 
 	void ModelPass::BeginScene(const glm::mat4& viewProj, const glm::vec3& viewPos, const Reference<LightingBuffer>& lighting)
@@ -52,7 +57,7 @@ namespace Monsi {
 		{
 			lighting->Bind(m_Shader);
 		}
-		
+
 		m_MeshBatches.clear();
 		m_BufferCursor = m_InstanceBuffer;
 	}
@@ -69,9 +74,18 @@ namespace Monsi {
 
 	void ModelPass::DrawModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation)
 	{
-		if (m_RegisteredModels.find(model.get()) == m_RegisteredModels.end())
+		const auto& meshes = model->GetMeshes();
+		for (size_t i = 0; i < meshes.size(); i++)
 		{
-			RegisterModel(model);
+			DrawMesh(&meshes[i], position, size, color, rotation);
+		}
+	}
+
+	void ModelPass::DrawMesh(const Mesh* meshPtr, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation)
+	{
+		if (m_RegisteredMeshes.find(meshPtr) == m_RegisteredMeshes.end())
+		{
+			RegisterMesh(meshPtr);
 		}
 
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position);
@@ -80,19 +94,15 @@ namespace Monsi {
 		if (rotation.z != 0.0f) transform = glm::rotate(transform, glm::radians(rotation.z), glm::vec3(0, 0, 1));
 		transform = glm::scale(transform, size);
 
-		const auto& meshes = model->GetMeshes();
-		for (size_t i = 0; i < meshes.size(); i++)
+		const auto& material = meshPtr->GetMaterial();
+		auto& batch = m_MeshBatches[meshPtr];
+
+		if (!batch.MeshPtr)
 		{
-			const Mesh* meshPtr = &meshes[i];
-			auto& batch = m_MeshBatches[meshPtr];
-
-			if (!batch.MeshPtr)
-			{
-				batch.MeshPtr = meshPtr;
-			}
-
-			batch.InstanceData.push_back({ transform, color });
+			batch.MeshPtr = meshPtr;
 		}
+
+		batch.InstanceData.push_back({ transform, color * material->DiffuseColor });
 	}
 
 	void ModelPass::Flush()
@@ -110,15 +120,15 @@ namespace Monsi {
 				continue;
 
 			auto& mesh = *batch.MeshPtr;
+			const auto& material = mesh.GetMaterial();
 
-			const auto& textures = mesh.GetTextures();
-			for (size_t i = 0; i < textures.size(); i++)
+			if (material && material->DiffuseMap)
 			{
-				if (textures[i].type == "texture_diffuse")
-				{
-					textures[i].texture->Bind(0);
-					break;
-				}
+				material->DiffuseMap->Bind(0);
+			}
+			else
+			{
+				m_WhiteTexture->Bind(0);
 			}
 
 			m_InstanceVBO->SetData(batch.InstanceData.data(), count * sizeof(ModelInstanceData));

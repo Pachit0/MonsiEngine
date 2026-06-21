@@ -1,12 +1,16 @@
 #pragma once
 
 #include <vector>
+#include <unordered_map>
+#include <string>
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
 #include "Mesh.h"
+#include "Texture.h"
+#include "Material.h"
 
 namespace Monsi {
 
@@ -17,15 +21,16 @@ namespace Monsi {
 		void LoadModel(const std::string& filepath);
 
 		const std::vector<Mesh>& GetMeshes() const { return m_Meshes; }
+
 	private:
 		void processNode(aiNode* node, const aiScene* scene);
 		Mesh processMesh(aiMesh* mesh, const aiScene* scene);
 
-		std::vector<Texture_t> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName);
+		Reference<Texture2D> LoadMaterialTexture(aiMaterial* mat, aiTextureType type);
 
 	private:
 		std::vector<Mesh> m_Meshes;
-		std::unordered_map<std::string, Texture_t> m_TextureCache;
+		std::unordered_map<std::string, Reference<Texture2D>> m_TextureCache;
 		std::string m_Directory;
 	};
 

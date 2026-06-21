@@ -6,6 +6,7 @@
 #include "Shader.h"
 #include "Texture.h"
 #include <unordered_set>
+#include <unordered_map>
 
 namespace Monsi {
 
@@ -20,9 +21,11 @@ namespace Monsi {
 		void DrawModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color);
 		void DrawModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation);
 
+		void DrawMesh(const Mesh* meshPtr, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation);
+
 	private:
 		void Flush();
-		void RegisterModel(const Reference<Model>& model);
+		void RegisterMesh(const Mesh* mesh);
 
 	private:
 		struct ModelInstanceData
@@ -43,13 +46,14 @@ namespace Monsi {
 		static constexpr uint32_t MaxInstances = 10000;
 
 		std::unordered_map<const Mesh*, MeshBatch> m_MeshBatches;
-		std::unordered_set<const Model*> m_RegisteredModels;
+		std::unordered_set<const Mesh*> m_RegisteredMeshes;
 
 		ModelInstanceData* m_InstanceBuffer = nullptr;
 		ModelInstanceData* m_BufferCursor = nullptr;
 
 		Reference<VertexBuffer> m_InstanceVBO;
 		Reference<Shader> m_Shader;
+		Reference<Texture2D> m_WhiteTexture;
 
 		glm::mat4 m_ViewProjection;
 	};

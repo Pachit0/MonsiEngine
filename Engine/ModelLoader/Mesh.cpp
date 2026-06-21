@@ -5,8 +5,8 @@
 
 namespace Monsi {
 
-	Mesh::Mesh(const std::vector<Vertex_t>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture_t>& textures)
-		: p_vertices(vertices), p_indices(indices), p_textures(textures)
+	Mesh::Mesh(const std::vector<Vertex_t>& vertices, const std::vector<unsigned int>& indices, const Reference<Material>& material)
+		: m_Vertices(vertices), m_Indices(indices), m_Material(material)
 	{
 		setupMesh();
 	}
@@ -15,7 +15,7 @@ namespace Monsi {
 	{
 		m_VertexArray = VertexArray::Create();
 
-		m_VertexBuffer = VertexBuffer::Create((float*)p_vertices.data(), p_vertices.size() * sizeof(Vertex_t));
+		m_VertexBuffer = VertexBuffer::Create((float*)m_Vertices.data(), m_Vertices.size() * sizeof(Vertex_t));
 
 		m_VertexBuffer->SetLayout({
 			{ ShaderDataType::Float3, "a_Position" },
@@ -25,7 +25,7 @@ namespace Monsi {
 
 		m_VertexArray->AddVertexBuffer(m_VertexBuffer);
 
-		m_IndexBuffer = IndexBuffer::Create(p_indices.data(), p_indices.size());
+		m_IndexBuffer = IndexBuffer::Create(m_Indices.data(), m_Indices.size());
 
 		m_VertexArray->SetIndexBuffer(m_IndexBuffer);
 	}

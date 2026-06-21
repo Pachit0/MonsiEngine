@@ -30,20 +30,27 @@ namespace Monsi {
 		std::vector<PointLight> PointLights;
 	};
 
+
+	struct PointLightUniformStrings {
+		std::string Position;
+		std::string Color;
+		std::string Intensity;
+		std::string Radius;
+	};
+
 	class LightingBuffer
 	{
 	public:
-
+		LightingBuffer();
+		void Clear();
 		void SetLighting(const SceneLighting& lighting);
-// 		void SetLighting(const DirectionalLight& lighting);
 		void AddPointLighting(const glm::vec3& position, const glm::vec3& color, float intensity, float radius);
 		void Bind(const Reference<Shader>& shader) const;
 
 		static constexpr uint32_t MaxPointLights = 32;
 	private:
 		SceneLighting m_Lighting;
-		std::vector<PointLight> m_VisiblePointLights;
-		DirectionalLight m_DirLight;
+		std::vector<PointLightUniformStrings> m_UniformNameCache;
 	};
 
 }

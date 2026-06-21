@@ -42,12 +42,14 @@ struct PointLight {
     float Radius;
 };
 
-
 uniform DirectionalLight u_MainLight;
 uniform int u_PointLightCount;
 uniform PointLight u_PointLights[32];
 uniform vec3 u_ViewPos;
 uniform sampler2D texture_diffuse1;
+
+float u_Shininess = 32.0;
+float u_SpecularStrength = 0.5;
 
 in vec2 TexCoords;
 in vec4 InstanceColor;
@@ -61,18 +63,31 @@ vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir
 
     vec3 lightDir = normalize(-light.Direction);
     float diff = max(dot(normal, lightDir), 0.0);
-    return light.Color * light.Intensity * diff;
+    vec3 diffuse = light.Color * light.Intensity * diff;
+
+    vec3 halfwayDir = normalize(lightDir + viewDir);
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), u_Shininess);
+    vec3 specular = light.Color * light.Intensity * (spec * u_SpecularStrength);
+
+    return diffuse + specular;
 }
 
-vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 fragPos) {
+vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
     vec3 ToLight = light.Position - fragPos;
-    if (length(ToLight) == 0.0) return vec3(0.0);
+    if (length(ToLight) < 0.0001) return vec3(0.0);
 
     vec3 lightDir = normalize(ToLight);
     float diff = max(dot(normal, lightDir), 0.0);
+    vec3 diffuse = light.Color * light.Intensity * diff;
+
+    vec3 halfwayDir = normalize(lightDir + viewDir);
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), u_Shininess);
+    vec3 specular = light.Color * light.Intensity * (spec * u_SpecularStrength);
+
     float distance = length(ToLight);
     float attenuation = clamp(1.0 - (distance / light.Radius), 0.0, 1.0);
-    return light.Color * light.Intensity * diff * attenuation;
+
+    return (diffuse + specular) * attenuation;
 }
 
 void main()
@@ -84,7 +99,7 @@ void main()
     lightResult += CalculateDirectionalLight(u_MainLight, norm, viewDir);
     
     for(int i = 0; i < u_PointLightCount; i++) {
-        lightResult += CalculatePointLight(u_PointLights[i], norm, v_FragPos);
+        lightResult += CalculatePointLight(u_PointLights[i], norm, v_FragPos, viewDir);
     }
 
     vec4 texColor = texture(texture_diffuse1, TexCoords) * InstanceColor;

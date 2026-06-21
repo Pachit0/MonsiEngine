@@ -32,7 +32,7 @@ namespace Monsi {
 		RecalculateViewMatrix();
 	}
 
-    void PerspectiveCamera::RecalculateViewMatrix()
+	void PerspectiveCamera::RecalculateViewMatrix()
     {
         ENGINE_PROFILER_FUNCTION();
 

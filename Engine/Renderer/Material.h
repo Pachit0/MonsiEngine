@@ -8,18 +8,17 @@ namespace Monsi {
 
 	class Material {
 	public:
+		Material() = default;
 
-		Material(const Reference<Texture>& diffuse, const glm::vec3& specular, float shininess);
-		void Bind(const Reference<Shader> shader);
+		void Bind(const Reference<Shader>& shader);
 
-		void SetDiffuseTexture(const Reference<Texture>& texture) { m_DiffuseTexture = texture; }
-		void SetSpecularColor(const glm::vec3& color) { m_SpecularColor = color; }
-		void SetShininess(float shininess) { m_Shininess = shininess; }
+		glm::vec4 DiffuseColor = glm::vec4(1.0f);
+		glm::vec3 SpecularColor = glm::vec3(1.0f);
+		float Shininess = 32.0f;
 
-	private:
-		Reference<Texture> m_DiffuseTexture;
-		glm::vec3 m_SpecularColor;
-		float m_Shininess;
+		Reference<Texture2D> DiffuseMap;
+		Reference<Texture2D> SpecularMap;
+		Reference<Texture2D> NormalMap;
 	};
 
 }
