@@ -24,7 +24,7 @@ namespace Monsi {
         m_Window = Scope<Window>(Window::Create(spec.Name));
         m_Window->SetEventCallbackFn(BIND_EVENT_FN(OnEvent));
 
-        Renderer::Init();
+        Renderer::Init(spec.type);
 
         m_ImGuiLayer = new ImGuiLayer();
         PushOverlay(m_ImGuiLayer);

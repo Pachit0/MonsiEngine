@@ -4,6 +4,7 @@
 #include <imgui_internal.h>
 #include <debug/instrumentor.h>
 #include <Entity.h>
+#include <glfw/glfw3.h>
 
 namespace Monsi {
 	

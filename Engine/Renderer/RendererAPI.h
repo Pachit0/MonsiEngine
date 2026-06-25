@@ -19,8 +19,6 @@ namespace Monsi {
 
 		};
 
-
-
 		virtual ~RendererAPI() = default;
 
 		virtual void Init() = 0;

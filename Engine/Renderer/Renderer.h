@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Renderer/RenderCommand.h"
+#include "Renderer/RenderFactory.h"
 #include "OrthographicCamera.h"
 #include "Shader.h"
 
@@ -8,7 +9,7 @@ namespace Monsi {
 
 	class Renderer {
 	public:
-		static void Init();
+		static void Init(RenderTypeEnum type);
 		static void onWindowResize(uint32_t width, uint32_t height);
 
 		static void Begin(OrthographicCamera& camera);

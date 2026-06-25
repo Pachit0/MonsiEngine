@@ -8,11 +8,11 @@ namespace Monsi {
 
 	Renderer::SceneData* Renderer::m_Scene = new Renderer::SceneData;
 
-	void Renderer::Init() {
+	void Renderer::Init(RenderTypeEnum type) {
 		ENGINE_PROFILER_FUNCTION();
 		RenderCommand::Init();
-		//Renderer2D::Init();
-		Renderer3D::Init();
+		RenderFactory::InitRenderType(type);
+
 	}
 
 	void Renderer::onWindowResize(uint32_t width, uint32_t height)

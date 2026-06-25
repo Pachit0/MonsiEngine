@@ -8,7 +8,7 @@ namespace Monsi {
 	class AStarSearch : public Application {
 	public:
 		AStarSearch()
-			: Application({ "AStarSearch2D" }) {
+			: Application({ "AStarSearch2D", Monsi::RenderTypeEnum::Renderer2D }) {
 			PushLayer(new AStarSearch2D());
 		}
 

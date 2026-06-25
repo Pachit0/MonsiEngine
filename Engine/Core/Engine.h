@@ -10,6 +10,7 @@
 #include "Platform/OpenGL/OpenGLBuffer.h"
 #include "Renderer/VertexArray.h"
 #include "Core/TimeStep.h"
+#include "Renderer/RenderFactory.h"
 
 #include "Window.h"
 
@@ -17,6 +18,7 @@ namespace Monsi {
 
     struct AppSpecification {
         std::string Name = "Monsi Application";
+        RenderTypeEnum type;
     };
 
     class ENGINE_API Application {

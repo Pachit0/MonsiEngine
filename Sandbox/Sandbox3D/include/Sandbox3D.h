@@ -2,10 +2,10 @@
 
 #include <Monsi.h>
 
-class ExampleLayer : public Monsi::Layer {
+class Sandbox3D : public Monsi::Layer {
 public:
-	ExampleLayer();
-	virtual ~ExampleLayer() = default;
+	Sandbox3D();
+	virtual ~Sandbox3D() = default;
 
 	void OnLayerAttach() override;
 	void OnLayerUpdate(Monsi::TimeStep timestep) override;

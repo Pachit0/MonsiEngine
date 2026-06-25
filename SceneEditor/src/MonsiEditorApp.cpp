@@ -8,7 +8,7 @@ namespace Monsi {
 	class MonsiEditor : public Application {
 	public:
 		MonsiEditor() 
-			: Application({ "Monsi Editor" }) {
+			: Application({ "Monsi Editor", RenderTypeEnum::Renderer2D }) {
 			PushLayer(new EditorLayer());
 		}
 

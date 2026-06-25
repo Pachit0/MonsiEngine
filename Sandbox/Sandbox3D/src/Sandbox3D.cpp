@@ -2,10 +2,10 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
-ExampleLayer::ExampleLayer() : Layer("Sandbox3D"), m_CameraControl(1280.0f / 720.0f), m_ViewportSize{ 0.0f,0.0f }, m_ViewportFocused(false), m_ViewportHovered(false)
+Sandbox3D::Sandbox3D() : Layer("Sandbox3D"), m_CameraControl(1280.0f / 720.0f), m_ViewportSize{ 0.0f,0.0f }, m_ViewportFocused(false), m_ViewportHovered(false)
 {}
 
-void ExampleLayer::OnLayerAttach()
+void Sandbox3D::OnLayerAttach()
 {
 	Monsi::FrameBufferSpec spec;
 	spec.Width = 1280;
@@ -36,7 +36,7 @@ void ExampleLayer::OnLayerAttach()
 	m_SphereTest = Monsi::MeshBuilder::CreateSphere(1.0f, 32, 32, shpereMaterial);
 }
 
-void ExampleLayer::OnLayerUpdate(Monsi::TimeStep timestep)
+void Sandbox3D::OnLayerUpdate(Monsi::TimeStep timestep)
 {
 	m_FrameTimeAccumulator += timestep;
 	m_FrameCount++;
@@ -54,7 +54,6 @@ void ExampleLayer::OnLayerUpdate(Monsi::TimeStep timestep)
 	{
 		m_FrameBuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		m_CameraControl.OnWindowResize(m_ViewportSize.x, m_ViewportSize.y);
-		m_CameraControl.GetCamera();
 	}
 
 	m_FrameBuffer->Bind();
@@ -98,12 +97,12 @@ void ExampleLayer::OnLayerUpdate(Monsi::TimeStep timestep)
 	m_FrameBuffer->Unbind();
 }
 
-void ExampleLayer::OnLayerDetach()
+void Sandbox3D::OnLayerDetach()
 {
 
 }
 
-void ExampleLayer::OnImGuiDraw() {
+void Sandbox3D::OnImGuiDraw() {
 
 	ImGui::BeginMainMenuBar();
 	if (ImGui::BeginMenu("File"))
@@ -192,7 +191,7 @@ void ExampleLayer::OnImGuiDraw() {
 	ImGui::End();
 }
 
-void ExampleLayer::OnLayerEvent(Monsi::Event& event)
+void Sandbox3D::OnLayerEvent(Monsi::Event& event)
 {
 	m_CameraControl.OnLayerEvent(event);
 }

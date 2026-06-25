@@ -6,7 +6,7 @@
 class ChessApp : public Monsi::Application {
 public:
 	ChessApp()
-		: Application({ "Chess Game" }) {
+		: Application({ "Chess Game", Monsi::RenderTypeEnum::Renderer2D }) {
 		PushLayer(new Chess());
 	}
 
