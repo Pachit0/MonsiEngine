@@ -13,6 +13,7 @@ namespace Monsi {
 		{
 			ENGINE_PROFILER_SCOPE("OpenGLTexture2D::OpenGLTexture2D(Resource) -> stbi_load");
 			data = stbi_load(ResourcePath.c_str(), &width, &height, &channels, 0);
+			ENGINE_LOG_INFO("Channels {0}", channels);
 		}
 		ENGINE_ASSERT(data, "Failed to load image!");
 		m_Width = width;
@@ -26,6 +27,10 @@ namespace Monsi {
 		else if (channels == 3) {
 			OpenGLFormat = GL_RGB8;
 			dataFormat = GL_RGB;
+		}
+		else if (channels == 1) {
+			OpenGLFormat = GL_R8;
+			dataFormat = GL_RED;
 		}
 
 		m_DataFormat = dataFormat;

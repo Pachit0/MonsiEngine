@@ -19,14 +19,20 @@ private:
 	bool m_ViewportHovered;
 
 	Monsi::Reference<Monsi::FrameBuffer> m_FrameBuffer;
-	Monsi::Reference<Monsi::Model> m_Model;
-	Monsi::Reference<Monsi::Model> m_ModelTwo;
+	Monsi::Reference<Monsi::Model> m_Backpack;
+
+	Monsi::Reference<Monsi::Model> m_Sponza;
+	
 	Monsi::SceneLighting currentFrameLighting;
 
 	Monsi::PerspectiveControl m_CameraControl;
 	Monsi::Reference<Monsi::Texture2D> m_MonsiTest;
 	Monsi::Reference<Monsi::CubeMapTexture> m_SkyBoxTest;
 	Monsi::Scope<Monsi::Mesh> m_SphereTest;
+	glm::vec3 m_SpherePosition;
+
+	float m_DeltaTime;
+	float m_lastFrame;
 
 private: //fps counter
 	float m_FPS = 0.0f;

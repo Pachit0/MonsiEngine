@@ -3,6 +3,7 @@
 #include <imgui_internal.h>
 
 Sandbox3D::Sandbox3D() : Layer("Sandbox3D"), m_CameraControl(1280.0f / 720.0f), m_ViewportSize{ 0.0f,0.0f }, m_ViewportFocused(false), m_ViewportHovered(false)
+	, m_SpherePosition({ -5.0f, 3.0f, 5.0f })
 {}
 
 void Sandbox3D::OnLayerAttach()
@@ -12,8 +13,10 @@ void Sandbox3D::OnLayerAttach()
 	spec.Height = 720;
 	m_FrameBuffer = Monsi::FrameBuffer::Create(spec);
 	m_MonsiTest = Monsi::Texture2D::Create( TEXTURE_PATH "background.png");
-	m_Model = Monsi::CreateReference<Monsi::Model>( MODEL_PATH "backpack/backpack.obj");
-	m_ModelTwo = Monsi::CreateReference<Monsi::Model>( MODEL_PATH "wall_cabinet/wall_cabinet.obj");
+
+	m_Backpack = Monsi::CreateReference<Monsi::Model>( MODEL_PATH "backpack/backpack.obj");
+
+	m_Sponza = Monsi::CreateReference<Monsi::Model>( MODEL_PATH "crytek_sponza/sponza.obj");
 
 	std::array<std::string, 6> skyboxTextures = {
 		TEXTURE_PATH "right.png",
@@ -38,6 +41,7 @@ void Sandbox3D::OnLayerAttach()
 
 void Sandbox3D::OnLayerUpdate(Monsi::TimeStep timestep)
 {
+
 	m_FrameTimeAccumulator += timestep;
 	m_FrameCount++;
 
@@ -65,7 +69,7 @@ void Sandbox3D::OnLayerUpdate(Monsi::TimeStep timestep)
 
 	Monsi::Renderer3D::SetLighting(currentFrameLighting);
 
-	//Monsi::Renderer3D::AddPointLight({ 0.5f, 0.5f, 0.5f }, { 1.0f,1.0f,1.0f }, 1.0f, 100.0f);
+	Monsi::Renderer3D::AddPointLight({ 0.5f, 0.5f, 0.5f }, { 1.0f,1.0f,1.0f }, 1.0f, 100.0f);
 
 	Monsi::Renderer3D::Begin3D(m_CameraControl);
 
@@ -78,18 +82,14 @@ void Sandbox3D::OnLayerUpdate(Monsi::TimeStep timestep)
 
 	glm::vec3 rotation = { 0.0f, -90.0f,0.0f };
 	glm::vec3 lightVisualizerPos = -currentFrameLighting.MainLight.Direction * 10.0f;
-	Monsi::Renderer3D::DrawCube({0.0f,0.0f,-5.0f}, {1.0f, 1.0f, 1.0f}, m_MonsiTest, rotation);
 	Monsi::Renderer3D::DrawCube(lightVisualizerPos, { 0.3f, 0.3f, 0.3f }, glm::vec4(currentFrameLighting.MainLight.Color, 1.0f), { 0.0f, 0.0f, 0.0f });
 
-	for (int x = 0; x < 5; x++) {
-		for (int y = 0; y < 5; y++) {
-			for (int z = 0; z < 5; z++) {
-				Monsi::Renderer3D::DrawModel(m_Model, { x + 5,y + 5, z + 5 }, { 0.5f, 0.5f, 0.5f }, { 1.0f,1.0f,1.0f,1.0f }, { 0.0f,rotationStep,0.0f });
-			}
-		}
-	}
-	Monsi::Renderer3D::DrawModel(m_ModelTwo, { 1.5f,0.0f,-5.0f }, { 0.5f, 0.5f, 0.5f }, { 1.0f,1.0f,1.0f,1.0f });
-	Monsi::Renderer3D::DrawMesh(m_SphereTest.get(), { 0.0f, 3.0f, -10.0f }, { 1.0f, 1.0f, 1.0f }, { 1.0f,1.0f,1.0f,1.0f }, { 0.0f,0.0f,0.0f });
+
+	Monsi::Renderer3D::DrawModel(m_Backpack, { -50.0f, 3.0f, 0.0f }, { 1.0f, 1.0f, 1.0f }, { 1.0f,1.0f,1.0f,1.0f }, { 0.0f,rotationStep,0.0f });
+	Monsi::Renderer3D::DrawModel(m_Sponza, { 0.0f,0.0f,0.0f }, { 0.05f, 0.05f, 0.05f }, { 1.0f,1.0f,1.0f,1.0f });
+
+	Monsi::Renderer3D::DrawMesh(m_SphereTest.get(), m_SpherePosition, { 1.0f, 1.0f, 1.0f }, { 1.0f,1.0f,1.0f,1.0f }, { 0.0f,0.0f,0.0f });
+
 	Monsi::Renderer3D::DrawSkyBox(m_CameraControl.GetCamera().GetViewMatrix(), m_CameraControl.GetCamera().GetProjectionMatrix(), m_SkyBoxTest);
 
 	Monsi::Renderer3D::End3D();
@@ -159,7 +159,7 @@ void Sandbox3D::OnImGuiDraw() {
 	ImGui::Text("Scene light parameters");
 	ImGui::SliderFloat("Intensity", &currentFrameLighting.MainLight.Intensity, 0.0f, 1.0f);
 	ImGui::SliderFloat3("Color", (float*)&currentFrameLighting.MainLight.Color, 0.0f, 1.0f);
-	ImGui::SliderFloat3("Direction", (float*)&currentFrameLighting.MainLight.Direction, -1.0f, 1.0f);
+	ImGui::SliderFloat3("Direction", (float*)&currentFrameLighting.MainLight.Direction, -10.0f, 10.0f);
 
 	ImGui::End();
 
@@ -186,7 +186,7 @@ void Sandbox3D::OnImGuiDraw() {
 	ImGui::Begin("Scene");
 
 	ImGui::Text("Monsi example scene");
-	ImGui::Text("Press C when focused on the viewport \n window to move the camera with WASD");
+	ImGui::Text("Press C when focused on the \n viewport window to move the camera with WASD");
 
 	ImGui::End();
 }

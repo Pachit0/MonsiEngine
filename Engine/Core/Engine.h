@@ -18,7 +18,9 @@ namespace Monsi {
 
     struct AppSpecification {
         std::string Name = "Monsi Application";
-        RenderTypeEnum type;
+        RenderTypeEnum type = RenderTypeEnum::RendererNull;
+		unsigned int width = 1280;
+		unsigned int height = 720;
     };
 
     class ENGINE_API Application {

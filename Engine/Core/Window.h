@@ -9,7 +9,7 @@ namespace Monsi {
 		unsigned int Width, Height;
 		std::string Title;
 		
-		WindowInfo(const std::string& WindowTitle = "Monsi Engine", unsigned int width = 1280, unsigned int height = 720)
+		WindowInfo(const std::string& WindowTitle = "Monsi Engine", unsigned int width = 1280, unsigned int height = 720) //this could be redundant in future version
 			: Width(width), Height(height), Title(WindowTitle) { }
 	};
 

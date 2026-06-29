@@ -21,7 +21,7 @@ namespace Monsi {
         ENGINE_ASSERT(!s_Instance, "Application object already exists!");
         s_Instance = this;
 
-        m_Window = Scope<Window>(Window::Create(spec.Name));
+        m_Window = Scope<Window>(Window::Create({ spec.Name, spec.width, spec.height }));
         m_Window->SetEventCallbackFn(BIND_EVENT_FN(OnEvent));
 
         Renderer::Init(spec.type);
