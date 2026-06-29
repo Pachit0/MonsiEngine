@@ -20,17 +20,30 @@ namespace Monsi {
 		m_Height = height;
 
 		GLenum OpenGLFormat = 0, dataFormat = 0;
-		if (channels == 4) {
-			OpenGLFormat = GL_RGBA8;
-			dataFormat = GL_RGBA;
-		}
-		else if (channels == 3) {
-			OpenGLFormat = GL_RGB8;
-			dataFormat = GL_RGB;
-		}
-		else if (channels == 1) {
-			OpenGLFormat = GL_R8;
-			dataFormat = GL_RED;
+		switch (channels) {
+			case 4: {
+				OpenGLFormat = GL_RGBA8;
+				dataFormat = GL_RGBA;
+				break;
+			}
+			case 3: {
+				OpenGLFormat = GL_RGB8;
+				dataFormat = GL_RGB;
+				break;
+			}
+			case 2: {
+				OpenGLFormat = GL_RG8;
+				dataFormat = GL_RG;
+				break;
+			}
+			case 1: {
+				OpenGLFormat = GL_R8;
+				dataFormat = GL_RED;
+				break;
+			}
+			default: {
+				break;
+			}
 		}
 
 		m_DataFormat = dataFormat;
