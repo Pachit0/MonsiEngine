@@ -26,13 +26,30 @@ namespace Monsi {
 		m_Height = height;
 
 		GLenum OpenGLFormat = 0, dataFormat = 0;
-		if (channels == 4) {
+		switch (channels) {
+		case 4: {
 			OpenGLFormat = GL_RGBA8;
 			dataFormat = GL_RGBA;
+			break;
 		}
-		else if (channels == 3) {
+		case 3: {
 			OpenGLFormat = GL_RGB8;
 			dataFormat = GL_RGB;
+			break;
+		}
+		case 2: {
+			OpenGLFormat = GL_RG8;
+			dataFormat = GL_RG;
+			break;
+		}
+		case 1: {
+			OpenGLFormat = GL_R8;
+			dataFormat = GL_RED;
+			break;
+		}
+		default: {
+			break;
+		}
 		}
 
 		m_DataFormat = dataFormat;
@@ -52,19 +69,22 @@ namespace Monsi {
 
 		int i = 1;
 		do {
+			int faceWidth, faceHeight, faceChannels;
 			{
 				std::string scopeName = "OpenGLTextureCubeMap -> stbi_load Face " + std::to_string(i);
 				ENGINE_PROFILER_SCOPE(scopeName.c_str());
-				data = stbi_load(ResourcePaths[i].c_str(), &width, &height, &channels, 0);
+				data = stbi_load(ResourcePaths[i].c_str(), &faceWidth, &faceHeight, &faceChannels, channels);
 			}
 			ENGINE_ASSERT(data, "Failed to load cubemap face image!");
-			ENGINE_ASSERT(width == m_Width && height == m_Height, "Cubemap faces must have identical dimensions!");
+			ENGINE_ASSERT(faceWidth == m_Width && faceHeight == m_Height, "Cubemap faces must have identical dimensions!");
 
 			glTextureSubImage3D(m_ID, 0, 0, 0, i, m_Width, m_Height, 1, dataFormat, GL_UNSIGNED_BYTE, data);
 			stbi_image_free(data);
 
 			i++;
 		} while (i < 6);
+
+		stbi_set_flip_vertically_on_load(true);
 	}
 
 	OpenGLCubeMapTexture::~OpenGLCubeMapTexture()

@@ -16,7 +16,9 @@ void Sandbox3D::OnLayerAttach()
 
 	m_Backpack = Monsi::CreateReference<Monsi::Model>( MODEL_PATH "backpack/backpack.obj");
 
-	m_Sponza = Monsi::CreateReference<Monsi::Model>( MODEL_PATH "crytek_sponza/sponza.obj");
+	Monsi::ModelImportSettings gamer;
+	gamer.FlipUVs = false;
+	m_Sponza = Monsi::CreateReference<Monsi::Model>( MODEL_PATH "crytek_sponza/sponza.obj", gamer);
 
 	std::array<std::string, 6> skyboxTextures = {
 		TEXTURE_PATH "right.png",

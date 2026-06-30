@@ -9,10 +9,41 @@ namespace Monsi {
 		LoadModel(filepath);
 	}
 
+	Model::Model(const std::string& filepath, ModelImportSettings settings)
+	{
+		LoadModel(filepath, settings);
+	}
+
 	void Model::LoadModel(const std::string& filepath)
 	{
 		Assimp::Importer importer;
-		const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals);
+		unsigned int flags = aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace;
+
+		const aiScene* scene = importer.ReadFile(filepath, flags);
+
+		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+		{
+			ENGINE_LOG_ERROR("ASSIMP ERROR: {0}", importer.GetErrorString());
+			ENGINE_ASSERT(false, "Model load failed!");
+			return;
+		}
+
+		m_Directory = filepath.substr(0, filepath.find_last_of("/\\"));
+		m_Meshes.reserve(scene->mNumMeshes);
+
+		processNode(scene->mRootNode, scene);
+	}
+
+	void Model::LoadModel(const std::string& filepath, ModelImportSettings settings)
+	{
+		Assimp::Importer importer;
+		unsigned int flags = aiProcess_Triangulate;
+
+		if (settings.GenSmoothNormals) flags |= aiProcess_GenSmoothNormals;
+		if (settings.CalcTangentSpace) flags |= aiProcess_CalcTangentSpace;
+		if (settings.FlipUVs)          flags |= aiProcess_FlipUVs;
+
+		const aiScene* scene = importer.ReadFile(filepath, flags);
 
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		{

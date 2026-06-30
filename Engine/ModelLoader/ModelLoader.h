@@ -14,11 +14,20 @@
 
 namespace Monsi {
 
+	struct ModelImportSettings {
+		bool FlipUVs = true;
+		bool GenSmoothNormals = true;
+		bool CalcTangentSpace = true;
+	};
+
 	class Model
 	{
 	public:
 		Model(const std::string& filepath);
+		Model(const std::string& filepath, ModelImportSettings settings);
+
 		void LoadModel(const std::string& filepath);
+		void LoadModel(const std::string& filepath, ModelImportSettings settings);
 
 		const std::vector<Mesh>& GetMeshes() const { return m_Meshes; }
 

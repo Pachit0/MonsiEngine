@@ -103,5 +103,11 @@ void main()
     }
 
     vec4 texColor = texture(texture_diffuse1, TexCoords) * InstanceColor;
+    
+    if (texColor.a < 0.5)
+    {
+        discard;
+    }
+
     FragColor = vec4(texColor.rgb * lightResult, texColor.a);
 }

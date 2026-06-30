@@ -2,6 +2,7 @@
 #include "SkyBoxPass.h"
 #include "RenderCommand.h"
 #include <glm/ext/matrix_transform.hpp>
+#include <glad/glad.h>
 
 namespace Monsi {
 
@@ -50,6 +51,7 @@ namespace Monsi {
 
 	void SkyBoxPass::DrawSkybox(const glm::mat4& view, const glm::mat4& projection, const Reference<CubeMapTexture>& skyboxTexture)
 	{
+		glDisable(GL_CULL_FACE); //there is probably a better way, this is a quick solution
 		glm::mat4 staticView = glm::mat4(glm::mat3(view));
 		glm::mat4 viewProj = projection * staticView;
 
@@ -64,6 +66,7 @@ namespace Monsi {
 		RenderCommand::DrawIndexed(m_SkyboxVA, 36);
 
 		RenderCommand::SetDepthFunc(DepthComp::LESS);
+		glEnable(GL_CULL_FACE);
 	}
 
 }
