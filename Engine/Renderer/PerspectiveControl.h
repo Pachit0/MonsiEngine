@@ -22,6 +22,7 @@ namespace Monsi {
         const PerspectiveCamera& GetCamera() const { return m_Camera; }
         bool IsMouseCaptured() const { return m_MouseCaptured; }
 
+        void setCameraSpeed(float speed) { m_CameraTranslationSpeed = speed; }
         void SetFOV(float fov) { m_FOV = fov; }
         float GetFOV() const { return m_FOV; }
 

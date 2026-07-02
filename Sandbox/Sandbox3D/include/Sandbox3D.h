@@ -20,16 +20,22 @@ private:
 
 	Monsi::Reference<Monsi::FrameBuffer> m_FrameBuffer;
 	Monsi::Reference<Monsi::Model> m_Backpack;
-
 	Monsi::Reference<Monsi::Model> m_Sponza;
-	
-	Monsi::SceneLighting currentFrameLighting;
 
-	Monsi::PerspectiveControl m_CameraControl;
 	Monsi::Reference<Monsi::Texture2D> m_MonsiTest;
 	Monsi::Reference<Monsi::CubeMapTexture> m_SkyBoxTest;
-	Monsi::Scope<Monsi::Mesh> m_SphereTest;
+	Monsi::Reference<Monsi::Mesh> m_SphereTest;
+	Monsi::Reference<Monsi::Material> m_ShpereMaterial;
+	Monsi::SceneLighting m_SceneLighting;
+
+	Monsi::PerspectiveControl m_CameraControl;
+
 	glm::vec3 m_SpherePosition;
+
+	glm::vec3 m_LightPointPosition;
+	glm::vec4 m_LightPointColor;
+	float m_Intensity;
+	float m_Radius;
 
 	float m_DeltaTime;
 	float m_lastFrame;

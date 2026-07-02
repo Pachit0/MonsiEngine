@@ -9,6 +9,7 @@
 #include "Core/MonsiMouseButtonCodes.h"
 #include "Core/Input.h"
 #include "Core/TimeStep.h"
+#include "Core/ColorPalette.h"
 
 //	ImGui
 #include "ImGui/ImGuiLayer.h"

@@ -17,6 +17,8 @@ namespace Monsi {
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
 
+		glEnable(GL_MULTISAMPLE);
+		glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
 	}
 
 	void OpenGLRendererAPI::SetViewport(uint32_t x, uint32_t y, uint32_t widht, uint32_t height) {

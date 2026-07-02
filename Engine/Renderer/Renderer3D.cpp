@@ -3,6 +3,7 @@
 #include "CubePass.h"
 #include "ModelPass.h"
 #include "SkyBoxPass.h"
+#include "ColorPalette.h"
 
 
 namespace Monsi {
@@ -85,7 +86,7 @@ namespace Monsi {
 		s_Data.SkyBox->DrawSkybox(view, projection, skyboxTexture);
 	}
 
-	void Renderer3D::SetLighting(const SceneLighting& lighting)
+	void Renderer3D::SetSceneLighting(const SceneLighting& lighting)
 	{
 		s_Data.SceneLight = lighting;
 		s_Data.Lighting->SetLighting(lighting);

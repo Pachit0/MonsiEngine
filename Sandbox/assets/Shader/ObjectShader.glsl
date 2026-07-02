@@ -34,6 +34,13 @@ void main()
 
 layout(location=0) out vec4 color;
 
+struct Material {
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;    
+    float shininess;
+}; 
+
 struct DirectionalLight {
     vec3 Direction;
     vec3 Color;
@@ -47,6 +54,7 @@ struct PointLight {
     float Radius;
 };
 
+uniform Material material;
 uniform DirectionalLight u_MainLight;
 uniform int u_PointLightCount;
 uniform PointLight u_PointLights[32];
@@ -61,34 +69,52 @@ in vec3 v_Normal;
 
 vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir) {
     if (length(light.Direction) == 0.0) return vec3(0.0);
+    
     vec3 lightDir = normalize(-light.Direction);
+    
     float diff = max(dot(normal, lightDir), 0.0);
-    return light.Color * light.Intensity * diff;
+    vec3 diffuse = light.Color * light.Intensity * diff * material.diffuse;
+    
+    vec3 halfwayDir = normalize(lightDir + viewDir);
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
+    vec3 specular = light.Color * light.Intensity * spec * material.specular;
+    
+    return diffuse + specular;
 }
 
-vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 fragPos) {
+vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
     vec3 ToLight = light.Position - fragPos;
     if (length(ToLight) < 0.0001) return vec3(0.0);
+    
     vec3 lightDir = normalize(ToLight);
+    
     float diff = max(dot(normal, lightDir), 0.0);
+    vec3 diffuse = light.Color * light.Intensity * diff * material.diffuse;
+    
+    vec3 halfwayDir = normalize(lightDir + viewDir);
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
+    vec3 specular = light.Color * light.Intensity * spec * material.specular;
+    
     float distance = length(ToLight);
     float attenuation = clamp(1.0 - (distance / light.Radius), 0.0, 1.0);
-    return light.Color * light.Intensity * diff * attenuation;
+    
+    return (diffuse + specular) * attenuation;
 }
 
 void main()
 {
     int l_TexIndex = int(v_TexIndex);
-    vec4 l_Texture = texture(u_Textures[int(v_TexIndex)], v_TexCoord);
+    vec4 l_Texture = texture(u_Textures[l_TexIndex], v_TexCoord);
 
     vec3 norm = normalize(v_Normal);
     vec3 viewDir = normalize(u_ViewPos - v_FragPos);
     
-    vec3 lightResult = vec3(0.1);
+    vec3 lightResult = material.ambient;
+    
     lightResult += CalculateDirectionalLight(u_MainLight, norm, viewDir);
     
     for(int i = 0; i < u_PointLightCount; i++) {
-        lightResult += CalculatePointLight(u_PointLights[i], norm, v_FragPos);
+        lightResult += CalculatePointLight(u_PointLights[i], norm, v_FragPos, viewDir);
     }
 
     vec4 texColor = v_Color * l_Texture;

@@ -29,6 +29,20 @@ void main()
 #shadertype fragment
 #version 330 core
 
+struct Material {
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;    
+    float shininess;
+
+    sampler2D specularMap;
+    sampler2D normalMap;
+
+    float hasDiffuseMap;
+    float hasSpecularMap;
+    float hasNormalMap;
+}; 
+
 struct DirectionalLight {
     vec3 Direction;
     vec3 Color;
@@ -44,12 +58,10 @@ struct PointLight {
 
 uniform DirectionalLight u_MainLight;
 uniform int u_PointLightCount;
+uniform Material material;
 uniform PointLight u_PointLights[32];
 uniform vec3 u_ViewPos;
 uniform sampler2D texture_diffuse1;
-
-float u_Shininess = 32.0;
-float u_SpecularStrength = 0.5;
 
 in vec2 TexCoords;
 in vec4 InstanceColor;
@@ -62,12 +74,13 @@ vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir
     if (length(light.Direction) == 0.0) return vec3(0.0);
 
     vec3 lightDir = normalize(-light.Direction);
+    
     float diff = max(dot(normal, lightDir), 0.0);
-    vec3 diffuse = light.Color * light.Intensity * diff;
+    vec3 diffuse = light.Color * light.Intensity * diff * material.diffuse;
 
     vec3 halfwayDir = normalize(lightDir + viewDir);
-    float spec = pow(max(dot(normal, halfwayDir), 0.0), u_Shininess);
-    vec3 specular = light.Color * light.Intensity * (spec * u_SpecularStrength);
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
+    vec3 specular = light.Color * light.Intensity * spec * material.specular;
 
     return diffuse + specular;
 }
@@ -77,12 +90,13 @@ vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewD
     if (length(ToLight) < 0.0001) return vec3(0.0);
 
     vec3 lightDir = normalize(ToLight);
+    
     float diff = max(dot(normal, lightDir), 0.0);
-    vec3 diffuse = light.Color * light.Intensity * diff;
+    vec3 diffuse = light.Color * light.Intensity * diff * material.diffuse;
 
     vec3 halfwayDir = normalize(lightDir + viewDir);
-    float spec = pow(max(dot(normal, halfwayDir), 0.0), u_Shininess);
-    vec3 specular = light.Color * light.Intensity * (spec * u_SpecularStrength);
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
+    vec3 specular = light.Color * light.Intensity * spec * material.specular;
 
     float distance = length(ToLight);
     float attenuation = clamp(1.0 - (distance / light.Radius), 0.0, 1.0);
@@ -92,21 +106,22 @@ vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewD
 
 void main()
 {
-    vec3 norm = normalize(v_Normal);
-    vec3 viewDir = normalize(u_ViewPos - v_FragPos);
-    
-    vec3 lightResult = vec3(0.1);
-    lightResult += CalculateDirectionalLight(u_MainLight, norm, viewDir);
-    
-    for(int i = 0; i < u_PointLightCount; i++) {
-        lightResult += CalculatePointLight(u_PointLights[i], norm, v_FragPos, viewDir);
-    }
-
     vec4 texColor = texture(texture_diffuse1, TexCoords) * InstanceColor;
     
     if (texColor.a < 0.5)
     {
         discard;
+    }
+
+    vec3 norm = normalize(v_Normal);
+    vec3 viewDir = normalize(u_ViewPos - v_FragPos);
+    
+    vec3 lightResult = material.ambient;
+    
+    lightResult += CalculateDirectionalLight(u_MainLight, norm, viewDir);
+    
+    for(int i = 0; i < u_PointLightCount; i++) {
+        lightResult += CalculatePointLight(u_PointLights[i], norm, v_FragPos, viewDir);
     }
 
     FragColor = vec4(texColor.rgb * lightResult, texColor.a);

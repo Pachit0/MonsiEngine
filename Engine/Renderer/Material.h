@@ -12,7 +12,8 @@ namespace Monsi {
 
 		void Bind(const Reference<Shader>& shader);
 
-		glm::vec4 DiffuseColor = glm::vec4(1.0f);
+		glm::vec3 AmbientColor = glm::vec3(0.1f);
+		glm::vec3 DiffuseColor = glm::vec3(1.0f);
 		glm::vec3 SpecularColor = glm::vec3(1.0f);
 		float Shininess = 32.0f;
 

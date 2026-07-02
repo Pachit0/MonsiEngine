@@ -113,6 +113,10 @@ namespace Monsi {
 
 		m_TextureShader->Bind();
 		m_TextureShader->setIntArray("u_Textures", samplers, MaxTextureSlots);
+		m_TextureShader->setVec3("material.ambient", glm::vec3(1.0f));
+		m_TextureShader->setVec3("material.diffuse", glm::vec3(1.0f));
+		m_TextureShader->setVec3("material.specular", glm::vec3(1.0f));
+		m_TextureShader->setFloat("material.shininess", 32.0f);
 	}
 
 	void CubePass::Shutdown()

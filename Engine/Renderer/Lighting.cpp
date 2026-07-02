@@ -54,4 +54,9 @@ namespace Monsi {
 		}
 	}
 
+	SceneLighting::SceneLighting()
+	{
+		PointLights.reserve(LightingBuffer::MaxPointLights);
+	}
+
 }

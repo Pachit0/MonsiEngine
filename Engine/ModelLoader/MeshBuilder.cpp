@@ -3,7 +3,7 @@
 
 namespace Monsi {
 
-	Scope<Mesh> MeshBuilder::CreateSphere(float radius, uint32_t rings, uint32_t sectors, const Reference<Material>& material)
+	Reference<Mesh> MeshBuilder::CreateSphere(float radius, uint32_t rings, uint32_t sectors, const Reference<Material>& material)
 	{
 		std::vector<Vertex_t> vertices;
 		std::vector<uint32_t> indices;
@@ -50,19 +50,19 @@ namespace Monsi {
 				uint32_t bottomRight = bottomLeft + 1;
 
 				indices.push_back(topLeft);
-				indices.push_back(bottomLeft);
 				indices.push_back(topRight);
+				indices.push_back(bottomLeft);
 
-				indices.push_back(topRight);
 				indices.push_back(bottomLeft);
+				indices.push_back(topRight);
 				indices.push_back(bottomRight);
 			}
 		}
 
-		return CreateScope<Mesh>(vertices, indices, material);
+		return CreateReference<Mesh>(vertices, indices, material);
 	}
 
-	Scope<Mesh> MeshBuilder::CreateGrid(float width, float depth, uint32_t columns, uint32_t rows, const Reference<Material>& material)
+	Reference<Mesh> MeshBuilder::CreateGrid(float width, float depth, uint32_t columns, uint32_t rows, const Reference<Material>& material)
 	{
 		std::vector<Vertex_t> vertices;
 		std::vector<uint32_t> indices;
@@ -115,6 +115,6 @@ namespace Monsi {
 			}
 		}
 
-		return CreateScope<Mesh>(vertices, indices, material);
+		return CreateReference<Mesh>(vertices, indices, material);
 	}
 }

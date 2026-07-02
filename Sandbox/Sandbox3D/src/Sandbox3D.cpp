@@ -1,13 +1,16 @@
 #include "Sandbox3D.h"
 #include <imgui.h>
 #include <imgui_internal.h>
+#include <glm/gtc/type_ptr.hpp>
 
 Sandbox3D::Sandbox3D() : Layer("Sandbox3D"), m_CameraControl(1280.0f / 720.0f), m_ViewportSize{ 0.0f,0.0f }, m_ViewportFocused(false), m_ViewportHovered(false)
-	, m_SpherePosition({ -5.0f, 3.0f, 5.0f })
+	, m_SpherePosition({ -5.0f, 3.0f, 5.0f }), m_Intensity(1.0f), m_Radius(10.0f), m_LightPointPosition{0.0f,0.0f,0.0f}, m_LightPointColor(1.0f,1.0f,1.0f,1.0f)
 {}
 
 void Sandbox3D::OnLayerAttach()
 {
+	m_CameraControl.setCameraSpeed(50.0f);
+
 	Monsi::FrameBufferSpec spec;
 	spec.Width = 1280;
 	spec.Height = 720;
@@ -30,20 +33,33 @@ void Sandbox3D::OnLayerAttach()
 	};
 
 	m_SkyBoxTest = Monsi::CubeMapTexture::Create(skyboxTextures);
-	
-	currentFrameLighting.MainLight.Direction = glm::vec3(-0.2f, -1.0f, -0.3f);
-	currentFrameLighting.MainLight.Color = glm::vec3(1.0f, 0.95f, 0.9f);
-	currentFrameLighting.MainLight.Intensity = 1.0f;
 
-	auto shpereMaterial = Monsi::CreateReference<Monsi::Material>();
-	shpereMaterial->SpecularColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	m_SceneLighting.MainLight.Direction = glm::vec3(0.0f, -1.0f, 0.0f);
+	m_SceneLighting.MainLight.Color = glm::vec3(1.0f, 0.95f, 0.9f);
+	m_SceneLighting.MainLight.Intensity = 1.0f;
 
-	m_SphereTest = Monsi::MeshBuilder::CreateSphere(1.0f, 32, 32, shpereMaterial);
+	Monsi::PointLight lightTest;
+	lightTest.Color = m_LightPointColor;
+	lightTest.Position = m_LightPointPosition;
+	lightTest.Intensity = m_Intensity;
+	lightTest.Radius = m_Radius;
+
+	m_SceneLighting.PointLights.emplace_back(lightTest);
+
+	m_ShpereMaterial = Monsi::CreateReference<Monsi::Material>();
+
+	m_ShpereMaterial->AmbientColor = glm::vec4(0.247f, 0.199f, 0.074f, 1.0f);
+	m_ShpereMaterial->DiffuseColor = glm::vec4(0.751f, 0.606f, 0.226f, 1.0f);
+	m_ShpereMaterial->SpecularColor = glm::vec4(0.628f, 0.555f, 0.366f, 1.0f);
+	m_ShpereMaterial->Shininess = 51.2f;
+
+	m_SphereTest = Monsi::MeshBuilder::CreateSphere(1.0f, 32, 32, m_ShpereMaterial);
+
+	m_SphereTest = Monsi::MeshBuilder::CreateSphere(1.0f, 32, 32, m_ShpereMaterial);
 }
 
 void Sandbox3D::OnLayerUpdate(Monsi::TimeStep timestep)
 {
-
 	m_FrameTimeAccumulator += timestep;
 	m_FrameCount++;
 
@@ -68,10 +84,7 @@ void Sandbox3D::OnLayerUpdate(Monsi::TimeStep timestep)
 	Monsi::RenderCommand::Clear();
 
 	m_CameraControl.OnLayerUpdate(timestep);
-
-	Monsi::Renderer3D::SetLighting(currentFrameLighting);
-
-	Monsi::Renderer3D::AddPointLight({ 0.5f, 0.5f, 0.5f }, { 1.0f,1.0f,1.0f }, 1.0f, 100.0f);
+	Monsi::Renderer3D::SetSceneLighting(m_SceneLighting);
 
 	Monsi::Renderer3D::Begin3D(m_CameraControl);
 
@@ -82,15 +95,23 @@ void Sandbox3D::OnLayerUpdate(Monsi::TimeStep timestep)
 		rotationStep -= 360.0f;
 	}
 
-	glm::vec3 rotation = { 0.0f, -90.0f,0.0f };
-	glm::vec3 lightVisualizerPos = -currentFrameLighting.MainLight.Direction * 10.0f;
-	Monsi::Renderer3D::DrawCube(lightVisualizerPos, { 0.3f, 0.3f, 0.3f }, glm::vec4(currentFrameLighting.MainLight.Color, 1.0f), { 0.0f, 0.0f, 0.0f });
+	static float totalTime = 0.0f;
+	totalTime += timestep;
 
+	glm::vec3 animatedSpherePos = m_SpherePosition;
+	animatedSpherePos.y += std::sin(totalTime * 2.0f) * 0.5f;
+
+	glm::vec3 rotation = { 0.0f, -90.0f,0.0f };
+
+	Monsi::Renderer3D::DrawCube(m_SceneLighting.PointLights[0].Position, { 0.3f, 0.3f, 0.3f }, { m_SceneLighting.PointLights[0].Color, 1.0f}, { 0.0f, 0.0f, 0.0f });
+
+	glm::vec3 lightVisualizerPos = -m_SceneLighting.MainLight.Direction * 10.0f;
+	Monsi::Renderer3D::DrawCube(lightVisualizerPos, { 0.3f, 0.3f, 0.3f }, { m_SceneLighting.MainLight.Color, 1.0f}, { 0.0f, 0.0f, 0.0f });
 
 	Monsi::Renderer3D::DrawModel(m_Backpack, { -50.0f, 3.0f, 0.0f }, { 1.0f, 1.0f, 1.0f }, { 1.0f,1.0f,1.0f,1.0f }, { 0.0f,rotationStep,0.0f });
 	Monsi::Renderer3D::DrawModel(m_Sponza, { 0.0f,0.0f,0.0f }, { 0.05f, 0.05f, 0.05f }, { 1.0f,1.0f,1.0f,1.0f });
 
-	Monsi::Renderer3D::DrawMesh(m_SphereTest.get(), m_SpherePosition, { 1.0f, 1.0f, 1.0f }, { 1.0f,1.0f,1.0f,1.0f }, { 0.0f,0.0f,0.0f });
+	Monsi::Renderer3D::DrawMesh(m_SphereTest.get(), animatedSpherePos, { 1.0f, 1.0f, 1.0f }, { 1.0f,1.0f,1.0f,1.0f }, { 0.0f, 0.0f, 0.0f });
 
 	Monsi::Renderer3D::DrawSkyBox(m_CameraControl.GetCamera().GetViewMatrix(), m_CameraControl.GetCamera().GetProjectionMatrix(), m_SkyBoxTest);
 
@@ -159,9 +180,23 @@ void Sandbox3D::OnImGuiDraw() {
 	ImGui::Separator();
 
 	ImGui::Text("Scene light parameters");
-	ImGui::SliderFloat("Intensity", &currentFrameLighting.MainLight.Intensity, 0.0f, 1.0f);
-	ImGui::SliderFloat3("Color", (float*)&currentFrameLighting.MainLight.Color, 0.0f, 1.0f);
-	ImGui::SliderFloat3("Direction", (float*)&currentFrameLighting.MainLight.Direction, -10.0f, 10.0f);
+	ImGui::SliderFloat("Scene light Intensity", &m_SceneLighting.MainLight.Intensity, 0.0f, 3.0f);
+	ImGui::ColorEdit3("Light Color", glm::value_ptr(m_SceneLighting.MainLight.Color));
+	ImGui::SliderFloat3("Direction", glm::value_ptr(m_SceneLighting.MainLight.Direction), -1.5f, 1.5f);
+
+	ImGui::Separator();
+
+	ImGui::Text("Point light parameters");
+	ImGui::SliderFloat3("Position", glm::value_ptr(m_SceneLighting.PointLights[0].Position), -10.0f, 10.0f);
+	ImGui::ColorEdit4("Color", glm::value_ptr(m_SceneLighting.PointLights[0].Color));
+	ImGui::SliderFloat("Point light Intensity", &m_SceneLighting.PointLights[0].Intensity, 0.0f, 10.0f);
+	ImGui::SliderFloat("Radius", &m_SceneLighting.PointLights[0].Radius, 0.0f, 100.0f);
+
+	ImGui::Text("Sphere material parameters");
+	ImGui::ColorEdit3("Ambient Color", glm::value_ptr(m_ShpereMaterial->AmbientColor));
+	ImGui::ColorEdit3("Diffuse Color", glm::value_ptr(m_ShpereMaterial->DiffuseColor));
+	ImGui::ColorEdit3("Specular Color", glm::value_ptr(m_ShpereMaterial->SpecularColor));
+	ImGui::SliderFloat("Shininess", &m_ShpereMaterial->Shininess, 1.0f, 64.0f);
 
 	ImGui::End();
 

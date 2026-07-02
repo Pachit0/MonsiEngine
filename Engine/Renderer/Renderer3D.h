@@ -28,9 +28,8 @@ namespace Monsi {
 
         static void DrawSkyBox(const glm::mat4& view, const glm::mat4& projection, const Reference<CubeMapTexture>& skyboxTexture);
         
-        static void SetLighting(const SceneLighting& lighting);
+        static void SetSceneLighting(const SceneLighting& lighting);
         static void AddPointLight(const glm::vec3& position, const glm::vec3& color, float intensity, float radius);
-
     };
 
 }

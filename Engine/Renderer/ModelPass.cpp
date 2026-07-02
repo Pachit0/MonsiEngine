@@ -94,7 +94,6 @@ namespace Monsi {
 		if (rotation.z != 0.0f) transform = glm::rotate(transform, glm::radians(rotation.z), glm::vec3(0, 0, 1));
 		transform = glm::scale(transform, size);
 
-		const auto& material = meshPtr->GetMaterial();
 		auto& batch = m_MeshBatches[meshPtr];
 
 		if (!batch.MeshPtr)
@@ -102,7 +101,7 @@ namespace Monsi {
 			batch.MeshPtr = meshPtr;
 		}
 
-		batch.InstanceData.push_back({ transform, color * material->DiffuseColor });
+		batch.InstanceData.push_back({ transform, color });
 	}
 
 	void ModelPass::Flush()
@@ -122,9 +121,14 @@ namespace Monsi {
 			auto& mesh = *batch.MeshPtr;
 			const auto& material = mesh.GetMaterial();
 
-			if (material && material->DiffuseMap)
+			if (material)
 			{
-				material->DiffuseMap->Bind(0);
+				material->Bind(m_Shader);
+
+				if (!material->DiffuseMap)
+				{
+					m_WhiteTexture->Bind(0);
+				}
 			}
 			else
 			{
