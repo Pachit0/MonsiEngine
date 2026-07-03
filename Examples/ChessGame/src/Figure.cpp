@@ -3,5 +3,6 @@
 
 Figure::Figure(FigureColor color) {
 	m_Color = color;
+	m_IsUnderAttack = 0;
 }
 
