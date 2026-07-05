@@ -1,6 +1,5 @@
 #pragma once
 
-#include "PerspectiveControl.h"
 #include "Texture.h"
 #include "ModelLoader.h"
 #include "Lighting.h"
@@ -15,7 +14,7 @@ namespace Monsi {
         static void Init();
         static void Shutdown();
 
-        static void Begin3D(const PerspectiveControl& camera);
+		static void Begin3D(const glm::mat4& viewProjection, const glm::vec3& cameraPosition);
         static void End3D();
 
         static void DrawCube(const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation);
@@ -25,11 +24,12 @@ namespace Monsi {
         static void DrawModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation);
 
 		static void DrawMesh(const Mesh* meshPtr, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation);
+		static void DrawModel(const Reference<Model>& model, const glm::mat4& transform, const glm::vec4& color);
+		static void DrawMesh(const Mesh* meshPtr, const glm::mat4& transform, const glm::vec4& color);
 
         static void DrawSkyBox(const glm::mat4& view, const glm::mat4& projection, const Reference<CubeMapTexture>& skyboxTexture);
         
         static void SetSceneLighting(const SceneLighting& lighting);
-        static void AddPointLight(const glm::vec3& position, const glm::vec3& color, float intensity, float radius);
     };
 
 }

@@ -104,6 +104,23 @@ namespace Monsi {
 		batch.InstanceData.push_back({ transform, color });
 	}
 
+	void ModelPass::DrawModel(const Reference<Model>& model, const glm::mat4& transform, const glm::vec4& color)
+	{
+		const auto& meshes = model->GetMeshes();
+		for (size_t i = 0; i < meshes.size(); i++)
+			DrawMesh(&meshes[i], transform, color);
+	}
+
+	void ModelPass::DrawMesh(const Mesh* meshPtr, const glm::mat4& transform, const glm::vec4& color)
+	{
+		if (m_RegisteredMeshes.find(meshPtr) == m_RegisteredMeshes.end())
+			RegisterMesh(meshPtr);
+
+		auto& batch = m_MeshBatches[meshPtr];
+		if (!batch.MeshPtr) batch.MeshPtr = meshPtr;
+		batch.InstanceData.push_back({ transform, color });
+	}
+
 	void ModelPass::Flush()
 	{
 		if (m_MeshBatches.empty())

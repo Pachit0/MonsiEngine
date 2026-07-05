@@ -8,35 +8,42 @@
 
 namespace Monsi {
 
-// 	struct MeshComponent {
-// 		enum class Primitive { None = 0, Cube, Sphere, Capsule, Quad };
-// 
-// 		Reference<Model> ModelAsset;
-// 		Primitive Type = Primitive::None;
-// 
-// 		MeshComponent() = default;
-// 		MeshComponent(const MeshComponent& other) = default;
-// 		MeshComponent(const std::string& filepath) : ModelAsset(CreateReference<Model>(filepath)) {}
-// 		MeshComponent(Primitive primitiveType) : Type(primitiveType) {}
-// 	};
-// 
-// 	struct MaterialComponent {
-// 		Reference<Texture2D> Texture;
-// 		glm::vec4 TintColor = glm::vec4(1.0f);
-// 
-// 		MaterialComponent() = default;
-// 		MaterialComponent(const MaterialComponent& other) = default;
-// 		MaterialComponent(const Reference<Texture2D>& texture) : Texture(texture) {}
-// 	};
-// 
-// 	struct LightComponent {
-// 		glm::vec3 Direction = { 0.0f, -1.0f, 0.0f };
-// 		glm::vec3 Color = { 1.0f, 1.0f, 1.0f };
-// 		float Intensity = 1.0f;
-// 
-// 		LightComponent() = default;
-// 		LightComponent(const LightComponent& other) = default;
-// 	};
+	struct MeshComponent {
+		Reference<Mesh>  MeshAsset;
+
+		MeshComponent() = default;
+		MeshComponent(const MeshComponent& other) = default;
+		MeshComponent(const Reference<Mesh>& mesh) : MeshAsset(mesh) {}
+	};
+
+	struct ModelComponent {
+		Reference<Model> ModelAsset;
+
+		ModelComponent() = default;
+		ModelComponent(const ModelComponent& other) = default;
+		ModelComponent(const Reference<Model>& model) : ModelAsset(model) {}
+	};
+
+	struct MaterialComponent {
+		Reference<Texture2D> Texture;
+		glm::vec4 TintColor = glm::vec4(1.0f);
+
+		MaterialComponent() = default;
+		MaterialComponent(const MaterialComponent& other) = default;
+	};
+
+	struct LightComponent {
+		enum class LightType { Directional = 0, Point = 1 };
+
+		LightType Type = LightType::Point;
+		glm::vec3 Color = { 1.0f, 1.0f, 1.0f };
+		float Intensity = 1.0f;
+		float Radius = 10.0f;
+		glm::vec3 Direction = { 0.0f, -1.0f, 0.0f };
+
+		LightComponent() = default;
+		LightComponent(const LightComponent& other) = default;
+	};
 
 	struct TransformComponent {
 		glm::mat4 Transform = glm::mat4(1.0f);

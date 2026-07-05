@@ -18,9 +18,11 @@ namespace Monsi {
 		void BeginScene(const glm::mat4& viewProj, const glm::vec3& viewPos, const Reference<LightingBuffer>& lighting);
 		void EndScene();
 
+		void DrawModel(const Reference<Model>& model, const glm::mat4& transform, const glm::vec4& color);
 		void DrawModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color);
 		void DrawModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation);
 
+		void DrawMesh(const Mesh* meshPtr, const glm::mat4& transform, const glm::vec4& color);
 		void DrawMesh(const Mesh* meshPtr, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation);
 
 	private:

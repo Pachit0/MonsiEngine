@@ -26,19 +26,19 @@ private:
 	Monsi::Reference<Monsi::CubeMapTexture> m_SkyBoxTest;
 	Monsi::Reference<Monsi::Mesh> m_SphereTest;
 	Monsi::Reference<Monsi::Material> m_ShpereMaterial;
-	Monsi::SceneLighting m_SceneLighting;
 
 	Monsi::PerspectiveControl m_CameraControl;
 
+	Monsi::Scene m_Scene;
+	Monsi::Entity m_CameraEntity;
+	Monsi::Entity m_MainLightEntity;
+	Monsi::Entity m_PointLightEntity;
+	Monsi::Entity m_BackpackEntity;
+	Monsi::Entity m_SponzaEntity;
+	Monsi::Entity m_SphereEntity;
+	Monsi::Entity m_CubeEntity;
+
 	glm::vec3 m_SpherePosition;
-
-	glm::vec3 m_LightPointPosition;
-	glm::vec4 m_LightPointColor;
-	float m_Intensity;
-	float m_Radius;
-
-	float m_DeltaTime;
-	float m_lastFrame;
 
 private: //fps counter
 	float m_FPS = 0.0f;

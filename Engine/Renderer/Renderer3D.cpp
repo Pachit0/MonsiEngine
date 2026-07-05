@@ -43,10 +43,10 @@ namespace Monsi {
 		s_Data.SkyBox.reset();
 	}
 
-	void Renderer3D::Begin3D(const PerspectiveControl& camera)
+	void Renderer3D::Begin3D(const glm::mat4& viewProjection, const glm::vec3& cameraPosition)
 	{
-		s_Data.Cube->BeginScene(camera.GetCamera().GetViewProjectionMatrix(), camera.GetCamera().GetPosition(), s_Data.Lighting);
-		s_Data.Model->BeginScene(camera.GetCamera().GetViewProjectionMatrix(), camera.GetCamera().GetPosition(), s_Data.Lighting);
+		s_Data.Cube->BeginScene(viewProjection, cameraPosition, s_Data.Lighting);
+		s_Data.Model->BeginScene(viewProjection, cameraPosition, s_Data.Lighting);
 	}
 
 	void Renderer3D::End3D()
@@ -54,6 +54,16 @@ namespace Monsi {
 		s_Data.Cube->EndScene();
 		s_Data.Model->EndScene();
 		s_Data.Lighting->Clear();
+	}
+
+	void Renderer3D::DrawModel(const Reference<Model>& model, const glm::mat4& transform, const glm::vec4& color)
+	{
+		s_Data.Model->DrawModel(model, transform, color);
+	}
+
+	void Renderer3D::DrawMesh(const Mesh* meshPtr, const glm::mat4& transform, const glm::vec4& color)
+	{
+		s_Data.Model->DrawMesh(meshPtr, transform, color);
 	}
 
 	void Renderer3D::DrawCube(const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation)
@@ -90,11 +100,6 @@ namespace Monsi {
 	{
 		s_Data.SceneLight = lighting;
 		s_Data.Lighting->SetLighting(lighting);
-	}
-
-	void Renderer3D::AddPointLight(const glm::vec3& position, const glm::vec3& color, float intensity, float radius)
-	{
-		s_Data.Lighting->AddPointLighting(position, color, intensity, radius);
 	}
 
 }
