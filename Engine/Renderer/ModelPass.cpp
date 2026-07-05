@@ -9,8 +9,6 @@ namespace Monsi {
 
 	void ModelPass::Init()
 	{
-		m_InstanceBuffer = new ModelInstanceData[MaxInstances];
-
 		m_Shader = Shader::Create(SHADER_PATH "ModelShader.glsl");
 
 		m_InstanceVBO = VertexBuffer::Create(MaxInstances * sizeof(ModelInstanceData));
@@ -33,9 +31,8 @@ namespace Monsi {
 
 	void ModelPass::Shutdown()
 	{
-		delete[] m_InstanceBuffer;
-		m_InstanceBuffer = nullptr;
 		m_RegisteredMeshes.clear();
+		m_MeshBatches.clear();
 	}
 
 	void ModelPass::RegisterMesh(const Mesh* mesh)
@@ -58,8 +55,10 @@ namespace Monsi {
 			lighting->Bind(m_Shader);
 		}
 
-		m_MeshBatches.clear();
-		m_BufferCursor = m_InstanceBuffer;
+		for (auto& [meshPtr, batch] : m_MeshBatches)
+		{
+			batch.InstanceData.clear();
+		}
 	}
 
 	void ModelPass::EndScene()
@@ -99,6 +98,7 @@ namespace Monsi {
 		if (!batch.MeshPtr)
 		{
 			batch.MeshPtr = meshPtr;
+			batch.InstanceData.reserve(DefaultBatchReserve);
 		}
 
 		batch.InstanceData.push_back({ transform, color });
@@ -117,7 +117,11 @@ namespace Monsi {
 			RegisterMesh(meshPtr);
 
 		auto& batch = m_MeshBatches[meshPtr];
-		if (!batch.MeshPtr) batch.MeshPtr = meshPtr;
+		if (!batch.MeshPtr)
+		{
+			batch.MeshPtr = meshPtr;
+			batch.InstanceData.reserve(DefaultBatchReserve);
+		}
 		batch.InstanceData.push_back({ transform, color });
 	}
 
@@ -134,6 +138,12 @@ namespace Monsi {
 			uint32_t count = (uint32_t)batch.InstanceData.size();
 			if (count == 0)
 				continue;
+
+			if (count > MaxInstances)
+			{
+				ENGINE_LOG_WARN("ModelPass::Flush - mesh batch has {0} instances, exceeding MaxInstances ({1}). Clamping.", count, MaxInstances);
+				count = MaxInstances;
+			}
 
 			auto& mesh = *batch.MeshPtr;
 			const auto& material = mesh.GetMaterial();

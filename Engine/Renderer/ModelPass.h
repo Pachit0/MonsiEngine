@@ -40,18 +40,14 @@ namespace Monsi {
 		{
 			const Mesh* MeshPtr = nullptr;
 			std::vector<ModelInstanceData> InstanceData;
-
-			ModelInstanceData* Instances = nullptr;
-			ModelInstanceData* Cursor = nullptr;
 		};
 
 		static constexpr uint32_t MaxInstances = 10000;
 
+		static constexpr uint32_t DefaultBatchReserve = 64;
+
 		std::unordered_map<const Mesh*, MeshBatch> m_MeshBatches;
 		std::unordered_set<const Mesh*> m_RegisteredMeshes;
-
-		ModelInstanceData* m_InstanceBuffer = nullptr;
-		ModelInstanceData* m_BufferCursor = nullptr;
 
 		Reference<VertexBuffer> m_InstanceVBO;
 		Reference<Shader> m_Shader;

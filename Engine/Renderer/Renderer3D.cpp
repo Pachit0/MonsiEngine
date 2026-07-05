@@ -66,30 +66,31 @@ namespace Monsi {
 		s_Data.Model->DrawMesh(meshPtr, transform, color);
 	}
 
-	void Renderer3D::DrawCube(const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation)
-	{
-		s_Data.Cube->DrawCube(position, size, color, rotation);
-	}
-
-	void Renderer3D::DrawCube(const glm::vec3& position, const glm::vec3& size, Reference<Texture2D> texture, const glm::vec3& rotation)
-	{
-		s_Data.Cube->DrawCube(position, size, texture, rotation);
-	}
-
-	void Renderer3D::DrawModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color)
-	{
-		s_Data.Model->DrawModel(model, position, size, color);
-	}
-
-	void Renderer3D::DrawModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation)
-	{
-		s_Data.Model->DrawModel(model, position, size, color, rotation);
-	}
-
-	void Renderer3D::DrawMesh(const Mesh* meshPtr, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation)
-	{
-		s_Data.Model->DrawMesh(meshPtr, position, size, color, rotation);
-	}
+//	Deprecated methods - will be removed
+// 	void Renderer3D::DrawCube(const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation)
+// 	{
+// 		s_Data.Cube->DrawCube(position, size, color, rotation);
+// 	}
+// 
+// 	void Renderer3D::DrawCube(const glm::vec3& position, const glm::vec3& size, Reference<Texture2D> texture, const glm::vec3& rotation)
+// 	{
+// 		s_Data.Cube->DrawCube(position, size, texture, rotation);
+// 	}
+// 
+// 	void Renderer3D::DrawModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color)
+// 	{
+// 		s_Data.Model->DrawModel(model, position, size, color);
+// 	}
+// 
+// 	void Renderer3D::DrawModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation)
+// 	{
+// 		s_Data.Model->DrawModel(model, position, size, color, rotation);
+// 	}
+// 
+// 	void Renderer3D::DrawMesh(const Mesh* meshPtr, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation)
+// 	{
+// 		s_Data.Model->DrawMesh(meshPtr, position, size, color, rotation);
+// 	}
 
 	void Renderer3D::DrawSkyBox(const glm::mat4& view, const glm::mat4& projection, const Reference<CubeMapTexture>& skyboxTexture)
 	{

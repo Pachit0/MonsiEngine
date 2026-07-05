@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 
 #include "SceneCamera.h"
+#include "CubePass.h"
 #include "Mesh.h"
 #include "ModelLoader.h"
 

@@ -108,8 +108,9 @@ namespace Monsi {
 		m_TextureShader = Shader::Create(SHADER_PATH "ObjectShader.glsl");
 
 		int samplers[MaxTextureSlots];
-		for (uint32_t i = 0; i < MaxTextureSlots; i++)
+		for (uint32_t i = 0; i < MaxTextureSlots; i++) {
 			samplers[i] = i;
+		}
 
 		m_TextureShader->Bind();
 		m_TextureShader->setIntArray("u_Textures", samplers, MaxTextureSlots);
@@ -220,16 +221,18 @@ namespace Monsi {
 	void CubePass::Flush()
 	{
 		uint32_t instanceCount = m_InstanceBufferItr - m_InstanceBufferBegin;
-		if (instanceCount == 0)
+		if (instanceCount == 0) {
 			return;
+		}
 
 		uint32_t dataSize = instanceCount * sizeof(CubeInstanceData);
 		m_InstanceVertexBuffer->SetData(m_InstanceBufferBegin, dataSize);
 
 		m_TextureShader->Bind();
 
-		for (uint32_t i = 0; i < m_TextureSlotIndex; i++)
+		for (uint32_t i = 0; i < m_TextureSlotIndex; i++) {
 			m_TextureSlots[i]->Bind(i);
+		}
 
 		m_CubeVA->Bind();
 		RenderCommand::DrawIndexedInstanced(m_CubeVA, 36, instanceCount);

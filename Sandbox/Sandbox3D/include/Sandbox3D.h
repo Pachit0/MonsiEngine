@@ -25,6 +25,11 @@ private:
 	Monsi::Reference<Monsi::Texture2D> m_MonsiTest;
 	Monsi::Reference<Monsi::CubeMapTexture> m_SkyBoxTest;
 	Monsi::Reference<Monsi::Mesh> m_SphereTest;
+	Monsi::Reference<Monsi::Mesh> m_CubeTest;
+	Monsi::Reference<Monsi::Mesh> m_TorusTest;
+	Monsi::Reference<Monsi::Mesh> m_CylinderTest;
+	Monsi::Reference<Monsi::Mesh> m_ConeTest;
+	Monsi::Reference<Monsi::Mesh> m_QuadTest;
 	Monsi::Reference<Monsi::Material> m_ShpereMaterial;
 
 	Monsi::PerspectiveControl m_CameraControl;
@@ -37,6 +42,10 @@ private:
 	Monsi::Entity m_SponzaEntity;
 	Monsi::Entity m_SphereEntity;
 	Monsi::Entity m_CubeEntity;
+	Monsi::Entity m_TorusEntity;
+	Monsi::Entity m_ConeEntity;
+	Monsi::Entity m_CylinderEntity;
+	Monsi::Entity m_QuadEntity;
 
 	glm::vec3 m_SpherePosition;
 

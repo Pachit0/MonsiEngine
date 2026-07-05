@@ -32,7 +32,7 @@ namespace Monsi {
 
 	private:
 		static constexpr uint32_t MaxCubes = 10000;
-		static constexpr uint32_t MaxTextureSlots = 32;
+		static constexpr uint32_t MaxTextureSlots = 1;
 
 		Reference<VertexArray> m_CubeVA;
 		Reference<VertexBuffer> m_CubeVertexBuffer;

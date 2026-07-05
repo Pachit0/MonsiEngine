@@ -41,7 +41,12 @@ void Sandbox3D::OnLayerAttach()
 	m_ShpereMaterial->SpecularColor = glm::vec3(0.628f, 0.555f, 0.366f);
 	m_ShpereMaterial->Shininess = 51.2f;
 
-	m_SphereTest = Monsi::MeshBuilder::CreateSphere(1.0f, 32, 32, m_ShpereMaterial);
+	m_SphereTest = Monsi::MeshBuilder::CreateSphere(1.0f, 32, 32, m_ShpereMaterial); 
+	m_TorusTest = Monsi::MeshBuilder::CreateTorus(2.5f, 0.5f, 32, 16, m_ShpereMaterial); 
+	m_ConeTest = Monsi::MeshBuilder::CreateCone(2.5f, 8, 32, m_ShpereMaterial); 
+	m_CylinderTest = Monsi::MeshBuilder::CreateCylinder(2.5f, 8, 32, m_ShpereMaterial); 
+	m_QuadTest = Monsi::MeshBuilder::CreateQuad(0.5f, 0.5f, m_ShpereMaterial); 
+	m_CubeTest = Monsi::MeshBuilder::CreateCube(0.5f, m_ShpereMaterial);
 
 	m_CameraEntity = m_Scene.CreateEntity("Camera");
 	auto& cameraComponent = m_CameraEntity.AddComponent<Monsi::CameraComponent>();
@@ -73,6 +78,27 @@ void Sandbox3D::OnLayerAttach()
 	m_SphereEntity = m_Scene.CreateEntity("Sphere");
 	m_SphereEntity.AddComponent<Monsi::MeshComponent>(m_SphereTest);
 	m_SphereEntity.GetComponent<Monsi::TransformComponent>().Transform = glm::translate(glm::mat4(1.0f), m_SpherePosition);
+
+	m_CubeEntity = m_Scene.CreateEntity("Cube");
+	m_CubeEntity.AddComponent<Monsi::MeshComponent>(m_CubeTest);
+	m_CubeEntity.GetComponent<Monsi::TransformComponent>().Transform = glm::translate(glm::mat4(1.0f), {0.0f,5.0f,0.0f});
+
+	m_TorusEntity = m_Scene.CreateEntity("Torus");
+	m_TorusEntity.AddComponent<Monsi::MeshComponent>(m_TorusTest);
+	m_TorusEntity.GetComponent<Monsi::TransformComponent>().Transform = glm::translate(glm::mat4(1.0f), {0.0f,1.0f,0.0f});
+
+	m_CylinderEntity = m_Scene.CreateEntity("Cylinder");
+	m_CylinderEntity.AddComponent<Monsi::MeshComponent>(m_CylinderTest);
+	m_CylinderEntity.GetComponent<Monsi::TransformComponent>().Transform = glm::translate(glm::mat4(1.0f), {10.0f,5.0f,0.0f});
+
+	m_ConeEntity = m_Scene.CreateEntity("Cone");
+	m_ConeEntity.AddComponent<Monsi::MeshComponent>(m_ConeTest);
+	m_ConeEntity.GetComponent<Monsi::TransformComponent>().Transform = glm::translate(glm::mat4(1.0f), {20.0f,5.0f,0.0f});
+
+	m_QuadEntity = m_Scene.CreateEntity("Quad");
+	m_QuadEntity.AddComponent<Monsi::MeshComponent>(m_QuadTest);
+	m_QuadEntity.GetComponent<Monsi::TransformComponent>().Transform = glm::translate(glm::mat4(1.0f), { 30.0f,1.0f,0.0f });
+
 }
 
 void Sandbox3D::OnLayerUpdate(Monsi::TimeStep timestep)
@@ -119,10 +145,6 @@ void Sandbox3D::OnLayerUpdate(Monsi::TimeStep timestep)
 	m_SphereEntity.GetComponent<Monsi::TransformComponent>().Transform = glm::translate(glm::mat4(1.0f), animatedSpherePos);
 
 	m_Scene.OnUpdate(timestep);
-
-	auto& pointLightTransform = m_PointLightEntity.GetComponent<Monsi::TransformComponent>();
-	glm::vec3 pointLightPos = glm::vec3(pointLightTransform.Transform[3]);
-	Monsi::Renderer3D::DrawCube(pointLightPos, { 1.0f,1.0f,1.0f }, { 1.0f,1.0f,1.0f,1.0f }, {0.0f, 0.0f, 0.0f});
 
 	Monsi::Renderer3D::DrawSkyBox(m_CameraControl.GetCamera().GetViewMatrix(), m_CameraControl.GetCamera().GetProjectionMatrix(), m_SkyBoxTest);
 
