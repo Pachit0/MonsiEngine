@@ -3,7 +3,6 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <debug/instrumentor.h>
-#include <Entity.h>
 #include <glfw/glfw3.h>
 
 namespace Monsi {
@@ -46,6 +45,31 @@ namespace Monsi {
 		cc.Primary = false;
 
 		m_Unit.SetContext(m_ActiveScene);
+
+		class CameraControllerClass : public ScriptableEntity
+		{
+		public:
+			void OnCreate()
+			{
+			}
+
+			void OnDestroy()
+			{
+			}
+
+			void OnUpdate(TimeStep ts)
+			{
+				auto& transform = GetComponent<TransformComponent>().Transform;
+				float speed = 15.0f;
+
+				if (Input::KeyPressed(MONSI_KEY_W)) transform[3][1] += speed * ts;
+				if (Input::KeyPressed(MONSI_KEY_S)) transform[3][1] -= speed * ts;
+				if (Input::KeyPressed(MONSI_KEY_A)) transform[3][0] -= speed * ts;
+				if (Input::KeyPressed(MONSI_KEY_D)) transform[3][0] += speed * ts;
+			}
+		};
+
+		m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraControllerClass>();
 	}
 
 	void EditorLayer::OnLayerUpdate(TimeStep timestep) {

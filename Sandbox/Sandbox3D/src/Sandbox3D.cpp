@@ -98,7 +98,6 @@ void Sandbox3D::OnLayerAttach()
 	m_QuadEntity = m_Scene.CreateEntity("Quad");
 	m_QuadEntity.AddComponent<Monsi::MeshComponent>(m_QuadTest);
 	m_QuadEntity.GetComponent<Monsi::TransformComponent>().Transform = glm::translate(glm::mat4(1.0f), { 30.0f,1.0f,0.0f });
-
 }
 
 void Sandbox3D::OnLayerUpdate(Monsi::TimeStep timestep)

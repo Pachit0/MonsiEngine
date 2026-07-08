@@ -57,6 +57,23 @@ namespace Monsi {
 		SceneCamera* mainCamera = nullptr;
 		glm::mat4* cameraTransform = nullptr;
 
+		{
+			m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& nativeScript)
+				{
+					if (!nativeScript.Instance)
+					{
+						nativeScript.InstantiateFunction();
+						nativeScript.Instance->m_Entity = Entity{ entity, this };
+
+						if (nativeScript.OnCreateFunction)
+							nativeScript.OnCreateFunction(nativeScript.Instance);
+					}
+
+					if (nativeScript.OnUpdateFunction)
+						nativeScript.OnUpdateFunction(nativeScript.Instance, timeStep);
+				});
+		}
+
 		auto view = m_Registry.view<TransformComponent, CameraComponent>();
 		for (auto entity : view)
 		{
