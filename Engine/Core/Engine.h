@@ -10,7 +10,7 @@
 #include "Platform/OpenGL/OpenGLBuffer.h"
 #include "Renderer/VertexArray.h"
 #include "Core/TimeStep.h"
-#include "Renderer/RenderFactory.h"
+#include "Renderer/RenderInitializator.h"
 
 #include "Window.h"
 

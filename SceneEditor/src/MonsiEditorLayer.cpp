@@ -148,7 +148,7 @@ namespace Monsi {
 			ImGui::DockBuilderFinish(dockspace_id);
 		}
 
-		ImGui::Begin("Properties");
+		ImGui::Begin("Info");
 
 		auto batchStats = Renderer2D::GetBatchStatistics();
 

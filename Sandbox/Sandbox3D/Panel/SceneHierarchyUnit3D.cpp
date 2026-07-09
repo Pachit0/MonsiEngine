@@ -1,25 +1,25 @@
 #include <imgui.h>
 
-#include "SceneHierarchyUnit.h"
+#include "SceneHierarchyUnit3D.h"
 #include "Components.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "SceneCamera.h"
 
 namespace Monsi {
 
-	SceneHierarchyUnit::SceneHierarchyUnit(const Reference<Scene>& scene)
+	SceneHierarchyUnit3D::SceneHierarchyUnit3D(const Reference<Scene>& scene)
 	{
 		SetContext(scene);
 
 	}
 
-	void SceneHierarchyUnit::SetContext(const Reference<Scene>& scene)
+	void SceneHierarchyUnit3D::SetContext(const Reference<Scene>& scene)
 	{
 		m_Scene = scene;
 		m_Selected = {};
 	}
 
-	void SceneHierarchyUnit::OnImGuiRender()
+	void SceneHierarchyUnit3D::OnImGuiRender()
 	{
 		ImGui::Begin("Hierarchy");
 
@@ -49,7 +49,7 @@ namespace Monsi {
 		ImGui::End();
 	}
 
-	void SceneHierarchyUnit::DrawEntityNode(Entity entity)
+	void SceneHierarchyUnit3D::DrawEntityNode(Entity entity)
 	{
 		auto& tag = entity.GetComponent<TagComponent>().Tag;
 		ImGuiTreeNodeFlags flags = ((m_Selected == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
@@ -80,7 +80,7 @@ namespace Monsi {
 
 	}
 
-	void SceneHierarchyUnit::DrawComponents(Entity entity)
+	void SceneHierarchyUnit3D::DrawComponents(Entity entity)
 	{
 		if (entity.HasComponent<TagComponent>()) {
 			auto& tag = entity.GetComponent<TagComponent>().Tag;

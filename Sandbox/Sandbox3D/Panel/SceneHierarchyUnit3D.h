@@ -8,10 +8,10 @@
 
 namespace Monsi {
 
-	class SceneHierarchyUnit {
+	class SceneHierarchyUnit3D {
 	public:
-		SceneHierarchyUnit() = default;
-		SceneHierarchyUnit(const Reference<Scene>& scene);
+		SceneHierarchyUnit3D() = default;
+		SceneHierarchyUnit3D(const Reference<Scene>& scene);
 
 		void SetContext(const Reference<Scene>& scene);
 

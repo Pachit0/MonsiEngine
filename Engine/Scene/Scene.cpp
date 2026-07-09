@@ -6,33 +6,16 @@
 #include "Scene.h"
 #include "Components.h"
 #include "Entity.h"
+#include "RenderInitializator.h"
 
 namespace Monsi {
 
-	static void OnTransformConstruct(entt::registry& registry, entt::entity entity) {
-
-	}
-
 	Scene::Scene()
 	{
-		entt::entity entity = m_Registry.create();
-		m_Registry.emplace<TransformComponent>(entity, glm::mat4(1.0f));
-
-		m_Registry.on_construct<TransformComponent>().connect<&OnTransformConstruct>();
-
-		if (m_Registry.all_of<TransformComponent>(entity))
-			TransformComponent& transform = m_Registry.get<TransformComponent>(entity);
-
-
-		auto view = m_Registry.view<TransformComponent>();
-		for (auto entity : view) {
-			TransformComponent& transform = m_Registry.get<TransformComponent>(entity);
-		}
 	}
 
 	Scene::~Scene()
 	{
-
 	}
 
 	Entity Scene::CreateEntity(const std::string& name)
@@ -56,21 +39,19 @@ namespace Monsi {
 	{
 		SceneCamera* mainCamera = nullptr;
 		glm::mat4* cameraTransform = nullptr;
+		RenderTypeEnum renderType = RenderSystem::GetActiveType();
 
 		{
 			m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& nativeScript)
 				{
 					if (!nativeScript.Instance)
 					{
-						nativeScript.InstantiateFunction();
+						nativeScript.Instance = nativeScript.InstantiateFuncPtr();
 						nativeScript.Instance->m_Entity = Entity{ entity, this };
-
-						if (nativeScript.OnCreateFunction)
-							nativeScript.OnCreateFunction(nativeScript.Instance);
+						nativeScript.Instance->OnCreate();
 					}
-
-					if (nativeScript.OnUpdateFunction)
-						nativeScript.OnUpdateFunction(nativeScript.Instance, timeStep);
+					
+					nativeScript.Instance->OnUpdate(timeStep);
 				});
 		}
 
@@ -88,7 +69,7 @@ namespace Monsi {
 
 		if (!mainCamera) return;
 
-		if (mainCamera->GetProjectionType() == SceneCamera::ProjectionType::Perspective)
+		if (renderType == RenderTypeEnum::Renderer3D)
 		{
 			glm::vec3 cameraPos = glm::vec3((*cameraTransform)[3]);
 			glm::mat4 viewProj = mainCamera->GetProjectionMatrix() * glm::inverse(*cameraTransform);

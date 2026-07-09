@@ -26,6 +26,10 @@ namespace Monsi {
 
 		float GetOrthographicSize() const { return m_OrthographicSize; }
 		void SetOrthographicSize(float size) { m_OrthographicSize = size; RecalcProjection(); }
+		float GetOrthographicNearClip() const { return m_OrthographicNear; }
+		void SetOrthographicNearClip(float nearClip) { m_OrthographicNear = nearClip; RecalcProjection(); }
+		float GetOrthographicFarClip() const { return m_OrthographicFar; }
+		void SetOrthographicFarClip(float farClip) { m_OrthographicFar = farClip; RecalcProjection(); }
 
 	private:
 		void RecalcProjection();

@@ -11,7 +11,7 @@ namespace Monsi {
 	void Renderer::Init(RenderTypeEnum type) {
 		ENGINE_PROFILER_FUNCTION();
 		RenderCommand::Init();
-		RenderFactory::InitRenderType(type);
+		RenderSystem::Init(type);
 
 	}
 

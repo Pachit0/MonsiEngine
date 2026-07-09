@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Monsi.h>
+#include "SceneHierarchyUnit3D.h"
 
 class Sandbox3D : public Monsi::Layer {
 public:
@@ -34,7 +35,7 @@ private:
 
 	Monsi::PerspectiveControl m_CameraControl;
 
-	Monsi::Scene m_Scene;
+	Monsi::Reference<Monsi::Scene> m_Scene;
 	Monsi::Entity m_CameraEntity;
 	Monsi::Entity m_MainLightEntity;
 	Monsi::Entity m_PointLightEntity;
@@ -47,6 +48,7 @@ private:
 	Monsi::Entity m_CylinderEntity;
 	Monsi::Entity m_QuadEntity;
 
+	Monsi::SceneHierarchyUnit3D m_Unit;
 	glm::vec3 m_SpherePosition;
 
 private: //fps counter

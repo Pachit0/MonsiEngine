@@ -29,7 +29,7 @@ target_link_libraries( Editor PRIVATE
     Engine
 )
 
-if(PRODUCTION_BUILD)	
+if(PRODUCTION_BUILD)
 
     target_compile_definitions(Editor PUBLIC SHADER_PATH="./assets/Shader")
     target_compile_definitions(Editor PUBLIC TEXTURE_PATH="./assets/Textures")
