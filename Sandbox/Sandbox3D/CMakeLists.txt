@@ -20,6 +20,7 @@ add_executable( Sandbox3D
 
 target_include_directories(Sandbox3D PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/Panel
 )
 
 target_link_libraries(Sandbox3D PRIVATE 

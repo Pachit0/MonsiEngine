@@ -24,6 +24,7 @@ namespace Monsi {
 
 		friend class Entity;
 		friend class SceneHierarchyUnit;
+		friend class SceneHierarchyUnit3D;
 	};
 
 }
