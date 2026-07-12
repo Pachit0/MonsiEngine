@@ -22,27 +22,25 @@ namespace Monsi {
         const PerspectiveCamera& GetCamera() const { return m_Camera; }
         bool IsMouseCaptured() const { return m_MouseCaptured; }
 
-        void setCameraSpeed(float speed) { m_CameraTranslationSpeed = speed; }
+        float GetYaw() { return m_Yaw; }
+        float GetPitch() { return m_Pitch; }
+        void SetCameraSpeed(float speed) { m_CameraTranslationSpeed = speed; }
         void SetFOV(float fov) { m_FOV = fov; }
         float GetFOV() const { return m_FOV; }
 
     private:
 		bool m_MouseCaptured = false;
-		float m_LastMouseX = 0.0f;
-		float m_LastMouseY = 0.0f;
 		bool m_FirstMouse = true;
-
         bool m_CameraRotationFlag;
 
+		float m_LastMouseX = 0.0f;
+		float m_LastMouseY = 0.0f;
         float m_AspectRatio;
-
         float m_FOV = 45.0f;
         float m_NearClip = 0.1f;
         float m_FarClip = 1000.0f;
-
         float m_Yaw = -90.0f;
         float m_Pitch = 0.0f;
-
         float m_CameraTranslationSpeed = 5.0f;
         float m_MouseSensitivity = 0.1f;
 
@@ -54,7 +52,6 @@ namespace Monsi {
         PerspectiveCamera m_Camera;
 
     private:
-
         bool OnZoomEvent(MouseEventScrolled& event);
         bool OnResizeEvent(WindowResizeEvent& event);
         bool OnMouseMoved(MouseEventMoved& event);

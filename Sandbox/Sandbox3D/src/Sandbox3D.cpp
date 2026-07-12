@@ -12,7 +12,7 @@ m_ViewportFocused(false), m_ViewportHovered(false), m_SpherePosition({ -5.0f, 3.
 void Sandbox3D::OnLayerAttach()
 {
 	m_Scene = Monsi::CreateReference<Monsi::Scene>();
-	m_CameraControl.setCameraSpeed(50.0f);
+	m_CameraControl.SetCameraSpeed(50.0f);
 
 	Monsi::FrameBufferSpec spec;
 	spec.Width = 1280;
@@ -42,11 +42,11 @@ void Sandbox3D::OnLayerAttach()
 	m_ShpereMaterial->SpecularColor = glm::vec3(0.628f, 0.555f, 0.366f);
 	m_ShpereMaterial->Shininess = 51.2f;
 
-	m_SphereTest = Monsi::MeshBuilder::CreateSphere(1.0f, 32, 32, m_ShpereMaterial); 
-	m_TorusTest = Monsi::MeshBuilder::CreateTorus(2.5f, 0.5f, 32, 16, m_ShpereMaterial); 
-	m_ConeTest = Monsi::MeshBuilder::CreateCone(2.5f, 8, 32, m_ShpereMaterial); 
-	m_CylinderTest = Monsi::MeshBuilder::CreateCylinder(2.5f, 8, 32, m_ShpereMaterial); 
-	m_QuadTest = Monsi::MeshBuilder::CreateQuad(0.5f, 0.5f, m_ShpereMaterial); 
+	m_SphereTest = Monsi::MeshBuilder::CreateSphere(1.0f, 32, 32, m_ShpereMaterial);
+	m_TorusTest = Monsi::MeshBuilder::CreateTorus(2.5f, 0.5f, 32, 16, m_ShpereMaterial);
+	m_ConeTest = Monsi::MeshBuilder::CreateCone(2.5f, 8, 32, m_ShpereMaterial);
+	m_CylinderTest = Monsi::MeshBuilder::CreateCylinder(2.5f, 8, 32, m_ShpereMaterial);
+	m_QuadTest = Monsi::MeshBuilder::CreateQuad(0.5f, 0.5f, m_ShpereMaterial);
 	m_CubeTest = Monsi::MeshBuilder::CreateCube(0.5f, m_ShpereMaterial);
 
 	m_CameraEntity = m_Scene->CreateEntity("Camera");
@@ -70,36 +70,36 @@ void Sandbox3D::OnLayerAttach()
 
 	m_BackpackEntity = m_Scene->CreateEntity("Backpack");
 	m_BackpackEntity.AddComponent<Monsi::ModelComponent>(m_Backpack);
-	m_BackpackEntity.GetComponent<Monsi::TransformComponent>().Transform = glm::translate(glm::mat4(1.0f), glm::vec3(-50.0f, 3.0f, 0.0f));
+	m_BackpackEntity.GetComponent<Monsi::TransformComponent>().Translation = glm::vec3(-50.0f, 3.0f, 0.0f);
 
 	m_SponzaEntity = m_Scene->CreateEntity("Sponza");
 	m_SponzaEntity.AddComponent<Monsi::ModelComponent>(m_Sponza);
-	m_SponzaEntity.GetComponent<Monsi::TransformComponent>().Transform = glm::scale(glm::mat4(1.0f), glm::vec3(0.05f));
+	m_SponzaEntity.GetComponent<Monsi::TransformComponent>().Scale = glm::vec3(0.05f);
 
 	m_SphereEntity = m_Scene->CreateEntity("Sphere");
 	m_SphereEntity.AddComponent<Monsi::MeshComponent>(m_SphereTest);
-	m_SphereEntity.GetComponent<Monsi::TransformComponent>().Transform = glm::translate(glm::mat4(1.0f), m_SpherePosition);
+	m_SphereEntity.GetComponent<Monsi::TransformComponent>().Translation = m_SpherePosition;
 
 	m_CubeEntity = m_Scene->CreateEntity("Cube");
 	m_CubeEntity.AddComponent<Monsi::MeshComponent>(m_CubeTest);
-	m_CubeEntity.GetComponent<Monsi::TransformComponent>().Transform = glm::translate(glm::mat4(1.0f), {0.0f,5.0f,0.0f});
+	m_CubeEntity.GetComponent<Monsi::TransformComponent>().Translation = glm::vec3(0.0f, 5.0f, 0.0f);
 
 	m_TorusEntity = m_Scene->CreateEntity("Torus");
 	m_TorusEntity.AddComponent<Monsi::MeshComponent>(m_TorusTest);
-	m_TorusEntity.GetComponent<Monsi::TransformComponent>().Transform = glm::translate(glm::mat4(1.0f), {0.0f,1.0f,0.0f});
+	m_TorusEntity.GetComponent<Monsi::TransformComponent>().Translation = glm::vec3(0.0f, 1.0f, 0.0f);
 
 	m_CylinderEntity = m_Scene->CreateEntity("Cylinder");
 	m_CylinderEntity.AddComponent<Monsi::MeshComponent>(m_CylinderTest);
-	m_CylinderEntity.GetComponent<Monsi::TransformComponent>().Transform = glm::translate(glm::mat4(1.0f), {10.0f,5.0f,0.0f});
+	m_CylinderEntity.GetComponent<Monsi::TransformComponent>().Translation = glm::vec3(10.0f, 5.0f, 0.0f);
 
 	m_ConeEntity = m_Scene->CreateEntity("Cone");
 	m_ConeEntity.AddComponent<Monsi::MeshComponent>(m_ConeTest);
-	m_ConeEntity.GetComponent<Monsi::TransformComponent>().Transform = glm::translate(glm::mat4(1.0f), {20.0f,5.0f,0.0f});
+	m_ConeEntity.GetComponent<Monsi::TransformComponent>().Translation = glm::vec3(20.0f, 5.0f, 0.0f);
 
 	m_QuadEntity = m_Scene->CreateEntity("Quad");
 	m_QuadEntity.AddComponent<Monsi::MeshComponent>(m_QuadTest);
-	m_QuadEntity.GetComponent<Monsi::TransformComponent>().Transform = glm::translate(glm::mat4(1.0f), { 30.0f,1.0f,0.0f });
-	
+	m_QuadEntity.GetComponent<Monsi::TransformComponent>().Translation = glm::vec3(30.0f, 1.0f, 0.0f);
+
 	m_Unit.SetContext(m_Scene);
 }
 
@@ -131,7 +131,9 @@ void Sandbox3D::OnLayerUpdate(Monsi::TimeStep timestep)
 
 	m_CameraControl.OnLayerUpdate(timestep);
 
-	m_CameraEntity.GetComponent<Monsi::TransformComponent>().Transform = glm::inverse(m_CameraControl.GetCamera().GetViewMatrix());
+	auto& camTransform = m_CameraEntity.GetComponent<Monsi::TransformComponent>();
+	camTransform.Translation = m_CameraControl.GetCamera().GetPosition();
+	camTransform.Rotation = glm::quatLookAt(m_CameraControl.GetCamera().GetFront(), m_CameraControl.GetCamera().GetUp());
 
 	static float rotationStep = 0.0f;
 	rotationStep += timestep * 50.0f;
@@ -142,9 +144,10 @@ void Sandbox3D::OnLayerUpdate(Monsi::TimeStep timestep)
 	glm::vec3 animatedSpherePos = m_SpherePosition;
 	animatedSpherePos.y += std::sin(totalTime * 2.0f) * 0.5f;
 
-	m_BackpackEntity.GetComponent<Monsi::TransformComponent>().Transform = glm::rotate(glm::translate(glm::mat4(1.0f), glm::vec3(-50.0f, 3.0f, 0.0f)), glm::radians(rotationStep), glm::vec3(0.0f, 1.0f, 0.0f));
+	auto& backpackTransform = m_BackpackEntity.GetComponent<Monsi::TransformComponent>();
+	backpackTransform.Rotation = glm::angleAxis(glm::radians(rotationStep), glm::vec3(0.0f, 1.0f, 0.0f));
 
-	m_SphereEntity.GetComponent<Monsi::TransformComponent>().Transform = glm::translate(glm::mat4(1.0f), animatedSpherePos);
+	m_SphereEntity.GetComponent<Monsi::TransformComponent>().Translation = animatedSpherePos;
 
 	m_Scene->OnUpdate(timestep);
 
@@ -162,10 +165,10 @@ void Sandbox3D::OnImGuiDraw() {
 	ImGui::BeginMainMenuBar();
 	if (ImGui::BeginMenu("File"))
 	{
-		if (ImGui::MenuItem("Exit")) { 
+		if (ImGui::MenuItem("Exit")) {
 			Monsi::Application::Get().CloseApp();
 		}
-		
+
 		ImGui::EndMenu();
 	}
 	ImGui::EndMainMenuBar();
@@ -216,12 +219,12 @@ void Sandbox3D::OnImGuiDraw() {
 
 	auto& pointLight = m_PointLightEntity.GetComponent<Monsi::LightComponent>();
 	auto& pointLightTransform = m_PointLightEntity.GetComponent<Monsi::TransformComponent>();
-	glm::vec3 pointLightPos = glm::vec3(pointLightTransform.Transform[3]);
+	glm::vec3 pointLightPos = glm::vec3(pointLightTransform.Translation);
 
 	ImGui::Text("Point light parameters");
 
 	if (ImGui::SliderFloat3("Position", glm::value_ptr(pointLightPos), -10.0f, 10.0f))
-		pointLightTransform.Transform = glm::translate(glm::mat4(1.0f), pointLightPos);
+		pointLightTransform.Translation = pointLightPos;
 
 	ImGui::ColorEdit3("Color", glm::value_ptr(pointLight.Color));
 	ImGui::SliderFloat("Point light Intensity", &pointLight.Intensity, 0.0f, 10.0f);

@@ -1,12 +1,15 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "SceneCamera.h"
 #include "CubePass.h"
 #include "Mesh.h"
 #include "ModelLoader.h"
 #include "ScriptableEntity.h"
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/quaternion.hpp>
 
 namespace Monsi {
 
@@ -47,15 +50,39 @@ namespace Monsi {
 		LightComponent(const LightComponent& other) = default;
 	};
 
+// 	struct TransformComponent {
+// 		glm::vec3 Translation = glm::vec3{ 0.0f,0.0f,0.0f };
+// 		glm::vec3 Rotation = glm::vec3{ 0.0f,0.0f,0.0f };
+// 		glm::vec3 Scale = glm::vec3{ 1.0,1.0f,1.0f };
+// 
+// 		TransformComponent() = default;
+// 		TransformComponent(const TransformComponent& other) = default;
+// 		TransformComponent(const glm::vec3& translation) : Translation(translation) {}
+// 
+// 		glm::mat4 GetTransform() const {
+// 			glm::mat4 rotation = 
+// 			  glm::rotate(glm::mat4(1.0f), Rotation.x, { 1,0,0 })
+// 			* glm::rotate(glm::mat4(1.0f), Rotation.y, { 0,1,0 })
+// 			* glm::rotate(glm::mat4(1.0f), Rotation.z, { 0,0,1 });
+// 
+// 			return glm::translate(glm::mat4(1.0f), Translation) * rotation * glm::scale(glm::mat4(1.0f), Scale);
+// 		}
+// 	};
+
 	struct TransformComponent {
-		glm::mat4 Transform = glm::mat4(1.0f);
+		glm::vec3 Translation = glm::vec3{ 0.0f, 0.0f, 0.0f };
+		glm::quat Rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+		glm::vec3 Scale = glm::vec3{ 1.0f, 1.0f, 1.0f };
 
 		TransformComponent() = default;
 		TransformComponent(const TransformComponent& other) = default;
-		TransformComponent(const glm::mat4& transform) : Transform(transform) {}
+		TransformComponent(const glm::vec3& translation) : Translation(translation) {}
 
-		operator const glm::mat4& () { return Transform; }
-		operator const glm::mat4& () const { return Transform; }
+		glm::mat4 GetTransform() const {
+			return glm::translate(glm::mat4(1.0f), Translation)
+				* glm::mat4_cast(Rotation)
+				* glm::scale(glm::mat4(1.0f), Scale);
+		}
 	};
 
 	struct SpriteRendererComponent {

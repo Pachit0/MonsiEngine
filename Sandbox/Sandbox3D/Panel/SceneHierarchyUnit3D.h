@@ -4,7 +4,7 @@
 #include "Core/Logger.h"
 #include "Scene/Scene.h"
 #include "Entity.h"
-
+#include <glm/glm.hpp>
 
 namespace Monsi {
 
@@ -22,8 +22,11 @@ namespace Monsi {
 
 	private:
 		Reference<Scene> m_Scene;
-
 		Entity m_Selected;
+
+		//temporary solution
+		glm::vec3 m_CachedEulerDegrees = glm::vec3(0.0f);
+		bool m_EditingRotation = false;
 	};
 
 

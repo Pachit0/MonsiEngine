@@ -38,7 +38,9 @@ namespace Monsi {
 	void Scene::OnUpdate(TimeStep timeStep)
 	{
 		SceneCamera* mainCamera = nullptr;
-		glm::mat4* cameraTransform = nullptr;
+		glm::mat4 cameraTransform;
+		glm::vec3 cameraPosition;
+
 		RenderTypeEnum renderType = RenderSystem::GetActiveType();
 
 		{
@@ -62,7 +64,8 @@ namespace Monsi {
 			if (camera.Primary)
 			{
 				mainCamera = &camera.Camera;
-				cameraTransform = &transform.Transform;
+				cameraTransform = transform.GetTransform();
+				cameraPosition = transform.Translation;
 				break;
 			}
 		}
@@ -71,8 +74,8 @@ namespace Monsi {
 
 		if (renderType == RenderTypeEnum::Renderer3D)
 		{
-			glm::vec3 cameraPos = glm::vec3((*cameraTransform)[3]);
-			glm::mat4 viewProj = mainCamera->GetProjectionMatrix() * glm::inverse(*cameraTransform);
+			glm::vec3 cameraPos = cameraPosition;
+			glm::mat4 viewProj = mainCamera->GetProjectionMatrix() * glm::inverse(cameraTransform);
 
 			SceneLighting sceneLighting;
 			auto lightView = m_Registry.view<TransformComponent, LightComponent>();
@@ -90,7 +93,7 @@ namespace Monsi {
 				{
 // 					if (sceneLighting.PointLights.size() >= LightingBuffer::MaxPointLights)
 // 						continue;
-					glm::vec3 position = glm::vec3(transform.Transform[3]);
+					glm::vec3 position = transform.Translation;
 					sceneLighting.PointLights.push_back({ position, light.Color, light.Intensity, light.Radius });
 				}
 			}
@@ -102,27 +105,27 @@ namespace Monsi {
 			for (auto entity : meshGroup)
 			{
 				auto [transform, mesh] = meshGroup.get<TransformComponent, MeshComponent>(entity);
-				Renderer3D::DrawMesh(mesh.MeshAsset.get(), transform.Transform, glm::vec4(1.0f));
+				Renderer3D::DrawMesh(mesh.MeshAsset.get(), transform.GetTransform(), glm::vec4(1.0f));
 			}
 
 			auto modelGroup = m_Registry.view<TransformComponent, ModelComponent>();
 			for (auto entity : modelGroup)
 			{
 				auto [transform, model] = modelGroup.get<TransformComponent, ModelComponent>(entity);
-				Renderer3D::DrawModel(model.ModelAsset, transform.Transform, glm::vec4(1.0f));
+				Renderer3D::DrawModel(model.ModelAsset, transform.GetTransform(), glm::vec4(1.0f));
 			}
 
 			Renderer3D::End3D();
 		}
 		else
 		{
-			Renderer2D::BeginScene2D(mainCamera->GetProjectionMatrix(), *cameraTransform);
+			Renderer2D::BeginScene2D(mainCamera->GetProjectionMatrix(), cameraTransform);
 
 			auto spriteGroup = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
 			for (auto entity : spriteGroup)
 			{
 				auto [transform, sprite] = spriteGroup.get<TransformComponent, SpriteRendererComponent>(entity);
-				Renderer2D::drawQuad(transform, sprite.Color);
+				Renderer2D::drawQuad(transform.GetTransform(), sprite.Color);
 			}
 
 			Renderer2D::EndScene2D();

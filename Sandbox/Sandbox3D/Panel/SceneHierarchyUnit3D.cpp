@@ -1,4 +1,5 @@
 #include <imgui.h>
+#include <imgui_internal.h>
 
 #include "SceneHierarchyUnit3D.h"
 #include "Components.h"
@@ -7,10 +8,95 @@
 
 namespace Monsi {
 
+	static void DrawVec3Control(const std::string& label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f)
+	{
+		ImGuiIO& io = ImGui::GetIO();
+		auto boldFont = io.Fonts->Fonts[0];
+
+		ImGui::PushID(label.c_str());
+
+		ImGuiTableFlags tableFlags = ImGuiTableFlags_SizingFixedFit;
+		if (!ImGui::BeginTable("##Vec3ControlTable", 2, tableFlags)) {
+			ImGui::PopID();
+			return;
+		}
+		ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_WidthFixed, columnWidth);
+		ImGui::TableSetupColumn("Controls", ImGuiTableColumnFlags_WidthStretch);
+
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 3.0f, 2.0f });
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
+
+		float lineHeight = ImGui::GetFrameHeight();
+		ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text(label.c_str());
+
+		ImGui::TableSetColumnIndex(1);
+
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.0f, 0.6f, 0.6f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.4f, 0.85f, 0.85f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.0f, 0.35f, 0.35f, 1.0f });
+		ImGui::PushFont(boldFont);
+
+		if (ImGui::Button("X", buttonSize)) {
+			values.x = resetValue;
+		}
+
+		ImGui::PopFont();
+		ImGui::PopStyleColor(3);
+
+		ImGui::SameLine();
+		ImGui::DragFloat("##X", &values.x, 0.1f, 0.0f, 0.0f, "%.4f");
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(1);
+
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.0f, 0.6f, 0.6f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.4f, 0.85f, 0.85f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.0f, 0.35f, 0.35f, 1.0f });
+		ImGui::PushFont(boldFont);
+
+		if (ImGui::Button("Y", buttonSize)) {
+			values.y = resetValue;
+		}
+
+		ImGui::PopFont();
+		ImGui::PopStyleColor(3);
+
+		ImGui::SameLine();
+		ImGui::DragFloat("##Y", &values.y, 0.1f, 0.0f, 0.0f, "%.4f");
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(1);
+
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.0f, 0.6f, 0.6f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.4f, 0.85f, 0.85f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.0f, 0.35f, 0.35f, 1.0f });
+		ImGui::PushFont(boldFont);
+
+		if (ImGui::Button("Z", buttonSize)) {
+			values.z = resetValue;
+		}
+
+		ImGui::PopFont();
+		ImGui::PopStyleColor(3);
+
+		ImGui::SameLine();
+		ImGui::DragFloat("##Z", &values.z, 0.1f, 0.0f, 0.0f, "%.4f");
+
+		ImGui::PopStyleVar(3);
+
+		ImGui::EndTable();
+
+		ImGui::PopID();
+	}
+
 	SceneHierarchyUnit3D::SceneHierarchyUnit3D(const Reference<Scene>& scene)
 	{
 		SetContext(scene);
-
 	}
 
 	void SceneHierarchyUnit3D::SetContext(const Reference<Scene>& scene)
@@ -95,16 +181,37 @@ namespace Monsi {
 		}
 		if (entity.HasComponent<TransformComponent>()) {
 			if (ImGui::TreeNodeEx((void*)typeid(TransformComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Transform")) {
-				auto& transform = entity.GetComponent<TransformComponent>().Transform;
-				ImGui::DragFloat3("Position", glm::value_ptr(transform[3]), 0.05f);
+				auto& transform = entity.GetComponent<TransformComponent>();
+				DrawVec3Control("Translation", transform.Translation);
+
+				static Entity m_LastRotationEntity;
+				static glm::vec3 m_CachedEulerDegrees;
+
+				if (entity != m_LastRotationEntity) {
+					m_CachedEulerDegrees = glm::degrees(glm::eulerAngles(transform.Rotation));
+					m_LastRotationEntity = entity;
+				}
+
+				DrawVec3Control("Rotation", m_CachedEulerDegrees);
+				transform.Rotation = glm::quat(glm::radians(m_CachedEulerDegrees));
+
+				DrawVec3Control("Scale", transform.Scale);
+
+				ImGui::TreePop();
+			}
+		}
+		if (entity.HasComponent<SpriteRendererComponent>()) {
+			if (ImGui::TreeNodeEx((void*)typeid(SpriteRendererComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Sprite Color")) {
+				auto& spriteRenderer = entity.GetComponent<SpriteRendererComponent>();
+				ImGui::ColorEdit4("Color", glm::value_ptr(spriteRenderer.Color));
 
 				ImGui::TreePop();
 			}
 		}
 		if (entity.HasComponent<CameraComponent>()) {
-			if (ImGui::TreeNodeEx((void*)typeid(TransformComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Camera")) {
+			if (ImGui::TreeNodeEx((void*)typeid(CameraComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Camera")) {
 				auto& cameraEntity = entity.GetComponent<CameraComponent>();
-				
+
 				const char* projectionType[] = { "Orthographic", "Perspective" };
 				const char* currentProjection = projectionType[(int)cameraEntity.Camera.GetProjectionType()];
 

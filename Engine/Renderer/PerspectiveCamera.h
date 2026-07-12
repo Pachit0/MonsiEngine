@@ -14,6 +14,8 @@ namespace Monsi {
         void SetDirection(const glm::vec3& front, const glm::vec3& up);
         void SetPosition(const glm::vec3& position);
         const glm::vec3& GetPosition() const { return m_Position; }
+		const glm::vec3& GetFront() const { return m_Front; }
+		const glm::vec3& GetUp() const { return m_Up; }
 
         void RecalculateViewMatrix();
 
