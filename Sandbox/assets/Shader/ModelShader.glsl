@@ -21,7 +21,8 @@ void main()
     
     vec4 worldPos = a_InstanceTransform * vec4(a_Position, 1.0);
     v_FragPos = vec3(worldPos);
-    v_Normal = mat3(transpose(inverse(a_InstanceTransform))) * a_Normal;
+
+    v_Normal = mat3(a_InstanceTransform) * a_Normal;
 
     gl_Position = u_ViewProjection * worldPos;
 }
@@ -71,7 +72,7 @@ in vec3 v_Normal;
 out vec4 FragColor;
 
 vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir) {
-    if (length(light.Direction) == 0.0) return vec3(0.0);
+    if (dot(light.Direction, light.Direction) < 0.0001) return vec3(0.0);
 
     vec3 lightDir = normalize(-light.Direction);
     
@@ -87,10 +88,12 @@ vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir
 
 vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
     vec3 ToLight = light.Position - fragPos;
-    if (length(ToLight) < 0.0001) return vec3(0.0);
+    float distance = length(ToLight);
 
-    vec3 lightDir = normalize(ToLight);
-    
+    if (distance < 0.0001) return vec3(0.0);
+
+    vec3 lightDir = ToLight / distance;
+
     float diff = max(dot(normal, lightDir), 0.0);
     vec3 diffuse = light.Color * light.Intensity * diff * material.diffuse;
 
@@ -98,7 +101,6 @@ vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewD
     float spec = pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
     vec3 specular = light.Color * light.Intensity * spec * material.specular;
 
-    float distance = length(ToLight);
     float attenuation = clamp(1.0 - (distance / light.Radius), 0.0, 1.0);
 
     return (diffuse + specular) * attenuation;

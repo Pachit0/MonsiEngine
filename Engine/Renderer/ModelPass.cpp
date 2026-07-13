@@ -1,4 +1,5 @@
 #include "MonsiPch.h"
+#include <algorithm>
 #include "ModelPass.h"
 #include "RenderCommand.h"
 #include "Lighting.h"
@@ -31,7 +32,6 @@ namespace Monsi {
 
 	void ModelPass::Shutdown()
 	{
-		m_RegisteredMeshes.clear();
 		m_MeshBatches.clear();
 	}
 
@@ -40,7 +40,6 @@ namespace Monsi {
 		auto& vao = mesh->GetVertexArray();
 		vao->Bind();
 		vao->AddVertexBuffer(m_InstanceVBO);
-		m_RegisteredMeshes.insert(mesh);
 	}
 
 	void ModelPass::BeginScene(const glm::mat4& viewProj, const glm::vec3& viewPos, const Reference<LightingBuffer>& lighting)
@@ -82,26 +81,13 @@ namespace Monsi {
 
 	void ModelPass::DrawMesh(const Mesh* meshPtr, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation)
 	{
-		if (m_RegisteredMeshes.find(meshPtr) == m_RegisteredMeshes.end())
-		{
-			RegisterMesh(meshPtr);
-		}
-
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position);
 		if (rotation.x != 0.0f) transform = glm::rotate(transform, glm::radians(rotation.x), glm::vec3(1, 0, 0));
 		if (rotation.y != 0.0f) transform = glm::rotate(transform, glm::radians(rotation.y), glm::vec3(0, 1, 0));
 		if (rotation.z != 0.0f) transform = glm::rotate(transform, glm::radians(rotation.z), glm::vec3(0, 0, 1));
 		transform = glm::scale(transform, size);
 
-		auto& batch = m_MeshBatches[meshPtr];
-
-		if (!batch.MeshPtr)
-		{
-			batch.MeshPtr = meshPtr;
-			batch.InstanceData.reserve(DefaultBatchReserve);
-		}
-
-		batch.InstanceData.push_back({ transform, color });
+		DrawMesh(meshPtr, transform, color);
 	}
 
 	void ModelPass::DrawModel(const Reference<Model>& model, const glm::mat4& transform, const glm::vec4& color)
@@ -113,15 +99,15 @@ namespace Monsi {
 
 	void ModelPass::DrawMesh(const Mesh* meshPtr, const glm::mat4& transform, const glm::vec4& color)
 	{
-		if (m_RegisteredMeshes.find(meshPtr) == m_RegisteredMeshes.end())
-			RegisterMesh(meshPtr);
-
 		auto& batch = m_MeshBatches[meshPtr];
+
 		if (!batch.MeshPtr)
 		{
+			RegisterMesh(meshPtr);
 			batch.MeshPtr = meshPtr;
 			batch.InstanceData.reserve(DefaultBatchReserve);
 		}
+
 		batch.InstanceData.push_back({ transform, color });
 	}
 
@@ -133,33 +119,60 @@ namespace Monsi {
 		m_Shader->Bind();
 		m_Shader->setMat4("u_ViewProjection", m_ViewProjection);
 
+		m_FlushList.clear();
 		for (auto& [meshPtr, batch] : m_MeshBatches)
 		{
+			if (!batch.InstanceData.empty())
+				m_FlushList.push_back(&batch);
+		}
+
+		std::sort(m_FlushList.begin(), m_FlushList.end(),
+			[](const MeshBatch* a, const MeshBatch* b)
+			{
+				return a->MeshPtr->GetMaterial().get() < b->MeshPtr->GetMaterial().get();
+			});
+
+		Material* lastMaterial = nullptr;
+
+		for (MeshBatch* batchPtr : m_FlushList)
+		{
+			auto& batch = *batchPtr;
 			uint32_t count = (uint32_t)batch.InstanceData.size();
-			if (count == 0)
-				continue;
 
 			if (count > MaxInstances)
 			{
-				ENGINE_LOG_WARN("ModelPass::Flush - mesh batch has {0} instances, exceeding MaxInstances ({1}). Clamping.", count, MaxInstances);
-				count = MaxInstances;
-			}
-
-			auto& mesh = *batch.MeshPtr;
-			const auto& material = mesh.GetMaterial();
-
-			if (material)
-			{
-				material->Bind(m_Shader);
-
-				if (!material->DiffuseMap)
+				if (!batch.WarnedOverflow)
 				{
-					m_WhiteTexture->Bind(0);
+					ENGINE_LOG_WARN("ModelPass::Flush - mesh batch has {0} instances, exceeding MaxInstances ({1}). Clamping.", count, MaxInstances);
+					batch.WarnedOverflow = true;
 				}
+				count = MaxInstances;
 			}
 			else
 			{
-				m_WhiteTexture->Bind(0);
+				batch.WarnedOverflow = false;
+			}
+
+			auto& mesh = *batch.MeshPtr;
+			Material* material = mesh.GetMaterial().get();
+
+			if (material != lastMaterial)
+			{
+				if (material)
+				{
+					material->Bind(m_Shader);
+
+					if (!material->DiffuseMap)
+					{
+						m_WhiteTexture->Bind(0);
+					}
+				}
+				else
+				{
+					m_WhiteTexture->Bind(0);
+				}
+
+				lastMaterial = material;
 			}
 
 			m_InstanceVBO->SetData(batch.InstanceData.data(), count * sizeof(ModelInstanceData));

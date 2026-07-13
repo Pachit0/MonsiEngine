@@ -5,7 +5,7 @@
 class SandboxApp3D : public Monsi::Application {
 public:
 	SandboxApp3D()
-		: Application({"Sandbox3D", Monsi::RenderTypeEnum::Renderer3D }) {
+		: Application({"Sandbox3D", Monsi::RenderTypeEnum::Renderer3D, 1600, 900 }) {
 		PushLayer(new Sandbox3D());
 	}
 

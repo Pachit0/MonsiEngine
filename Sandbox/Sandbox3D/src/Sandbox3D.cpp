@@ -4,7 +4,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-Sandbox3D::Sandbox3D() : Layer("Sandbox3D"), m_CameraControl(1280.0f / 720.0f), m_ViewportSize{ 0.0f,0.0f },
+Sandbox3D::Sandbox3D() : Layer("Sandbox3D"), m_CameraControl(1600.0f / 900.0f), m_ViewportSize{ 0.0f,0.0f },
 m_ViewportFocused(false), m_ViewportHovered(false), m_SpherePosition({ -5.0f, 3.0f, 5.0f })
 {
 }
@@ -15,8 +15,8 @@ void Sandbox3D::OnLayerAttach()
 	m_CameraControl.SetCameraSpeed(50.0f);
 
 	Monsi::FrameBufferSpec spec;
-	spec.Width = 1280;
-	spec.Height = 720;
+	spec.Width = 1600;
+	spec.Height = 900;
 	m_FrameBuffer = Monsi::FrameBuffer::Create(spec);
 	m_MonsiTest = Monsi::Texture2D::Create(TEXTURE_PATH "background.png");
 
@@ -34,6 +34,7 @@ void Sandbox3D::OnLayerAttach()
 		TEXTURE_PATH "front.png",
 		TEXTURE_PATH "back.png"
 	};
+
 	m_SkyBoxTest = Monsi::CubeMapTexture::Create(skyboxTextures);
 
 	m_ShpereMaterial = Monsi::CreateReference<Monsi::Material>();
@@ -42,12 +43,12 @@ void Sandbox3D::OnLayerAttach()
 	m_ShpereMaterial->SpecularColor = glm::vec3(0.628f, 0.555f, 0.366f);
 	m_ShpereMaterial->Shininess = 51.2f;
 
-	m_SphereTest = Monsi::MeshBuilder::CreateSphere(1.0f, 32, 32, m_ShpereMaterial);
-	m_TorusTest = Monsi::MeshBuilder::CreateTorus(2.5f, 0.5f, 32, 16, m_ShpereMaterial);
-	m_ConeTest = Monsi::MeshBuilder::CreateCone(2.5f, 8, 32, m_ShpereMaterial);
-	m_CylinderTest = Monsi::MeshBuilder::CreateCylinder(2.5f, 8, 32, m_ShpereMaterial);
-	m_QuadTest = Monsi::MeshBuilder::CreateQuad(0.5f, 0.5f, m_ShpereMaterial);
-	m_CubeTest = Monsi::MeshBuilder::CreateCube(0.5f, m_ShpereMaterial);
+	m_SphereTest = Monsi::MeshBuilder::CreateSphere(1.0f, 32, 32, Monsi::CreateReference<Monsi::Material>(m_ShpereMaterial));
+	m_TorusTest = Monsi::MeshBuilder::CreateTorus(2.5f, 0.5f, 32, 16, Monsi::CreateReference<Monsi::Material>(m_ShpereMaterial));
+	m_ConeTest = Monsi::MeshBuilder::CreateCone(2.5f, 8, 32, Monsi::CreateReference<Monsi::Material>(m_ShpereMaterial));
+	m_CylinderTest = Monsi::MeshBuilder::CreateCylinder(2.5f, 8, 32, Monsi::CreateReference<Monsi::Material>(m_ShpereMaterial));
+	m_QuadTest = Monsi::MeshBuilder::CreateQuad(0.5f, 0.5f, Monsi::CreateReference<Monsi::Material>(m_ShpereMaterial));
+	m_CubeTest = Monsi::MeshBuilder::CreateCube(0.5f, Monsi::CreateReference<Monsi::Material>(m_ShpereMaterial));
 
 	m_CameraEntity = m_Scene->CreateEntity("Camera");
 	auto& cameraComponent = m_CameraEntity.AddComponent<Monsi::CameraComponent>();
@@ -55,16 +56,14 @@ void Sandbox3D::OnLayerAttach()
 	cameraComponent.Primary = true;
 
 	m_MainLightEntity = m_Scene->CreateEntity("Directional Light");
-	auto& mainLight = m_MainLightEntity.AddComponent<Monsi::LightComponent>();
-	mainLight.Type = Monsi::LightComponent::LightType::Directional;
+	auto& mainLight = m_MainLightEntity.AddComponent<Monsi::DirectionalLightComponent>();
 	mainLight.Direction = glm::vec3(0.0f, -1.0f, 0.0f);
-	mainLight.Color = glm::vec3(1.0f, 0.95f, 0.9f);
+	mainLight.Color = MonsiColors::White;
 	mainLight.Intensity = 1.0f;
 
 	m_PointLightEntity = m_Scene->CreateEntity("Point Light");
-	auto& pointLight = m_PointLightEntity.AddComponent<Monsi::LightComponent>();
-	pointLight.Type = Monsi::LightComponent::LightType::Point;
-	pointLight.Color = glm::vec3(1.0f);
+	auto& pointLight = m_PointLightEntity.AddComponent<Monsi::PointLightComponent>();
+	pointLight.Color = MonsiColors::Mint;
 	pointLight.Intensity = 1.0f;
 	pointLight.Radius = 10.0f;
 
@@ -207,37 +206,6 @@ void Sandbox3D::OnImGuiDraw() {
 	ImGui::Text("FPS: %.1f", m_FPS);
 	ImGui::Text("Frame Time: %.3f ms", (1.0f / m_FPS) * 1000.0f);
 
-	ImGui::Separator();
-
-	auto& mainLight = m_MainLightEntity.GetComponent<Monsi::LightComponent>();
-	ImGui::Text("Scene light parameters");
-	ImGui::SliderFloat("Scene light Intensity", &mainLight.Intensity, 0.0f, 3.0f);
-	ImGui::ColorEdit3("Light Color", glm::value_ptr(mainLight.Color));
-	ImGui::SliderFloat3("Direction", glm::value_ptr(mainLight.Direction), -1.5f, 1.5f);
-
-	ImGui::Separator();
-
-	auto& pointLight = m_PointLightEntity.GetComponent<Monsi::LightComponent>();
-	auto& pointLightTransform = m_PointLightEntity.GetComponent<Monsi::TransformComponent>();
-	glm::vec3 pointLightPos = glm::vec3(pointLightTransform.Translation);
-
-	ImGui::Text("Point light parameters");
-
-	if (ImGui::SliderFloat3("Position", glm::value_ptr(pointLightPos), -10.0f, 10.0f))
-		pointLightTransform.Translation = pointLightPos;
-
-	ImGui::ColorEdit3("Color", glm::value_ptr(pointLight.Color));
-	ImGui::SliderFloat("Point light Intensity", &pointLight.Intensity, 0.0f, 10.0f);
-	ImGui::SliderFloat("Radius", &pointLight.Radius, 0.0f, 100.0f);
-
-	ImGui::Separator();
-
-	ImGui::Text("Sphere material parameters");
-	ImGui::ColorEdit3("Ambient Color", glm::value_ptr(m_ShpereMaterial->AmbientColor));
-	ImGui::ColorEdit3("Diffuse Color", glm::value_ptr(m_ShpereMaterial->DiffuseColor));
-	ImGui::ColorEdit3("Specular Color", glm::value_ptr(m_ShpereMaterial->SpecularColor));
-	ImGui::SliderFloat("Shininess", &m_ShpereMaterial->Shininess, 1.0f, 64.0f);
-
 	ImGui::End();
 
 	m_Unit.OnImGuiRender();
@@ -256,11 +224,6 @@ void Sandbox3D::OnImGuiDraw() {
 	ImGui::Image((void*)textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
 	ImGui::End();
 	ImGui::PopStyleVar();
-
-	ImGui::Begin("Scene");
-	ImGui::Text("Monsi example scene");
-	ImGui::Text("Press C when focused on the viewport\nwindow to move the camera with WASD");
-	ImGui::End();
 }
 
 void Sandbox3D::OnLayerEvent(Monsi::Event& event)

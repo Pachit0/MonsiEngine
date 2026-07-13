@@ -4,7 +4,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "SceneCamera.h"
-#include "CubePass.h"
 #include "Mesh.h"
 #include "ModelLoader.h"
 #include "ScriptableEntity.h"
@@ -29,47 +28,34 @@ namespace Monsi {
 		ModelComponent(const Reference<Model>& model) : ModelAsset(model) {}
 	};
 
-	struct MaterialComponent {
-		Reference<Texture2D> Texture;
-		glm::vec4 TintColor = glm::vec4(1.0f);
+// 	struct MaterialComponent {
+// 		glm::vec4 TintColor = glm::vec4(1.0f);
+// 		Reference<Texture2D> Texture;
+// 
+// 		MaterialComponent() = default;
+// 		MaterialComponent(const MaterialComponent& other) = default;
+// 	};
 
-		MaterialComponent() = default;
-		MaterialComponent(const MaterialComponent& other) = default;
+	struct DirectionalLightComponent {
+		glm::vec3 Color = { 1.0f, 1.0f, 1.0f };
+		glm::vec3 Direction = { 0.0f, -1.0f, 0.0f };
+		float Intensity = 1.0f;
+
+		DirectionalLightComponent() = default;
+		DirectionalLightComponent(const DirectionalLightComponent& other) = default;
 	};
 
-	struct LightComponent {
-		enum class LightType { Directional = 0, Point = 1 };
-
-		LightType Type = LightType::Point;
+	struct PointLightComponent {
 		glm::vec3 Color = { 1.0f, 1.0f, 1.0f };
 		float Intensity = 1.0f;
 		float Radius = 10.0f;
-		glm::vec3 Direction = { 0.0f, -1.0f, 0.0f };
 
-		LightComponent() = default;
-		LightComponent(const LightComponent& other) = default;
+		PointLightComponent() = default;
+		PointLightComponent(const PointLightComponent& other) = default;
 	};
 
-// 	struct TransformComponent {
-// 		glm::vec3 Translation = glm::vec3{ 0.0f,0.0f,0.0f };
-// 		glm::vec3 Rotation = glm::vec3{ 0.0f,0.0f,0.0f };
-// 		glm::vec3 Scale = glm::vec3{ 1.0,1.0f,1.0f };
-// 
-// 		TransformComponent() = default;
-// 		TransformComponent(const TransformComponent& other) = default;
-// 		TransformComponent(const glm::vec3& translation) : Translation(translation) {}
-// 
-// 		glm::mat4 GetTransform() const {
-// 			glm::mat4 rotation = 
-// 			  glm::rotate(glm::mat4(1.0f), Rotation.x, { 1,0,0 })
-// 			* glm::rotate(glm::mat4(1.0f), Rotation.y, { 0,1,0 })
-// 			* glm::rotate(glm::mat4(1.0f), Rotation.z, { 0,0,1 });
-// 
-// 			return glm::translate(glm::mat4(1.0f), Translation) * rotation * glm::scale(glm::mat4(1.0f), Scale);
-// 		}
-// 	};
-
 	struct TransformComponent {
+//		bool EulerCoords = false; //In the future probably should think about adding euler coords as an option
 		glm::vec3 Translation = glm::vec3{ 0.0f, 0.0f, 0.0f };
 		glm::quat Rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 		glm::vec3 Scale = glm::vec3{ 1.0f, 1.0f, 1.0f };

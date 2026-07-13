@@ -9,6 +9,11 @@ namespace Monsi {
 	class Material {
 	public:
 		Material() = default;
+		Material(const Material& other) = default;
+		Material(Material&& other) noexcept = default;
+		Material(const Reference<Material>& other);
+		Material& operator=(Material& other) = default;
+		Material& operator=(Material&& other) = default;
 
 		void Bind(const Reference<Shader>& shader);
 

@@ -3,6 +3,22 @@
 
 namespace Monsi {
 
+	Material::Material(const Reference<Material>& other)
+	{
+		if (!other) {
+			ENGINE_ASSERT(false, "The memory for the material is null!");
+		}
+
+		AmbientColor = other->AmbientColor;
+		DiffuseColor = other->DiffuseColor;
+		SpecularColor = other->SpecularColor;
+		Shininess = other->Shininess;
+
+		DiffuseMap = other->DiffuseMap;
+		SpecularMap = other->SpecularMap;
+		NormalMap = other->NormalMap;
+	}
+
 	void Material::Bind(const Reference<Shader>& shader)
 	{
 		shader->setVec3("material.ambient", AmbientColor);

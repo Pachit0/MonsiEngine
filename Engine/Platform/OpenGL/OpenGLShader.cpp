@@ -20,7 +20,6 @@ namespace Monsi {
 		auto shaderSources = PreProcess(source);
 		Compile(shaderSources);
 
-		//get name from file
 		auto lastSlash = filePath.find_last_of("/\\");
 		lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
 		auto lastDot = filePath.rfind('.');
@@ -45,6 +44,7 @@ namespace Monsi {
 
 	void OpenGLShader::Compile(const std::unordered_map<GLenum, std::string>& shaderSources) {
 		ENGINE_PROFILER_FUNCTION();
+		m_UniformLocationCache.clear();
 		GLuint program = glCreateProgram();
 		std::vector<GLenum> glShaderIDs;
 		glShaderIDs.reserve(shaderSources.size());
@@ -145,6 +145,17 @@ namespace Monsi {
 		return result;
 	}
 
+	int OpenGLShader::GetUniformLocation(const std::string& name)
+	{
+		auto it = m_UniformLocationCache.find(name);
+		if (it != m_UniformLocationCache.end())
+			return it->second;
+
+		int location = glGetUniformLocation(m_ID, name.c_str());
+		m_UniformLocationCache[name] = location;
+		return location;
+	}
+
 	const void OpenGLShader::setInt(const std::string& name, int value) {
 		UploadInt(name, value);
 	}
@@ -179,56 +190,56 @@ namespace Monsi {
 	}
 
 	void OpenGLShader::UploadBool(const std::string& name, bool value) {
-		glUniform1i(glGetUniformLocation(m_ID, name.c_str()), static_cast<int>(value));
+		glUniform1i(GetUniformLocation(name), static_cast<int>(value));
 	}
 
 	void OpenGLShader::UploadInt(const std::string& name, int value) {
-		glUniform1i(glGetUniformLocation(m_ID, name.c_str()), value);
+		glUniform1i(GetUniformLocation(name), value);
 	}
 
 	void OpenGLShader::UploadIntArray(const std::string& name, int* value, uint32_t count)
 	{
-		glUniform1iv(glGetUniformLocation(m_ID, name.c_str()), count, value);
+		glUniform1iv(GetUniformLocation(name), count, value);
 	}
 
 	void OpenGLShader::UploadFloat(const std::string& name, float value) {
-		glUniform1f(glGetUniformLocation(m_ID, name.c_str()), value);
+		glUniform1f(GetUniformLocation(name), value);
 	}
 
 	void OpenGLShader::UploadVec2(const std::string& name, const glm::vec2& value) {
-		glUniform2fv(glGetUniformLocation(m_ID, name.c_str()), 1, &value[0]);
+		glUniform2fv(GetUniformLocation(name), 1, &value[0]);
 	}
 
 	void OpenGLShader::UploadVec2(const std::string& name, float x, float y) {
-		glUniform2f(glGetUniformLocation(m_ID, name.c_str()), x, y);
+		glUniform2f(GetUniformLocation(name), x, y);
 	}
 
 	void OpenGLShader::UploadVec3(const std::string& name, const glm::vec3& value) {
-		glUniform3fv(glGetUniformLocation(m_ID, name.c_str()), 1, &value[0]);
+		glUniform3fv(GetUniformLocation(name), 1, &value[0]);
 	}
 
 	void OpenGLShader::UploadVec3(const std::string& name, float x, float y, float z) {
-		glUniform3f(glGetUniformLocation(m_ID, name.c_str()), x, y, z);
+		glUniform3f(GetUniformLocation(name), x, y, z);
 	}
 
 	void OpenGLShader::UploadVec4(const std::string& name, const glm::vec4& value) {
-		glUniform4fv(glGetUniformLocation(m_ID, name.c_str()), 1, &value[0]);
+		glUniform4fv(GetUniformLocation(name), 1, &value[0]);
 	}
 
 	void OpenGLShader::UploadVec4(const std::string& name, float x, float y, float z, float w) {
-		glUniform4f(glGetUniformLocation(m_ID, name.c_str()), x, y, z, w);
+		glUniform4f(GetUniformLocation(name), x, y, z, w);
 	}
 
 	void OpenGLShader::UploadMat2(const std::string& name, const glm::mat2& mat) {
-		glUniformMatrix2fv(glGetUniformLocation(m_ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
+		glUniformMatrix2fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat));
 	}
 
 	void OpenGLShader::UploadMat3(const std::string& name, const glm::mat3& mat) {
-		glUniformMatrix3fv(glGetUniformLocation(m_ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
+		glUniformMatrix3fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat));
 	}
 
 	void OpenGLShader::UploadMat4(const std::string& name, const glm::mat4& mat) {
-		glUniformMatrix4fv(glGetUniformLocation(m_ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
+		glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat));
 	}
 
 }

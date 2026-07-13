@@ -24,11 +24,26 @@ namespace Monsi {
 		Mesh() = default;
 		Mesh(const std::vector<Vertex_t>& vertices, const std::vector<unsigned int>& indices, const Reference<Material>& material);
 
-		const Reference<Material>& GetMaterial() const { return m_Material; }
-		void SetMaterial(const Reference<Material>& material) { m_Material = material; }
-
 		const Reference<VertexArray>& GetVertexArray() const { return m_VertexArray; }
 		uint32_t GetIndexCount() const { return m_Indices.size(); }
+
+		void SetMaterial(const Reference<Material>& material) { m_Material = material; }
+		void SetAmbientColor(const glm::vec3& color) { m_Material->AmbientColor = color; }
+		void SetDiffuseColor(const glm::vec3& color) { m_Material->DiffuseColor = color; }
+		void SetSpecularColor(const glm::vec3& color) { m_Material->SpecularColor = color; }
+		void SetShininess(float shine) { m_Material->Shininess = shine; }
+		void SetDiffuseMap(const Reference<Texture2D>& tex) { m_Material->DiffuseMap = tex; }
+		void SetSpecularMap(const Reference<Texture2D>& tex) { m_Material->SpecularMap = tex; }
+		void SetNormalMap(const Reference<Texture2D>& tex) { m_Material->NormalMap = tex; }
+
+		float GetShininess() const { return m_Material->Shininess; }
+		const Reference<Material>& GetMaterial() const { return m_Material; }
+		const glm::vec3& GetAmbientColor() const { return m_Material->AmbientColor; }
+		const glm::vec3& GetDiffuseColor() const { return m_Material->DiffuseColor; }
+		const glm::vec3& GetSpecularColor() const { return m_Material->SpecularColor; }
+		const Reference<Texture2D>& GetDiffuseMap() const { return m_Material->DiffuseMap; }
+		const Reference<Texture2D>& GetSpecularMap() const { return m_Material->SpecularMap; }
+		const Reference<Texture2D>& GetNormalMap() const { return m_Material->NormalMap; }
 
 	private:
 		void setupMesh();

@@ -78,25 +78,25 @@ namespace Monsi {
 			glm::mat4 viewProj = mainCamera->GetProjectionMatrix() * glm::inverse(cameraTransform);
 
 			SceneLighting sceneLighting;
-			auto lightView = m_Registry.view<TransformComponent, LightComponent>();
-			for (auto entity : lightView)
+			auto DirectionalLightView = m_Registry.view<TransformComponent, DirectionalLightComponent>();
+			for (auto entity : DirectionalLightView)
 			{
-				auto [transform, light] = lightView.get<TransformComponent, LightComponent>(entity);
-
-				if (light.Type == LightComponent::LightType::Directional)
-				{
-					sceneLighting.MainLight.Direction = light.Direction;
-					sceneLighting.MainLight.Color = light.Color;
-					sceneLighting.MainLight.Intensity = light.Intensity;
-				}
-				else
-				{
-// 					if (sceneLighting.PointLights.size() >= LightingBuffer::MaxPointLights)
-// 						continue;
-					glm::vec3 position = transform.Translation;
-					sceneLighting.PointLights.push_back({ position, light.Color, light.Intensity, light.Radius });
-				}
+				auto [transform, light] = DirectionalLightView.get<TransformComponent, DirectionalLightComponent>(entity);
+				sceneLighting.MainLight.Direction = light.Direction;
+				sceneLighting.MainLight.Color = light.Color;
+				sceneLighting.MainLight.Intensity = light.Intensity;
 			}
+
+			auto PointLightView = m_Registry.view<TransformComponent, PointLightComponent>();
+			for (auto entity : PointLightView)
+			{
+				auto [transform, light] = PointLightView.get<TransformComponent, PointLightComponent>(entity);
+				// 	if (sceneLighting.PointLights.size() >= LightingBuffer::MaxPointLights)
+				// 		continue;
+				glm::vec3 position = transform.Translation;
+				sceneLighting.PointLights.push_back({ position, light.Color, light.Intensity, light.Radius });
+			}
+
 			Renderer3D::SetSceneLighting(sceneLighting);
 
 			Renderer3D::Begin3D(viewProj, cameraPos);

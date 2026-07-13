@@ -208,6 +208,50 @@ namespace Monsi {
 				ImGui::TreePop();
 			}
 		}
+		if (entity.HasComponent<DirectionalLightComponent>()) {
+			if (ImGui::TreeNodeEx((void*)typeid(DirectionalLightComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Directional Light")) {
+				auto& directionalLight = entity.GetComponent<DirectionalLightComponent>();
+
+				DrawVec3Control("Direction", directionalLight.Direction);
+				ImGui::ColorEdit3("Color", glm::value_ptr(directionalLight.Color));
+				ImGui::DragFloat("Intensity", &directionalLight.Intensity);
+
+				ImGui::TreePop();
+			}
+		}
+		if (entity.HasComponent<PointLightComponent>()) {
+			if (ImGui::TreeNodeEx((void*)typeid(PointLightComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Point Light")) {
+				auto& pointLight = entity.GetComponent<PointLightComponent>();
+				ImGui::ColorEdit3("Color", glm::value_ptr(pointLight.Color));
+				ImGui::DragFloat("Radius", &pointLight.Radius);
+				ImGui::DragFloat("Intensity", &pointLight.Intensity);
+
+				ImGui::TreePop();
+			}
+		}
+		if (entity.HasComponent<MeshComponent>()) {
+			if (ImGui::TreeNodeEx((void*)typeid(MeshComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Mesh")) {
+				auto& mesh = entity.GetComponent<MeshComponent>();
+				auto& material = mesh.MeshAsset->GetMaterial();
+
+				ImGui::ColorEdit3("Ambient Color", glm::value_ptr(material->AmbientColor));
+				ImGui::ColorEdit3("Diffuse Color", glm::value_ptr(material->DiffuseColor));
+				ImGui::ColorEdit3("Specular Color", glm::value_ptr(material->SpecularColor));
+				ImGui::DragFloat("Shininess", &material->Shininess);
+
+				ImGui::TreePop();
+			}
+		}
+		if (entity.HasComponent<ModelComponent>()) {
+			if (ImGui::TreeNodeEx((void*)typeid(ModelComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Model")) {
+				auto& model = entity.GetComponent<ModelComponent>();
+				auto& materialVector = model.ModelAsset->GetMeshes();
+				int count = materialVector.size();
+				ImGui::Text("Number of meshes used: %d", count);
+				//TODO everything else that should go here (I don't even know, will see some other day :3)
+				ImGui::TreePop();
+			}
+		}
 		if (entity.HasComponent<CameraComponent>()) {
 			if (ImGui::TreeNodeEx((void*)typeid(CameraComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Camera")) {
 				auto& cameraEntity = entity.GetComponent<CameraComponent>();

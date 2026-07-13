@@ -1,6 +1,5 @@
 #include "MonsiPch.h"
 #include "Renderer3D.h"
-#include "CubePass.h"
 #include "ModelPass.h"
 #include "SkyBoxPass.h"
 #include "ColorPalette.h"
@@ -10,7 +9,6 @@ namespace Monsi {
 
 	struct Renderer3DData {
 
-		Reference<CubePass> Cube;
 		Reference<ModelPass> Model;
 		Reference<LightingBuffer> Lighting;
 		Reference< SkyBoxPass> SkyBox;
@@ -21,8 +19,6 @@ namespace Monsi {
 
 	void Renderer3D::Init()
 	{
-		s_Data.Cube = CreateReference<CubePass>();
-		s_Data.Cube->Init();
 		s_Data.Model = CreateReference<ModelPass>();
 		s_Data.Model->Init();
 		s_Data.Lighting = CreateReference<LightingBuffer>();
@@ -36,22 +32,17 @@ namespace Monsi {
 		s_Data.Model->Shutdown();
 		s_Data.Model.reset();
 
-		s_Data.Cube->Shutdown();
-		s_Data.Cube.reset();
-
 		s_Data.SkyBox->Shutdown();
 		s_Data.SkyBox.reset();
 	}
 
 	void Renderer3D::Begin3D(const glm::mat4& viewProjection, const glm::vec3& cameraPosition)
 	{
-		s_Data.Cube->BeginScene(viewProjection, cameraPosition, s_Data.Lighting);
 		s_Data.Model->BeginScene(viewProjection, cameraPosition, s_Data.Lighting);
 	}
 
 	void Renderer3D::End3D()
 	{
-		s_Data.Cube->EndScene();
 		s_Data.Model->EndScene();
 		s_Data.Lighting->Clear();
 	}
@@ -65,32 +56,6 @@ namespace Monsi {
 	{
 		s_Data.Model->DrawMesh(meshPtr, transform, color);
 	}
-
-//	Deprecated methods - will be removed
-// 	void Renderer3D::DrawCube(const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation)
-// 	{
-// 		s_Data.Cube->DrawCube(position, size, color, rotation);
-// 	}
-// 
-// 	void Renderer3D::DrawCube(const glm::vec3& position, const glm::vec3& size, Reference<Texture2D> texture, const glm::vec3& rotation)
-// 	{
-// 		s_Data.Cube->DrawCube(position, size, texture, rotation);
-// 	}
-// 
-// 	void Renderer3D::DrawModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color)
-// 	{
-// 		s_Data.Model->DrawModel(model, position, size, color);
-// 	}
-// 
-// 	void Renderer3D::DrawModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation)
-// 	{
-// 		s_Data.Model->DrawModel(model, position, size, color, rotation);
-// 	}
-// 
-// 	void Renderer3D::DrawMesh(const Mesh* meshPtr, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation)
-// 	{
-// 		s_Data.Model->DrawMesh(meshPtr, position, size, color, rotation);
-// 	}
 
 	void Renderer3D::DrawSkyBox(const glm::mat4& view, const glm::mat4& projection, const Reference<CubeMapTexture>& skyboxTexture)
 	{
