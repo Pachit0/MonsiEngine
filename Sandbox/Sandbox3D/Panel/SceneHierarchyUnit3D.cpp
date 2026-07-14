@@ -2,6 +2,8 @@
 #include <imgui_internal.h>
 
 #include "SceneHierarchyUnit3D.h"
+#include "RenderInitializator.h"
+#include "MeshBuilder.h"
 #include "Components.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "SceneCamera.h"
@@ -120,6 +122,13 @@ namespace Monsi {
 			};
 		}
 
+		if (ImGui::BeginPopupContextWindow(0, ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems)) {
+			if (ImGui::MenuItem("Create Empty Entity")) {
+				m_Scene->CreateEntity("Empty Entity");
+			}
+			ImGui::EndPopup();
+		}
+
 		if (ImGui::IsMouseDown(ImGuiMouseButton_Left) && ImGui::IsWindowHovered()) {
 			m_Selected = {};
 		}
@@ -130,6 +139,48 @@ namespace Monsi {
 
 		if (m_Selected) {
 			DrawComponents(m_Selected);
+			
+			if (ImGui::Button("Add Component")) {
+				ImGui::OpenPopup("Add Component");
+			}
+			if (ImGui::BeginPopup("Add Component")) {
+				if (ImGui::MenuItem("Camera")) {
+					m_Selected.AddComponent<CameraComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+
+				if(RenderSystem::GetActiveType() == RenderTypeEnum::Renderer2D){ //preping this to be unified not 2 seperate modules
+					if (ImGui::MenuItem("Sprite Renderer")) {
+						m_Selected.AddComponent<SpriteRendererComponent>();
+						ImGui::CloseCurrentPopup();
+					}
+				}
+				else {
+					if (!m_Selected.HasComponent<MeshComponent>()) {
+						if (ImGui::MenuItem("Sphere")) {
+							m_Selected.AddComponent<MeshComponent>(MeshBuilder::CreateSphere(1.0f, 32, 32, Monsi::CreateReference<Monsi::Material>()));
+							ImGui::CloseCurrentPopup();
+						}
+						if (ImGui::MenuItem("Torus")) {
+							m_Selected.AddComponent<MeshComponent>(MeshBuilder::CreateTorus(2.5f, 0.5f, 32, 16, Monsi::CreateReference<Monsi::Material>()));
+							ImGui::CloseCurrentPopup();
+						}
+						if (ImGui::MenuItem("Cube")) {
+							m_Selected.AddComponent<MeshComponent>(MeshBuilder::CreateCube(1.0f, Monsi::CreateReference<Monsi::Material>()));
+							ImGui::CloseCurrentPopup();
+						}
+						if (ImGui::MenuItem("Cylinder")) {
+							m_Selected.AddComponent<MeshComponent>(MeshBuilder::CreateCylinder(2.5f, 8, 32, Monsi::CreateReference<Monsi::Material>()));
+							ImGui::CloseCurrentPopup();
+						}
+						if (ImGui::MenuItem("Cone")) {
+							m_Selected.AddComponent<MeshComponent>(MeshBuilder::CreateCone(2.5f, 8, 32, Monsi::CreateReference<Monsi::Material>()));
+							ImGui::CloseCurrentPopup();
+						}
+					}
+				}
+				ImGui::EndPopup();
+			}
 		}
 
 		ImGui::End();
@@ -149,9 +200,9 @@ namespace Monsi {
 		bool entityDeleted = false;
 		if (ImGui::BeginPopupContextItem())
 		{
-			if (ImGui::MenuItem("Delete Entity")) {
+			if (ImGui::MenuItem("Delete Entity"))
 				entityDeleted = true;
-			}
+
 			ImGui::EndPopup();
 		}
 
@@ -159,9 +210,17 @@ namespace Monsi {
 		{
 			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
 			bool opened = ImGui::TreeNodeEx((void*)1337, flags, tag.c_str());
-			if (opened)
+			if (opened) {
 				ImGui::TreePop();
+			}
 			ImGui::TreePop();
+		}
+
+		if (entityDeleted)
+		{
+			m_Scene->RemoveEntity(entity);
+			if (m_Selected == entity)
+				m_Selected = {};
 		}
 
 	}
@@ -179,21 +238,28 @@ namespace Monsi {
 				tag = std::string(buffer);
 			}
 		}
+
+		const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen |ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanAvailWidth |
+			ImGuiTreeNodeFlags_AllowOverlap | ImGuiTreeNodeFlags_FramePadding;
+		
 		if (entity.HasComponent<TransformComponent>()) {
-			if (ImGui::TreeNodeEx((void*)typeid(TransformComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Transform")) {
+			bool opened = ImGui::TreeNodeEx((void*)typeid(TransformComponent).hash_code(), treeNodeFlags, "Transform");
+
+			if (opened) {
+
 				auto& transform = entity.GetComponent<TransformComponent>();
 				DrawVec3Control("Translation", transform.Translation);
 
-				static Entity m_LastRotationEntity;
-				static glm::vec3 m_CachedEulerDegrees;
+				static Entity LastRotationEntity;
+				static glm::vec3 EulerDegrees;
 
-				if (entity != m_LastRotationEntity) {
-					m_CachedEulerDegrees = glm::degrees(glm::eulerAngles(transform.Rotation));
-					m_LastRotationEntity = entity;
+				if (entity != LastRotationEntity) {
+					EulerDegrees = glm::degrees(glm::eulerAngles(transform.Rotation));
+					LastRotationEntity = entity;
 				}
 
-				DrawVec3Control("Rotation", m_CachedEulerDegrees);
-				transform.Rotation = glm::quat(glm::radians(m_CachedEulerDegrees));
+				DrawVec3Control("Rotation", EulerDegrees);
+				transform.Rotation = glm::quat(glm::radians(EulerDegrees));
 
 				DrawVec3Control("Scale", transform.Scale);
 
@@ -201,7 +267,7 @@ namespace Monsi {
 			}
 		}
 		if (entity.HasComponent<SpriteRendererComponent>()) {
-			if (ImGui::TreeNodeEx((void*)typeid(SpriteRendererComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Sprite Color")) {
+			if (ImGui::TreeNodeEx((void*)typeid(SpriteRendererComponent).hash_code(), treeNodeFlags, "Sprite Color")) {
 				auto& spriteRenderer = entity.GetComponent<SpriteRendererComponent>();
 				ImGui::ColorEdit4("Color", glm::value_ptr(spriteRenderer.Color));
 
@@ -209,7 +275,7 @@ namespace Monsi {
 			}
 		}
 		if (entity.HasComponent<DirectionalLightComponent>()) {
-			if (ImGui::TreeNodeEx((void*)typeid(DirectionalLightComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Directional Light")) {
+			if (ImGui::TreeNodeEx((void*)typeid(DirectionalLightComponent).hash_code(), treeNodeFlags, "Directional Light")) {
 				auto& directionalLight = entity.GetComponent<DirectionalLightComponent>();
 
 				DrawVec3Control("Direction", directionalLight.Direction);
@@ -220,7 +286,7 @@ namespace Monsi {
 			}
 		}
 		if (entity.HasComponent<PointLightComponent>()) {
-			if (ImGui::TreeNodeEx((void*)typeid(PointLightComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Point Light")) {
+			if (ImGui::TreeNodeEx((void*)typeid(PointLightComponent).hash_code(), treeNodeFlags, "Point Light")) {
 				auto& pointLight = entity.GetComponent<PointLightComponent>();
 				ImGui::ColorEdit3("Color", glm::value_ptr(pointLight.Color));
 				ImGui::DragFloat("Radius", &pointLight.Radius);
@@ -230,7 +296,22 @@ namespace Monsi {
 			}
 		}
 		if (entity.HasComponent<MeshComponent>()) {
-			if (ImGui::TreeNodeEx((void*)typeid(MeshComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Mesh")) {
+			bool opened = ImGui::TreeNodeEx((void*)typeid(MeshComponent).hash_code(), treeNodeFlags, "Mesh");
+
+			ImGui::SameLine();
+			if (ImGui::Button("...")) {
+				ImGui::OpenPopup("Settings");
+			}
+
+			bool RemoveComponent = false;
+			if (ImGui::BeginPopup("Settings")) {
+				if (ImGui::MenuItem("Remove Component")) {
+					RemoveComponent = true;
+				}
+				ImGui::EndPopup();
+			}
+
+			if (opened) {
 				auto& mesh = entity.GetComponent<MeshComponent>();
 				auto& material = mesh.MeshAsset->GetMaterial();
 
@@ -241,9 +322,13 @@ namespace Monsi {
 
 				ImGui::TreePop();
 			}
+
+			if (RemoveComponent) {
+				entity.RemoveComponent<MeshComponent>();
+			}
 		}
 		if (entity.HasComponent<ModelComponent>()) {
-			if (ImGui::TreeNodeEx((void*)typeid(ModelComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Model")) {
+			if (ImGui::TreeNodeEx((void*)typeid(ModelComponent).hash_code(), treeNodeFlags, "Model")) {
 				auto& model = entity.GetComponent<ModelComponent>();
 				auto& materialVector = model.ModelAsset->GetMeshes();
 				int count = materialVector.size();
@@ -253,7 +338,7 @@ namespace Monsi {
 			}
 		}
 		if (entity.HasComponent<CameraComponent>()) {
-			if (ImGui::TreeNodeEx((void*)typeid(CameraComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Camera")) {
+			if (ImGui::TreeNodeEx((void*)typeid(CameraComponent).hash_code(), treeNodeFlags, "Camera")) {
 				auto& cameraEntity = entity.GetComponent<CameraComponent>();
 
 				const char* projectionType[] = { "Orthographic", "Perspective" };

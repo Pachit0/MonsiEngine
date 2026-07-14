@@ -28,14 +28,6 @@ namespace Monsi {
 		ModelComponent(const Reference<Model>& model) : ModelAsset(model) {}
 	};
 
-// 	struct MaterialComponent {
-// 		glm::vec4 TintColor = glm::vec4(1.0f);
-// 		Reference<Texture2D> Texture;
-// 
-// 		MaterialComponent() = default;
-// 		MaterialComponent(const MaterialComponent& other) = default;
-// 	};
-
 	struct DirectionalLightComponent {
 		glm::vec3 Color = { 1.0f, 1.0f, 1.0f };
 		glm::vec3 Direction = { 0.0f, -1.0f, 0.0f };

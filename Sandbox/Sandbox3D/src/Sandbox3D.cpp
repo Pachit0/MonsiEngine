@@ -56,6 +56,7 @@ void Sandbox3D::OnLayerAttach()
 	cameraComponent.Primary = true;
 
 	m_MainLightEntity = m_Scene->CreateEntity("Directional Light");
+	m_MainLightEntity.AddComponent<Monsi::MeshComponent>(Monsi::MeshBuilder::CreateSphere(1.0f, 32, 32, Monsi::CreateReference<Monsi::Material>(m_ShpereMaterial)));
 	auto& mainLight = m_MainLightEntity.AddComponent<Monsi::DirectionalLightComponent>();
 	mainLight.Direction = glm::vec3(0.0f, -1.0f, 0.0f);
 	mainLight.Color = MonsiColors::White;

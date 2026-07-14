@@ -35,6 +35,11 @@ namespace Monsi {
 	}
 
 
+	void Scene::RemoveEntity(Entity entity)
+	{
+		m_Registry.destroy(entity);
+	}
+
 	void Scene::OnUpdate(TimeStep timeStep)
 	{
 		SceneCamera* mainCamera = nullptr;
@@ -146,4 +151,40 @@ namespace Monsi {
 		}
 	}
 
+	template<typename T>
+	void Scene::OnAddComponent(Entity entity, T& component) {
+		static_assert(false);
+	}
+
+	template<>
+	void Scene::OnAddComponent<TagComponent>(Entity entity, TagComponent& component) {}
+
+	template<>
+	void Scene::OnAddComponent<TransformComponent>(Entity entity, TransformComponent& component) {}
+
+	template<>
+	void Scene::OnAddComponent<SpriteRendererComponent>(Entity entity, SpriteRendererComponent& component) {}
+
+	template<>
+	void Scene::OnAddComponent<CameraComponent>(Entity entity, CameraComponent& component)
+	{
+		if (m_ViewportWidth > 0 && m_ViewportHeight > 0) {
+			component.Camera.SetViewportSize(m_ViewportWidth, m_ViewportHeight);
+		}
+	}
+
+	template<>
+	void Scene::OnAddComponent<DirectionalLightComponent>(Entity entity, DirectionalLightComponent& component) {}
+
+	template<>
+	void Scene::OnAddComponent<PointLightComponent>(Entity entity, PointLightComponent& component) {}
+
+	template<>
+	void Scene::OnAddComponent<MeshComponent>(Entity entity, MeshComponent& component) {}
+
+	template<>
+	void Scene::OnAddComponent<ModelComponent>(Entity entity, ModelComponent& component) {}
+
+	template<>
+	void Scene::OnAddComponent<NativeScriptComponent>(Entity entity, NativeScriptComponent& component) {}
 }
