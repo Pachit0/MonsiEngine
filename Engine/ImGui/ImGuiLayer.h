@@ -7,9 +7,11 @@
 #include "imgui.h"
 
 namespace Monsi {
+	enum class ImGuiTheme { Dark, Light, Classic, Cyan, Magenta, Red, Blue };
 
 	class ENGINE_API ImGuiLayer : public Layer {
 	public:
+
 		ImGuiLayer();
 		virtual ~ImGuiLayer();
 
@@ -22,8 +24,20 @@ namespace Monsi {
 		void End();
 
 		void SetImGuiEventState(bool state) { m_BlockImGuiEvents = state; }
+		void SetTheme(ImGuiTheme theme);
+
+	private:
+		void SetDarkThemeColors();
+		void SetLightThemeColors();
+		void SetClassicThemeColors();
+		void SetCyanThemeColors();
+		void SetMagentaThemeColors();
+		void SetRedThemeColors();
+		void SetBlueThemeColors();
+
 	private:
 		bool m_BlockImGuiEvents = true;
 		float m_Time = 0.0f;
+		ImGuiTheme m_CurrentTheme = ImGuiTheme::Dark;
 	};
 }

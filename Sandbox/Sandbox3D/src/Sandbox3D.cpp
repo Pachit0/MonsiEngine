@@ -171,11 +171,31 @@ void Sandbox3D::OnImGuiDraw() {
 
 		ImGui::EndMenu();
 	}
+	if (ImGui::BeginMenu("Theme"))
+	{
+		if (ImGui::MenuItem("Dark"))    Monsi::Application::Get().GetImGuiLayer()->SetTheme(Monsi::ImGuiTheme::Dark);
+		if (ImGui::MenuItem("Light"))   Monsi::Application::Get().GetImGuiLayer()->SetTheme(Monsi::ImGuiTheme::Light);
+		if (ImGui::MenuItem("Classic")) Monsi::Application::Get().GetImGuiLayer()->SetTheme(Monsi::ImGuiTheme::Classic);
+		if (ImGui::MenuItem("Blue"))	Monsi::Application::Get().GetImGuiLayer()->SetTheme(Monsi::ImGuiTheme::Blue);
+		if (ImGui::MenuItem("Red"))		Monsi::Application::Get().GetImGuiLayer()->SetTheme(Monsi::ImGuiTheme::Red);
+		if (ImGui::MenuItem("Cyan"))	Monsi::Application::Get().GetImGuiLayer()->SetTheme(Monsi::ImGuiTheme::Cyan);
+		if (ImGui::MenuItem("Magenta")) Monsi::Application::Get().GetImGuiLayer()->SetTheme(Monsi::ImGuiTheme::Magenta);
+		ImGui::EndMenu();
+	}
 	ImGui::EndMainMenuBar();
+
+	ImGuiStyle& style = ImGui::GetStyle();
+
+	float windowMinSizeWidth = style.WindowMinSize.x;
+	float windowMinSizeHeight = style.WindowMinSize.y;
+
+	style.WindowMinSize.x = 400.0f;
 
 	ImGuiViewport* viewport = ImGui::GetMainViewport();
 	ImGuiID dockspace_id = ImGui::GetID("MyDockspace");
 	ImGui::DockSpaceOverViewport(dockspace_id, viewport, ImGuiDockNodeFlags_None);
+
+	style.WindowMinSize.x = windowMinSizeWidth;
 
 	static bool first_time = true;
 	if (first_time)
@@ -195,11 +215,18 @@ void Sandbox3D::OnImGuiDraw() {
 		ImGui::DockBuilderSplitNode(dock_id_left, ImGuiDir_Up, 0.5f, &dock_id_left_top, &dock_id_left_bottom);
 
 		ImGui::DockBuilderDockWindow("Viewport", dock_id_main);
-		ImGui::DockBuilderDockWindow("Properties", dock_id_left_top);
-		ImGui::DockBuilderDockWindow("Scene", dock_id_left_bottom);
+		ImGui::DockBuilderDockWindow("Hierarchy", dock_id_left_top);
+		ImGui::DockBuilderDockWindow("Properties", dock_id_left_bottom);
+		ImGui::DockBuilderDockWindow("Info", dock_id_left_bottom);
+
+		if (ImGuiDockNode* node = ImGui::DockBuilderGetNode(dock_id_main)) {
+			node->LocalFlags |= ImGuiDockNodeFlags_NoTabBar;
+		}
 
 		ImGui::DockBuilderFinish(dockspace_id);
 	}
+
+	m_Unit.OnImGuiRender();
 
 	ImGui::Begin("Info");
 
@@ -209,10 +236,8 @@ void Sandbox3D::OnImGuiDraw() {
 
 	ImGui::End();
 
-	m_Unit.OnImGuiRender();
-
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0.0f,0.0f });
-	ImGui::Begin("Viewport");
+	ImGui::Begin("Viewport", nullptr, ImGuiWindowFlags_NoDecoration);
 	m_ViewportFocused = ImGui::IsWindowFocused();
 	m_ViewportHovered = ImGui::IsWindowHovered();
 	Monsi::Application::Get().GetImGuiLayer()->SetImGuiEventState(!m_ViewportFocused || !m_ViewportHovered);
@@ -224,7 +249,7 @@ void Sandbox3D::OnImGuiDraw() {
 	uint32_t textureID = m_FrameBuffer->GetColorAttachmentID();
 	ImGui::Image((void*)textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
 	ImGui::End();
-	ImGui::PopStyleVar();
+	ImGui::PopStyleVar(1);
 }
 
 void Sandbox3D::OnLayerEvent(Monsi::Event& event)
