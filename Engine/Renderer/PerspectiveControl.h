@@ -12,6 +12,8 @@ namespace Monsi {
     {
     public:
         PerspectiveControl(float aspectRatio, bool rotationFlag = true);
+        PerspectiveControl(const glm::vec3& position, float aspectRatio, bool rotationFlag = true);
+        PerspectiveControl(const glm::vec3& position, const glm::vec3& direction, float aspectRatio, bool rotationFlag = true);
 
         void OnLayerUpdate(TimeStep timestep);
         void OnLayerEvent(Event& event);

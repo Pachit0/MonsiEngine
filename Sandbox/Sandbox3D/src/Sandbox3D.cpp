@@ -1,10 +1,12 @@
-#include "Sandbox3D.h"
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include "Sandbox3D.h"
+#include "ScriptableEntity.h"
+#include "TimeStep.h"
 
-Sandbox3D::Sandbox3D() : Layer("Sandbox3D"), m_CameraControl(1600.0f / 900.0f), m_ViewportSize{ 0.0f,0.0f },
+Sandbox3D::Sandbox3D() : Layer("Sandbox3D"), m_ViewportSize{ 0.0f,0.0f },
 m_ViewportFocused(false), m_ViewportHovered(false), m_SpherePosition({ -5.0f, 3.0f, 5.0f })
 {
 }
@@ -12,7 +14,6 @@ m_ViewportFocused(false), m_ViewportHovered(false), m_SpherePosition({ -5.0f, 3.
 void Sandbox3D::OnLayerAttach()
 {
 	m_Scene = Monsi::CreateReference<Monsi::Scene>();
-	m_CameraControl.SetCameraSpeed(50.0f);
 
 	Monsi::FrameBufferSpec spec;
 	spec.Width = 1600;
@@ -101,6 +102,8 @@ void Sandbox3D::OnLayerAttach()
 	m_QuadEntity.GetComponent<Monsi::TransformComponent>().Translation = glm::vec3(30.0f, 1.0f, 0.0f);
 
 	m_Unit.SetContext(m_Scene);
+
+	m_CameraEntity.AddComponent<Monsi::NativeScriptComponent>().Bind<Monsi::PerspectiveCameraControllerScript>();
 }
 
 void Sandbox3D::OnLayerUpdate(Monsi::TimeStep timestep)
@@ -120,7 +123,6 @@ void Sandbox3D::OnLayerUpdate(Monsi::TimeStep timestep)
 		(spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
 	{
 		m_FrameBuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-		m_CameraControl.OnWindowResize(m_ViewportSize.x, m_ViewportSize.y);
 		m_Scene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 	}
 
@@ -128,12 +130,6 @@ void Sandbox3D::OnLayerUpdate(Monsi::TimeStep timestep)
 
 	Monsi::RenderCommand::SetClearColor({ 0.5f, 0.0f, 0.05f, 1.0f });
 	Monsi::RenderCommand::Clear();
-
-	m_CameraControl.OnLayerUpdate(timestep);
-
-	auto& camTransform = m_CameraEntity.GetComponent<Monsi::TransformComponent>();
-	camTransform.Translation = m_CameraControl.GetCamera().GetPosition();
-	camTransform.Rotation = glm::quatLookAt(m_CameraControl.GetCamera().GetFront(), m_CameraControl.GetCamera().GetUp());
 
 	static float rotationStep = 0.0f;
 	rotationStep += timestep * 50.0f;
@@ -151,7 +147,12 @@ void Sandbox3D::OnLayerUpdate(Monsi::TimeStep timestep)
 
 	m_Scene->OnUpdate(timestep);
 
-	Monsi::Renderer3D::DrawSkyBox(m_CameraControl.GetCamera().GetViewMatrix(), m_CameraControl.GetCamera().GetProjectionMatrix(), m_SkyBoxTest);
+	auto& camTransform = m_CameraEntity.GetComponent<Monsi::TransformComponent>();
+	auto& camComponent = m_CameraEntity.GetComponent<Monsi::CameraComponent>();
+	glm::mat4 camView = glm::inverse(camTransform.GetTransform());
+	glm::mat4 camProj = camComponent.Camera.GetProjectionMatrix();
+
+	Monsi::Renderer3D::DrawSkyBox(camView, camProj, m_SkyBoxTest);
 
 	m_FrameBuffer->Unbind();
 }
@@ -254,5 +255,4 @@ void Sandbox3D::OnImGuiDraw() {
 
 void Sandbox3D::OnLayerEvent(Monsi::Event& event)
 {
-	m_CameraControl.OnLayerEvent(event);
 }

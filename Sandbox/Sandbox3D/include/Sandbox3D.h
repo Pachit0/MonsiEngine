@@ -33,8 +33,6 @@ private:
 	Monsi::Reference<Monsi::Mesh> m_QuadTest;
 	Monsi::Reference<Monsi::Material> m_ShpereMaterial;
 
-	Monsi::PerspectiveControl m_CameraControl;
-
 	Monsi::Reference<Monsi::Scene> m_Scene;
 	Monsi::Entity m_CameraEntity;
 	Monsi::Entity m_MainLightEntity;

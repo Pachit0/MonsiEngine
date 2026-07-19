@@ -1,6 +1,8 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
+#include "MonsiKeyCodes.h"
+#include "Scripts/CameraControllerScript.h"
 #include "SceneHierarchyUnit3D.h"
 #include "RenderInitializator.h"
 #include "MeshBuilder.h"
@@ -272,7 +274,7 @@ namespace Monsi {
 			}
 		}
 		
-		DrawComponent<TransformComponent>("Transform", entity, [entity](auto& component) {
+		DrawComponent<TransformComponent>("Transform", entity, [&entity](auto& component) {
 			DrawVec3Control("Translation", component.Translation);
 
 			static Entity LastRotationEntity;
@@ -282,12 +284,30 @@ namespace Monsi {
 				EulerDegrees = glm::degrees(glm::eulerAngles(component.Rotation));
 				LastRotationEntity = entity;
 			}
+			else {
+				glm::quat expectedQuat = glm::quat(glm::radians(EulerDegrees));
+				if (glm::abs(glm::dot(component.Rotation, expectedQuat)) < 0.999f) {
+					EulerDegrees = glm::degrees(glm::eulerAngles(component.Rotation));
+				}
+			}
+
+			glm::vec3 preUIEuler = EulerDegrees;
 
 			DrawVec3Control("Rotation", EulerDegrees);
-			component.Rotation = glm::quat(glm::radians(EulerDegrees));
+
+			if (preUIEuler != EulerDegrees) {
+				component.Rotation = glm::quat(glm::radians(EulerDegrees));
+
+				if (entity.HasComponent<NativeScriptComponent>()) {
+					auto& nsc = entity.GetComponent<NativeScriptComponent>();
+					if (auto* camScript = nsc.GetScriptAs<PerspectiveCameraControllerScript>()) {
+						camScript->SetYawPitch(EulerDegrees.y, EulerDegrees.x);
+					}
+				}
+			}
 
 			DrawVec3Control("Scale", component.Scale);
-		}, false);
+			}, false);
 
 		DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [](auto& component) {
 			ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
@@ -320,10 +340,34 @@ namespace Monsi {
 			//TODO everything else that should go here (I don't even know, will see some other day :3)
 		});
 
+		DrawComponent<NativeScriptComponent>("Camera Controller Script", entity, [](auto& component) {
+			auto* camScript = component.GetScriptAs<PerspectiveCameraControllerScript>();
+
+			if (!camScript) {
+				ImGui::TextDisabled("(script type has no exposed properties)");
+				return;
+			}
+
+			const char* lookModeNames[] = { "Right Click", "FPS" };
+			int currentMode = (int)camScript->GetLookMode();
+
+			if (ImGui::BeginCombo("Look Mode", lookModeNames[currentMode])) {
+				for (int i = 0; i < 2; i++) {
+					bool selected = (currentMode == i);
+					if (ImGui::Selectable(lookModeNames[i], selected)) {
+						camScript->SetLookMode((PerspectiveCameraControllerScript::LookMode)i);
+					}
+					if (selected) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
+		});
+
 		DrawComponent<CameraComponent>("Camera", entity, [](auto& component) {
 			const char* projectionType[] = { "Orthographic", "Perspective" };
 			const char* currentProjection = projectionType[(int)component.Camera.GetProjectionType()];
-
 			if (ImGui::BeginCombo("Projection", currentProjection)) {
 				for (int i = 0; i < 2; i++) {
 					bool selectedProjection = currentProjection == projectionType[i];

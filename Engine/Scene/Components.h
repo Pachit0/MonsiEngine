@@ -102,5 +102,11 @@ namespace Monsi {
 			InstantiateFuncPtr = []() { return static_cast<ScriptableEntity*>(new T()); };
 			DestroyInstanceFuncPtr = [](NativeScriptComponent* nativeScript) { delete nativeScript->Instance; nativeScript->Instance = nullptr; };
 		}
+
+		template<typename T>
+		T* GetScriptAs()
+		{
+			return dynamic_cast<T*>(Instance);
+		}
 	};
 }

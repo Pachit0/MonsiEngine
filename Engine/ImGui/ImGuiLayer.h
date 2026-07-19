@@ -38,6 +38,6 @@ namespace Monsi {
 	private:
 		bool m_BlockImGuiEvents = true;
 		float m_Time = 0.0f;
-		ImGuiTheme m_CurrentTheme = ImGuiTheme::Dark;
+		ImGuiTheme m_CurrentTheme = ImGuiTheme::Cyan;
 	};
 }
