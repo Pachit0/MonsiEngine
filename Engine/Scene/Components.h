@@ -4,6 +4,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "SceneCamera.h"
+#include "SkyBoxPass.h"
 #include "Mesh.h"
 #include "ModelLoader.h"
 #include "ScriptableEntity.h"
@@ -28,6 +29,15 @@ namespace Monsi {
 		ModelComponent(const Reference<Model>& model) : ModelAsset(model) {}
 	};
 
+	struct SkyBoxComponent {
+		Reference<SkyBoxPass> SkyBox;
+		Reference<CubeMapTexture> SkyboxTexture;
+
+		SkyBoxComponent() = default;
+		SkyBoxComponent(const SkyBoxComponent& other) = default;
+		SkyBoxComponent(const Reference<SkyBoxPass>& skybox, const Reference<CubeMapTexture>& texture = nullptr) : SkyBox(skybox), SkyboxTexture(texture) {}
+	};
+
 	struct DirectionalLightComponent {
 		glm::vec3 Color = { 1.0f, 1.0f, 1.0f };
 		glm::vec3 Direction = { 0.0f, -1.0f, 0.0f };
@@ -47,7 +57,6 @@ namespace Monsi {
 	};
 
 	struct TransformComponent {
-//		bool EulerCoords = false; //In the future probably should think about adding euler coords as an option
 		glm::vec3 Translation = glm::vec3{ 0.0f, 0.0f, 0.0f };
 		glm::quat Rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 		glm::vec3 Scale = glm::vec3{ 1.0f, 1.0f, 1.0f };

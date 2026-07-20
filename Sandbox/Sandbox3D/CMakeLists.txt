@@ -5,12 +5,12 @@ project(Sandbox3D)
 
 file(GLOB SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/Panel/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../SceneEditor/Panel/*.cpp"
 )
 
 file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/Panel/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../SceneEditor/Panel/*.h"
 )
 
 add_executable( Sandbox3D
@@ -20,7 +20,7 @@ add_executable( Sandbox3D
 
 target_include_directories(Sandbox3D PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/Panel
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../SceneEditor/Panel
 )
 
 target_link_libraries(Sandbox3D PRIVATE 

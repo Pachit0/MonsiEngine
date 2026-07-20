@@ -1,5 +1,6 @@
 #include "MonsiPch.h"
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "Renderer2D.h"
 #include "Renderer3D.h"
@@ -18,10 +19,12 @@ namespace Monsi {
 	{
 	}
 
-	Entity Scene::CreateEntity(const std::string& name)
+	Entity Scene::CreateEntity(const std::string& name, bool hasTransform)
 	{
 		Entity e{ m_Registry.create(), this };
-		e.AddComponent<TransformComponent>();
+
+		if (hasTransform)
+			e.AddComponent<TransformComponent>();
 
 		auto& tag = e.AddComponent<TagComponent>();
 		tag.Tag = name.empty() ? "Entity" : name;
@@ -57,7 +60,7 @@ namespace Monsi {
 						nativeScript.Instance->m_Entity = Entity{ entity, this };
 						nativeScript.Instance->OnCreate();
 					}
-					
+
 					nativeScript.Instance->OnUpdate(timeStep);
 				});
 		}
@@ -96,13 +99,34 @@ namespace Monsi {
 			for (auto entity : PointLightView)
 			{
 				auto [transform, light] = PointLightView.get<TransformComponent, PointLightComponent>(entity);
-				// 	if (sceneLighting.PointLights.size() >= LightingBuffer::MaxPointLights)
-				// 		continue;
 				glm::vec3 position = transform.Translation;
 				sceneLighting.PointLights.push_back({ position, light.Color, light.Intensity, light.Radius });
 			}
 
 			Renderer3D::SetSceneLighting(sceneLighting);
+
+			auto skyboxView = m_Registry.view<SkyBoxComponent>();
+			for (auto entity : skyboxView)
+			{
+				auto& skybox = skyboxView.get<SkyBoxComponent>(entity);
+				if (skybox.SkyBox)
+				{
+					glm::mat4 skyboxViewMatrix = glm::mat4(glm::mat3(glm::inverse(cameraTransform)));
+
+					glm::mat4 projMatrix;
+					if (mainCamera->GetProjectionType() == SceneCamera::ProjectionType::Orthographic)
+					{
+						float aspectRatio = (m_ViewportHeight > 0) ? (float)m_ViewportWidth / (float)m_ViewportHeight : 1.0f;
+						projMatrix = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 100.0f);
+					}
+					else
+					{
+						projMatrix = mainCamera->GetProjectionMatrix();
+					}
+
+					skybox.SkyBox->DrawSkybox(skyboxViewMatrix, projMatrix, skybox.SkyboxTexture);
+				}
+			}
 
 			Renderer3D::Begin3D(viewProj, cameraPos);
 
@@ -184,6 +208,9 @@ namespace Monsi {
 
 	template<>
 	void Scene::OnAddComponent<ModelComponent>(Entity entity, ModelComponent& component) {}
+
+	template<>
+	void Scene::OnAddComponent<SkyBoxComponent>(Entity entity, SkyBoxComponent& component) {}
 
 	template<>
 	void Scene::OnAddComponent<NativeScriptComponent>(Entity entity, NativeScriptComponent& component) {}

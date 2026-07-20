@@ -25,7 +25,7 @@ namespace Monsi {
 		void OnCreate()
 		{
 			auto& transform = GetComponent<TransformComponent>();
-			transform.Rotation = glm::quat(glm::vec3(glm::radians(m_Pitch), glm::radians(m_Yaw), 0.0f));
+			transform.Rotation = glm::quat(glm::vec3(glm::radians(m_Pitch), glm::radians(m_Yaw), glm::radians(m_Roll)));
 		}
 
 		void OnDestroy()
@@ -75,16 +75,21 @@ namespace Monsi {
 			else
 				UpdateLookRightClick();
 
-			transform.Rotation = glm::quat(glm::vec3(glm::radians(m_Pitch), glm::radians(m_Yaw), 0.0f));
+			transform.Rotation = glm::quat(glm::vec3(glm::radians(m_Pitch), glm::radians(m_Yaw), glm::radians(m_Roll)));
 		}
 
 		void SetTranslationSpeed(float speed) { m_TranslationSpeed = speed; }
 		void SetMouseSensitivity(float sensitivity) { m_MouseSensitivity = sensitivity; }
 
-		void SetYawPitch(float yaw, float pitch)
+		void SetYawPitchRoll(float yaw, float pitch, float roll)
 		{
 			m_Yaw = yaw;
-			m_Pitch = glm::clamp(pitch, -89.9f, 89.9f);
+			m_Pitch = pitch;
+			m_Roll = roll;
+		}
+
+		glm::vec3 GetYawPitchRoll() {
+			return glm::vec3{ m_Yaw,m_Pitch,m_Roll };
 		}
 
 		LookMode GetLookMode() const { return m_LookMode; }
@@ -166,6 +171,7 @@ namespace Monsi {
 		void UpdateLookRightClick()
 		{
 			bool rightMouseDown = Input::MouseButtonPressed(MONSI_MOUSE_BUTTON_RIGHT);
+
 			auto& mousePos = Input::GetMousePos();
 
 			if (!rightMouseDown)
@@ -196,9 +202,6 @@ namespace Monsi {
 		{
 			m_Yaw += deltaX * m_MouseSensitivity;
 			m_Pitch += deltaY * m_MouseSensitivity;
-
-			if (m_Pitch > 89.9f)  m_Pitch = 89.9f;
-			if (m_Pitch < -89.9f) m_Pitch = -89.9f;
 		}
 
 	private:
@@ -206,6 +209,7 @@ namespace Monsi {
 
 		float m_Yaw = -90.0f;
 		float m_Pitch = 0.0f;
+		float m_Roll = 0.0f;
 
 		float m_TranslationSpeed = 15.0f;
 		float m_MouseSensitivity = 0.1f;

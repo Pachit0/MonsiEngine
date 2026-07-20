@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Monsi.h>
-#include "SceneHierarchyUnit3D.h"
+#include "SceneHierarchyUnit.h"
 
 class Sandbox3D : public Monsi::Layer {
 public:
@@ -25,6 +25,7 @@ private:
 
 	Monsi::Reference<Monsi::Texture2D> m_MonsiTest;
 	Monsi::Reference<Monsi::CubeMapTexture> m_SkyBoxTest;
+	Monsi::Reference<Monsi::SkyBoxPass> m_SkyBoxPass;
 	Monsi::Reference<Monsi::Mesh> m_SphereTest;
 	Monsi::Reference<Monsi::Mesh> m_CubeTest;
 	Monsi::Reference<Monsi::Mesh> m_TorusTest;
@@ -35,6 +36,7 @@ private:
 
 	Monsi::Reference<Monsi::Scene> m_Scene;
 	Monsi::Entity m_CameraEntity;
+	Monsi::Entity m_SkyBoxEntity;
 	Monsi::Entity m_MainLightEntity;
 	Monsi::Entity m_PointLightEntity;
 	Monsi::Entity m_BackpackEntity;
@@ -46,7 +48,7 @@ private:
 	Monsi::Entity m_CylinderEntity;
 	Monsi::Entity m_QuadEntity;
 
-	Monsi::SceneHierarchyUnit3D m_Unit;
+	Monsi::SceneHierarchyUnit m_Unit;
 	glm::vec3 m_SpherePosition;
 
 private: //fps counter

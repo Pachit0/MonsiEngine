@@ -11,7 +11,7 @@ namespace Monsi {
 		Scene();
 		~Scene();
 
-		Entity CreateEntity(const std::string& name = std::string());
+		Entity CreateEntity(const std::string& name = std::string(), bool hasTransform = true);
 		Entity CreateEntityEmpty();
 
 		void RemoveEntity(Entity entity);

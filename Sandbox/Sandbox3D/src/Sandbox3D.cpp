@@ -38,6 +38,12 @@ void Sandbox3D::OnLayerAttach()
 
 	m_SkyBoxTest = Monsi::CubeMapTexture::Create(skyboxTextures);
 
+	m_SkyBoxPass = Monsi::CreateReference<Monsi::SkyBoxPass>();
+	m_SkyBoxPass->Init();
+
+	m_SkyBoxEntity = m_Scene->CreateEntity("SkyBox", false);
+	m_SkyBoxEntity.AddComponent<Monsi::SkyBoxComponent>(m_SkyBoxPass, m_SkyBoxTest);
+
 	m_ShpereMaterial = Monsi::CreateReference<Monsi::Material>();
 	m_ShpereMaterial->AmbientColor = glm::vec3(0.247f, 0.199f, 0.074f);
 	m_ShpereMaterial->DiffuseColor = glm::vec3(0.751f, 0.606f, 0.226f);
@@ -147,18 +153,15 @@ void Sandbox3D::OnLayerUpdate(Monsi::TimeStep timestep)
 
 	m_Scene->OnUpdate(timestep);
 
-	auto& camTransform = m_CameraEntity.GetComponent<Monsi::TransformComponent>();
-	auto& camComponent = m_CameraEntity.GetComponent<Monsi::CameraComponent>();
-	glm::mat4 camView = glm::inverse(camTransform.GetTransform());
-	glm::mat4 camProj = camComponent.Camera.GetProjectionMatrix();
-
-	Monsi::Renderer3D::DrawSkyBox(camView, camProj, m_SkyBoxTest);
-
 	m_FrameBuffer->Unbind();
 }
 
 void Sandbox3D::OnLayerDetach()
 {
+	if (m_SkyBoxPass)
+	{
+		m_SkyBoxPass->Shutdown();
+	}
 }
 
 void Sandbox3D::OnImGuiDraw() {
