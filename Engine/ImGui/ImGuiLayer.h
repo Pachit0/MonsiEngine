@@ -9,7 +9,7 @@
 namespace Monsi {
 	enum class ImGuiTheme { Dark, Light, Classic, Cyan, Magenta, Red, Blue };
 
-	class ENGINE_API ImGuiLayer : public Layer {
+	class ImGuiLayer : public Layer {
 	public:
 
 		ImGuiLayer();

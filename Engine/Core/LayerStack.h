@@ -7,7 +7,7 @@
 
 namespace Monsi {
 
-	class ENGINE_API LayerStack {
+	class LayerStack {
 	public:
 		LayerStack();
 		~LayerStack();

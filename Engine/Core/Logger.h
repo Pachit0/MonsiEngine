@@ -5,7 +5,7 @@
 #include "spdlog/fmt/ostr.h"
 
 namespace Monsi {
-	class ENGINE_API Log {
+	class Log {
 	public:
 		
 		static void Init();

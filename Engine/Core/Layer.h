@@ -5,7 +5,7 @@
 
 namespace Monsi {
 
-	class ENGINE_API Layer {
+	class Layer {
 	public:
 		Layer(const std::string& LayerName = "Default");
 		virtual ~Layer() = default;

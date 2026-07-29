@@ -5,7 +5,7 @@
 #include "EventFormatter.h"
 
 namespace Monsi {
-	class ENGINE_API KeyEvent : public Event {
+	class KeyEvent : public Event {
 
 	public:
 		inline int GetKeyCode() const { return m_keyCode; }
@@ -16,7 +16,7 @@ namespace Monsi {
 		int m_keyCode;
 	};
 
-	class ENGINE_API KeyEventPressed : public KeyEvent {
+	class KeyEventPressed : public KeyEvent {
 	public:
 		KeyEventPressed(int keycode, bool repeat) : KeyEvent(keycode), m_Repeat(repeat) {}
 
@@ -33,7 +33,7 @@ namespace Monsi {
 		bool m_Repeat = false;
 	};
 
-	class ENGINE_API KeyEventReleased : public KeyEvent {
+	class KeyEventReleased : public KeyEvent {
 	public:
 		KeyEventReleased(int keycode) : KeyEvent(keycode) {}
 
@@ -46,7 +46,7 @@ namespace Monsi {
 		EVENT_CLASS_TYPE(KeyReleased)
 	};
 
-	class ENGINE_API KeyEventTyped : public KeyEvent {
+	class KeyEventTyped : public KeyEvent {
 	public:
 		KeyEventTyped(int keycode) : KeyEvent(keycode) {}
 

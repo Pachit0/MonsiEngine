@@ -23,7 +23,7 @@ namespace Monsi {
 		unsigned int height = 720;
     };
 
-    class ENGINE_API Application {
+    class Application {
     public:
         Application(const AppSpecification& spec);
         virtual ~Application();
