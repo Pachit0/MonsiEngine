@@ -1,7 +1,7 @@
 #include "MonsiPch.h"
 #include "Renderer/RenderCommand.h"
 
-#include "platform/OpenGL/OpenGLRendererAPI.h"
+#include "Platform/OpenGL/OpenGLRendererAPI.h"
 
 namespace Monsi {
 

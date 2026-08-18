@@ -281,7 +281,8 @@ namespace Monsi {
 
 			char buffer[512];
 			memset(buffer, 0, sizeof(buffer));
-			strcpy_s(buffer, sizeof(buffer), tag.c_str());
+			strncpy(buffer, tag.c_str(), sizeof(buffer) - 1);
+			buffer[sizeof(buffer) - 1] = '\0';
 
 			if (ImGui::InputText("##xxTag", buffer, sizeof(buffer))) {
 				tag = std::string(buffer);
@@ -352,7 +353,7 @@ namespace Monsi {
 			});
 
 		DrawComponent<NativeScriptComponent>("Camera Controller Script", entity, [&](auto& component) {
-			auto* camScript = component.GetScriptAs<PerspectiveCameraControllerScript>();
+			auto* camScript = component.template GetScriptAs<PerspectiveCameraControllerScript>();
 
 			if (!camScript) {
 				ImGui::TextDisabled("(script type has no exposed properties)");

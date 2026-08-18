@@ -39,9 +39,7 @@ set(ALL_HEADERS ${HEADERS} ${THIRD_PARTY_HEADERS})
 
 add_library(Engine STATIC ${ALL_SOURCES} ${ALL_HEADERS})
 
-if(WIN32)
-    target_compile_definitions(Engine PRIVATE GLFW_INCLUDE_NONE MONSI_BUILD_DEBUG ENGINE_PROFILER)
-endif()
+target_compile_definitions(Engine PRIVATE GLFW_INCLUDE_NONE MONSI_BUILD_DEBUG ENGINE_PROFILER)
 
 add_subdirectory(thirdparty)
 
@@ -75,7 +73,9 @@ target_link_libraries(Engine
 )
 
 if(WIN32)
-target_link_libraries(Engine PUBLIC opengl32)
+    target_link_libraries(Engine PUBLIC opengl32)
+else(LINUX)
+    target_link_libraries(Engine PUBLIC GL ${X11_LIBRARIES})
 endif()
 
 if(PRODUCTION_BUILD)	

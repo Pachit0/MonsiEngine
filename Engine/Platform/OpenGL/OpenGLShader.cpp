@@ -130,7 +130,7 @@ namespace Monsi {
 	std::string OpenGLShader::ReadFile(const std::string& filePath) {
 		ENGINE_PROFILER_FUNCTION();
 		std::string result;
-		std::ifstream in(filePath, std::ios::in, std::ios::binary);
+		std::ifstream in(filePath, std::ios::in | std::ios::binary);
 		if (in) {
 			in.seekg(0, std::ios::end);
 			result.resize(in.tellg());

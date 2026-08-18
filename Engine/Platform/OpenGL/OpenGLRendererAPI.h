@@ -14,9 +14,7 @@ namespace Monsi {
 		void SetDepthFunc(DepthComp comp) override;
 
 		void DrawIndexed(const Reference<VertexArray>& vertexArray, uint32_t indexCount = 0) override;
-		void OpenGLRendererAPI::DrawIndexedInstanced(const Reference<VertexArray>& vertexArray, uint32_t indexCount, uint32_t instanceCount) override;
-	private:
-
+		void DrawIndexedInstanced(const Reference<VertexArray>& vertexArray, uint32_t indexCount, uint32_t instanceCount) override;
 	};
 
 }

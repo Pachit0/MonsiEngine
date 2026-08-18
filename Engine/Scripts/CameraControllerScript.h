@@ -105,7 +105,7 @@ namespace Monsi {
 			m_WasLookingLastFrame = false;
 			m_FirstMouse = true;
 
-			auto& mousePos = Input::GetMousePos();
+			const auto& mousePos = Input::GetMousePos();
 			m_LastMouseX = mousePos.first;
 			m_LastMouseY = mousePos.second;
 
@@ -147,7 +147,7 @@ namespace Monsi {
 			if (!m_MouseCaptured)
 				return;
 
-			auto& mousePos = Input::GetMousePos();
+			const auto& mousePos = Input::GetMousePos();
 
 			if (m_FirstMouse)
 			{
@@ -172,7 +172,7 @@ namespace Monsi {
 		{
 			bool rightMouseDown = Input::MouseButtonPressed(MONSI_MOUSE_BUTTON_RIGHT);
 
-			auto& mousePos = Input::GetMousePos();
+			const auto& mousePos = Input::GetMousePos();
 
 			if (!rightMouseDown)
 			{
