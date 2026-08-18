@@ -74,7 +74,8 @@ target_link_libraries(Engine
 
 if(WIN32)
     target_link_libraries(Engine PUBLIC opengl32)
-else(LINUX)
+else(CMAKE_SYSTEM_NAME MATCHES "Linux")
+    find_package(X11 REQUIRED)
     target_link_libraries(Engine PUBLIC GL ${X11_LIBRARIES})
 endif()
 

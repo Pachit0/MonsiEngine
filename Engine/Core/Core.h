@@ -79,5 +79,19 @@ namespace Monsi{
         #define ENGINE_API
     #endif
 #else
-    #error Monsi supports only Windows!
+	#define ENGINE_API
+#endif
+
+#ifdef MONSI_PLATFORM_LINUX // placeholder
+    #if ENGINE_LINK_DYNAMICALLY
+        #ifdef ENGINE_BUILD_DLL
+            #define ENGINE_API __declspec(dllexport)
+        #else
+            #define ENGINE_API __declspec(dllimport)
+        #endif
+    #else
+        #define ENGINE_API
+    #endif
+#else
+	#define ENGINE_API
 #endif
