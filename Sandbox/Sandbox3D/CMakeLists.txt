@@ -1,8 +1,5 @@
 project(Sandbox3D)
 
-#The Panel folder won't stay like that.
-#In the future I will figure out how to make it a single Hierarchy Panel
-
 file(GLOB SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/../../SceneEditor/Panel/*.cpp"

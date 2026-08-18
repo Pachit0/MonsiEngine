@@ -20,6 +20,8 @@
 #elif defined(__GNUC__) || defined(__clang__)
 	#if defined(__x86_64__) || defined(__i386__)
 		#define DEBUG_BREAK() __asm__ volatile(int $3)
+	#elif defined(__aarch64__) || defined(__arm__)
+		#define DEBUG_BREAK() __asm__ volatile("brk #0")
 	#else
 		#include "signal.h"
 		#define DEBUG_BREAK() raise(SIGTRAP)
