@@ -16,18 +16,18 @@
 #endif
 
 #if defined(_MSC_VER)
-	#define DEBUG_BREAK() __debugbreak();
+    #define DEBUG_BREAK() __debugbreak()
 #elif defined(__GNUC__) || defined(__clang__)
-	#if defined(__x86_64__) || defined(__i386__)
-		#define DEBUG_BREAK() __asm__ volatile(int $3)
-	#elif defined(__aarch64__) || defined(__arm__)
-		#define DEBUG_BREAK() __asm__ volatile("brk #0")
-	#else
-		#include "signal.h"
-		#define DEBUG_BREAK() raise(SIGTRAP)
-	#endif
+    #if defined(__x86_64__) || defined(__i386__)
+        #define DEBUG_BREAK() __asm__ volatile("int $3")
+    #elif defined(__aarch64__) || defined(__arm__)
+        #define DEBUG_BREAK() __asm__ volatile("brk #0")
+    #else
+        #include <signal.h>
+        #define DEBUG_BREAK() raise(SIGTRAP)
+    #endif
 #else
-	#define DEBUG_BREAK()
+    #define DEBUG_BREAK()
 #endif
 
 #ifdef MONSI_ENABLE_ASSERTS
