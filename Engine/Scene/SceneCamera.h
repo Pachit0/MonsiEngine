@@ -37,9 +37,9 @@ namespace Monsi {
 	private:
 		ProjectionType m_ProjectionType = ProjectionType::Orthographic;
 
-		float m_OrthographicSize = 10.0f;
-		float m_OrthographicNear = -1.0f;
-		float m_OrthographicFar = 1.0f;
+		float m_OrthographicSize = 250.0f;
+		float m_OrthographicNear = -1000.0f;
+		float m_OrthographicFar = 1000.0f;
 
 		float m_PerspectiveFOV = glm::radians(45.0f);
 		float m_PerspectiveNear = 0.01f;

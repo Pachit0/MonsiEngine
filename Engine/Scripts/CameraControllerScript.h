@@ -205,7 +205,7 @@ namespace Monsi {
 		}
 
 	private:
-		LookMode m_LookMode = LookMode::FPS;
+		LookMode m_LookMode = LookMode::RightClick;
 
 		float m_Yaw = -90.0f;
 		float m_Pitch = 0.0f;
