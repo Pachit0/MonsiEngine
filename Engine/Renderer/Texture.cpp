@@ -19,8 +19,8 @@ namespace Monsi {
 
 	Reference<Texture2D> Texture2D::Create(uint32_t width, uint32_t height) {
 		switch (Renderer::GetRendererAPI()) {
-		case RendererAPI::API::None: ENGINE_ASSERT(false, "RendererAPI::None!"); return nullptr;
-		case RendererAPI::API::OpenGL: return CreateReference<OpenGLTexture2D>(width, height);
+			case RendererAPI::API::None: ENGINE_ASSERT(false, "RendererAPI::None!"); return nullptr;
+			case RendererAPI::API::OpenGL: return CreateReference<OpenGLTexture2D>(width, height);
 		}
 
 		ENGINE_ASSERT(false, "Unknown RendererAPI!");
@@ -29,8 +29,8 @@ namespace Monsi {
 
 	Reference<CubeMapTexture> CubeMapTexture::Create(const std::array<std::string, 6>& ResourcePaths) {
 		switch (Renderer::GetRendererAPI()) {
-		case RendererAPI::API::None: ENGINE_ASSERT(false, "RendererAPI::None!"); return nullptr;
-		case RendererAPI::API::OpenGL: return CreateReference<OpenGLCubeMapTexture>(ResourcePaths);
+			case RendererAPI::API::None: ENGINE_ASSERT(false, "RendererAPI::None!"); return nullptr;
+			case RendererAPI::API::OpenGL: return CreateReference<OpenGLCubeMapTexture>(ResourcePaths);
 		}
 
 		ENGINE_ASSERT(false, "Unknown RendererAPI!");

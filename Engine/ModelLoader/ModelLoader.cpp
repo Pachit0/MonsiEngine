@@ -37,6 +37,7 @@ namespace Monsi {
 			return;
 		}
 
+		m_FilePath = filepath;
 		m_Directory = filepath.substr(0, filepath.find_last_of("/\\"));
 		m_Meshes.reserve(scene->mNumMeshes);
 

@@ -5,6 +5,7 @@
 #include "Sandbox3D.h"
 #include "ScriptableEntity.h"
 #include "TimeStep.h"
+#include "SceneManager.h"
 
 Sandbox3D::Sandbox3D() : Layer("Sandbox3D"), m_ViewportSize{ 0.0f,0.0f },
 m_ViewportFocused(false), m_ViewportHovered(false), m_SpherePosition({ -5.0f, 3.0f, 5.0f })
@@ -27,7 +28,7 @@ void Sandbox3D::OnLayerAttach()
 	gamer.FlipUVs = false;
 	m_Sponza = Monsi::CreateReference<Monsi::Model>(MODEL_PATH "crytek_sponza/sponza.obj", gamer);
 
-	std::array<std::string, 6> skyboxTextures = {
+	std::array<std::string, 6> skyBoxTexturesPaths = {
 		TEXTURE_PATH "right.png",
 		TEXTURE_PATH "left.png",
 		TEXTURE_PATH "top.png",
@@ -36,9 +37,9 @@ void Sandbox3D::OnLayerAttach()
 		TEXTURE_PATH "back.png"
 	};
 
-	m_SkyBoxTest = Monsi::CubeMapTexture::Create(skyboxTextures);
+	m_SkyBoxTest = Monsi::CubeMapTexture::Create(skyBoxTexturesPaths);
 
-	m_SkyBoxPass = Monsi::CreateReference<Monsi::SkyBoxPass>();
+	m_SkyBoxPass = Monsi::CreateReference<Monsi::SkyBoxPass>(skyBoxTexturesPaths);
 	m_SkyBoxPass->Init();
 
 	m_SkyBoxEntity = m_Scene->CreateEntity("SkyBox", false);
@@ -110,6 +111,7 @@ void Sandbox3D::OnLayerAttach()
 	m_Unit.SetContext(m_Scene);
 
 	m_CameraEntity.AddComponent<Monsi::NativeScriptComponent>().Bind<Monsi::PerspectiveCameraControllerScript>();
+
 }
 
 void Sandbox3D::OnLayerUpdate(Monsi::TimeStep timestep)
@@ -146,10 +148,14 @@ void Sandbox3D::OnLayerUpdate(Monsi::TimeStep timestep)
 	glm::vec3 animatedSpherePos = m_SpherePosition;
 	animatedSpherePos.y += std::sin(totalTime * 2.0f) * 0.5f;
 
-	auto& backpackTransform = m_BackpackEntity.GetComponent<Monsi::TransformComponent>();
-	backpackTransform.Rotation = glm::angleAxis(glm::radians(rotationStep), glm::vec3(0.0f, 1.0f, 0.0f));
+	if (m_BackpackEntity.HasComponent<Monsi::TransformComponent>()) {
+		auto& backpackTransform = m_BackpackEntity.GetComponent<Monsi::TransformComponent>();
+		backpackTransform.Rotation = glm::angleAxis(glm::radians(rotationStep), glm::vec3(0.0f, 1.0f, 0.0f));
+	}
 
-	m_SphereEntity.GetComponent<Monsi::TransformComponent>().Translation = animatedSpherePos;
+	if (m_SphereEntity.HasComponent<Monsi::TransformComponent>()) {
+		m_SphereEntity.GetComponent<Monsi::TransformComponent>().Translation = animatedSpherePos;
+	}
 
 	m_Scene->OnUpdate(timestep);
 
@@ -171,6 +177,14 @@ void Sandbox3D::OnImGuiDraw() {
 	{
 		if (ImGui::MenuItem("Exit")) {
 			Monsi::Application::Get().CloseApp();
+		}
+		if (ImGui::MenuItem("Save")) {
+			Monsi::SceneManager manager(m_Scene);
+			manager.SaveScene("manager.mscene");
+		}
+		if (ImGui::MenuItem("Load")) {
+			Monsi::SceneManager manager(m_Scene);
+			manager.LoadScene("manager.mscene");
 		}
 
 		ImGui::EndMenu();

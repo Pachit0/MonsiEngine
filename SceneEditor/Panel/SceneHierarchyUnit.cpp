@@ -106,9 +106,12 @@ namespace Monsi {
 			ImGui::PopStyleVar(1);
 
 			ImGui::SameLine(contentRegionAvail.x - lineHeight * 0.25f);
+			ImGui::PushID(label.c_str());
+
 			if (ImGui::Button("...")) {
 				ImGui::OpenPopup("Settings");
 			}
+			ImGui::PopID();
 
 			bool RemoveComponent = false;
 			if (ImGui::BeginPopup("Settings")) {

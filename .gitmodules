@@ -13,3 +13,6 @@
 [submodule "Engine/thirdparty/assimp"]
 	path = Engine/thirdparty/assimp
 	url = https://github.com/assimp/assimp.git
+[submodule "Engine/thirdparty/yaml-cpp"]
+	path = Engine/thirdparty/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp.git

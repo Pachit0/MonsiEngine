@@ -27,8 +27,8 @@ namespace Monsi {
 		entt::registry m_Registry;
 
 		friend class Entity;
+		friend class SceneManager;
 		friend class SceneHierarchyUnit;
-		friend class SceneHierarchyUnit3D;
 	};
 
 }

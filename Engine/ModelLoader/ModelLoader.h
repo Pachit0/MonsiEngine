@@ -29,6 +29,8 @@ namespace Monsi {
 		void LoadModel(const std::string& filepath);
 		void LoadModel(const std::string& filepath, ModelImportSettings settings);
 
+		std::string GetFilePath() const { return m_FilePath; }
+
 		const std::vector<Mesh>& GetMeshes() const { return m_Meshes; }
 
 	private:
@@ -41,6 +43,7 @@ namespace Monsi {
 		std::vector<Mesh> m_Meshes;
 		std::unordered_map<std::string, Reference<Texture2D>> m_TextureCache;
 		std::string m_Directory;
+		std::string m_FilePath;
 	};
 
 }

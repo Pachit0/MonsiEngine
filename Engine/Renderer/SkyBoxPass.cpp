@@ -6,6 +6,11 @@
 
 namespace Monsi {
 
+	SkyBoxPass::SkyBoxPass(const std::array<std::string, 6>& paths)
+	{
+		m_FilePath = paths;
+	}
+
 	void SkyBoxPass::Init()
 	{
 		m_SkyboxVA = VertexArray::Create();
