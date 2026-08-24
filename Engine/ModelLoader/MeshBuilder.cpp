@@ -3,95 +3,108 @@
 
 namespace Monsi {
 
-	namespace {
+	static	void AddQuadFace(std::vector<Vertex_t>& vertices, std::vector<uint32_t>& indices,
+		const glm::vec3& center, const glm::vec3& normal,
+		const glm::vec3& right, const glm::vec3& up,
+		float halfWidth, float halfHeight)
+	{
+		uint32_t base = (uint32_t)vertices.size();
 
-		void AddQuadFace(std::vector<Vertex_t>& vertices, std::vector<uint32_t>& indices,
-			const glm::vec3& center, const glm::vec3& normal,
-			const glm::vec3& right, const glm::vec3& up,
-			float halfWidth, float halfHeight)
+		Vertex_t vertex;
+		vertex.Normal = normal;
+
+		vertex.Position = center - right * halfWidth + up * halfHeight;
+		vertex.TexCoords = { 0.0f, 0.0f };
+		vertices.push_back(vertex);
+
+		vertex.Position = center + right * halfWidth + up * halfHeight;
+		vertex.TexCoords = { 1.0f, 0.0f };
+		vertices.push_back(vertex);
+
+		vertex.Position = center - right * halfWidth - up * halfHeight;
+		vertex.TexCoords = { 0.0f, 1.0f };
+		vertices.push_back(vertex);
+
+		vertex.Position = center + right * halfWidth - up * halfHeight;
+		vertex.TexCoords = { 1.0f, 1.0f };
+		vertices.push_back(vertex);
+
+		indices.push_back(base + 0);
+		indices.push_back(base + 2);
+		indices.push_back(base + 1);
+
+		indices.push_back(base + 1);
+		indices.push_back(base + 2);
+		indices.push_back(base + 3);
+	}
+
+	static void AddDiskCap(std::vector<Vertex_t>& vertices, std::vector<uint32_t>& indices,
+		float y, float radius, uint32_t sectors, const glm::vec3& normal, float windingSign)
+	{
+		const float pi = 3.1415926535f;
+
+		uint32_t centerIndex = (uint32_t)vertices.size();
+
+		Vertex_t centerVertex;
+		centerVertex.Position = glm::vec3(0.0f, y, 0.0f);
+		centerVertex.Normal = normal;
+		centerVertex.TexCoords = { 0.5f, 0.5f };
+		vertices.push_back(centerVertex);
+
+		uint32_t rimStart = (uint32_t)vertices.size();
+
+		for (uint32_t s = 0; s <= sectors; ++s)
 		{
-			uint32_t base = (uint32_t)vertices.size();
+			float phi = (float)s * 2.0f * pi / (float)sectors;
+			float x = std::cos(phi);
+			float z = std::sin(phi);
 
 			Vertex_t vertex;
+			vertex.Position = glm::vec3(x * radius, y, z * radius);
 			vertex.Normal = normal;
-
-			vertex.Position = center - right * halfWidth + up * halfHeight;
-			vertex.TexCoords = { 0.0f, 0.0f };
+			vertex.TexCoords = { x * 0.5f + 0.5f, z * 0.5f + 0.5f };
 			vertices.push_back(vertex);
-
-			vertex.Position = center + right * halfWidth + up * halfHeight;
-			vertex.TexCoords = { 1.0f, 0.0f };
-			vertices.push_back(vertex);
-
-			vertex.Position = center - right * halfWidth - up * halfHeight;
-			vertex.TexCoords = { 0.0f, 1.0f };
-			vertices.push_back(vertex);
-
-			vertex.Position = center + right * halfWidth - up * halfHeight;
-			vertex.TexCoords = { 1.0f, 1.0f };
-			vertices.push_back(vertex);
-
-			indices.push_back(base + 0);
-			indices.push_back(base + 2);
-			indices.push_back(base + 1);
-
-			indices.push_back(base + 1);
-			indices.push_back(base + 2);
-			indices.push_back(base + 3);
 		}
 
-		void AddDiskCap(std::vector<Vertex_t>& vertices, std::vector<uint32_t>& indices,
-			float y, float radius, uint32_t sectors, const glm::vec3& normal, float windingSign)
+		for (uint32_t s = 0; s < sectors; ++s)
 		{
-			const float pi = 3.1415926535f;
+			uint32_t a = rimStart + s;
+			uint32_t b = rimStart + s + 1;
 
-			uint32_t centerIndex = (uint32_t)vertices.size();
-
-			Vertex_t centerVertex;
-			centerVertex.Position = glm::vec3(0.0f, y, 0.0f);
-			centerVertex.Normal = normal;
-			centerVertex.TexCoords = { 0.5f, 0.5f };
-			vertices.push_back(centerVertex);
-
-			uint32_t rimStart = (uint32_t)vertices.size();
-
-			for (uint32_t s = 0; s <= sectors; ++s)
+			if (windingSign >= 0.0f)
 			{
-				float phi = (float)s * 2.0f * pi / (float)sectors;
-				float x = std::cos(phi);
-				float z = std::sin(phi);
-
-				Vertex_t vertex;
-				vertex.Position = glm::vec3(x * radius, y, z * radius);
-				vertex.Normal = normal;
-				vertex.TexCoords = { x * 0.5f + 0.5f, z * 0.5f + 0.5f };
-				vertices.push_back(vertex);
+				indices.push_back(centerIndex);
+				indices.push_back(b);
+				indices.push_back(a);
 			}
-
-			for (uint32_t s = 0; s < sectors; ++s)
+			else
 			{
-				uint32_t a = rimStart + s;
-				uint32_t b = rimStart + s + 1;
+				indices.push_back(centerIndex);
+				indices.push_back(a);
+				indices.push_back(b);
+			}
+		}
+	}
 
-				if (windingSign >= 0.0f)
+	Reference<Mesh> MeshBuilder::CreateFromParams(const PrimitiveParams& params, const Reference<Material>& material)
+	{
+		return std::visit([&material](auto&& p) -> Reference<Mesh>
+			{
+				using T = std::decay_t<decltype(p)>;
+				if constexpr (std::is_same_v<T, std::monostate>)
 				{
-					indices.push_back(centerIndex);
-					indices.push_back(b);
-					indices.push_back(a);
+					return nullptr;
 				}
 				else
 				{
-					indices.push_back(centerIndex);
-					indices.push_back(a);
-					indices.push_back(b);
+					return MeshBuilder::Create(p, material);
 				}
-			}
-		}
-
+			}, params);
 	}
 
 	Reference<Mesh> MeshBuilder::CreateSphere(float radius, uint32_t rings, uint32_t sectors, const Reference<Material>& material)
 	{
+		Reference<Mesh> meshBuild;
 		std::vector<Vertex_t> vertices;
 		std::vector<uint32_t> indices;
 
@@ -146,11 +159,15 @@ namespace Monsi {
 			}
 		}
 
-		return CreateReference<Mesh>(vertices, indices, material);
+		meshBuild = CreateReference<Mesh>(vertices, indices, material);
+		meshBuild->m_Type = PrimitiveType::Sphere;
+
+		return meshBuild;
 	}
 
 	Reference<Mesh> MeshBuilder::CreateGrid(float width, float depth, uint32_t columns, uint32_t rows, const Reference<Material>& material)
 	{
+		Reference<Mesh> meshBuild;
 		std::vector<Vertex_t> vertices;
 		std::vector<uint32_t> indices;
 
@@ -202,11 +219,15 @@ namespace Monsi {
 			}
 		}
 
-		return CreateReference<Mesh>(vertices, indices, material);
+		meshBuild = CreateReference<Mesh>(vertices, indices, material);
+		meshBuild->m_Type = PrimitiveType::Grid;
+
+		return meshBuild;
 	}
 
 	Reference<Mesh> MeshBuilder::CreateCube(float size, const Reference<Material>& material)
 	{
+		Reference<Mesh> meshBuild;
 		std::vector<Vertex_t> vertices;
 		std::vector<uint32_t> indices;
 
@@ -222,11 +243,15 @@ namespace Monsi {
 		AddQuadFace(vertices, indices, glm::vec3(0.0f, 0.0f, half), glm::vec3(0, 0, 1), glm::vec3(1, 0, 0), glm::vec3(0, 1, 0), half, half);
 		AddQuadFace(vertices, indices, glm::vec3(0.0f, 0.0f, -half), glm::vec3(0, 0, -1), glm::vec3(-1, 0, 0), glm::vec3(0, 1, 0), half, half);
 
-		return CreateReference<Mesh>(vertices, indices, material);
+		meshBuild = CreateReference<Mesh>(vertices, indices, material);
+		meshBuild->m_Type = PrimitiveType::Cube;
+
+		return meshBuild;
 	}
 
 	Reference<Mesh> MeshBuilder::CreateCylinder(float radius, float height, uint32_t sectors, const Reference<Material>& material)
 	{
+		Reference<Mesh> meshBuild;
 		std::vector<Vertex_t> vertices;
 		std::vector<uint32_t> indices;
 
@@ -275,11 +300,15 @@ namespace Monsi {
 		AddDiskCap(vertices, indices, halfHeight, radius, sectors, glm::vec3(0, 1, 0), 1.0f);
 		AddDiskCap(vertices, indices, -halfHeight, radius, sectors, glm::vec3(0, -1, 0), -1.0f);
 
-		return CreateReference<Mesh>(vertices, indices, material);
+		meshBuild = CreateReference<Mesh>(vertices, indices, material);
+		meshBuild->m_Type = PrimitiveType::Cylinder;
+
+		return meshBuild;
 	}
 
 	Reference<Mesh> MeshBuilder::CreateCone(float radius, float height, uint32_t sectors, const Reference<Material>& material)
 	{
+		Reference<Mesh> meshBuild;
 		std::vector<Vertex_t> vertices;
 		std::vector<uint32_t> indices;
 
@@ -324,11 +353,15 @@ namespace Monsi {
 
 		AddDiskCap(vertices, indices, -halfHeight, radius, sectors, glm::vec3(0, -1, 0), -1.0f);
 
-		return CreateReference<Mesh>(vertices, indices, material);
+		meshBuild = CreateReference<Mesh>(vertices, indices, material);
+		meshBuild->m_Type = PrimitiveType::Cone;
+
+		return meshBuild;
 	}
 
 	Reference<Mesh> MeshBuilder::CreateTorus(float majorRadius, float minorRadius, uint32_t majorSegments, uint32_t minorSegments, const Reference<Material>& material)
 	{
+		Reference<Mesh> meshBuild;
 		std::vector<Vertex_t> vertices;
 		std::vector<uint32_t> indices;
 
@@ -386,11 +419,15 @@ namespace Monsi {
 			}
 		}
 
-		return CreateReference<Mesh>(vertices, indices, material);
+		meshBuild = CreateReference<Mesh>(vertices, indices, material);
+		meshBuild->m_Type = PrimitiveType::Torus;
+
+		return meshBuild;
 	}
 
 	Reference<Mesh> MeshBuilder::CreateQuad(float width, float height, const Reference<Material>& material)
 	{
+		Reference<Mesh> meshBuild;
 		std::vector<Vertex_t> vertices;
 		std::vector<uint32_t> indices;
 
@@ -399,6 +436,75 @@ namespace Monsi {
 
 		AddQuadFace(vertices, indices, glm::vec3(0.0f), glm::vec3(0, 0, 1), glm::vec3(1, 0, 0), glm::vec3(0, 1, 0), width * 0.5f, height * 0.5f);
 
-		return CreateReference<Mesh>(vertices, indices, material);
+		meshBuild = CreateReference<Mesh>(vertices, indices, material);
+		meshBuild->m_Type = PrimitiveType::Quad;
+
+		return meshBuild;
 	}
+
+	Monsi::PrimitiveParams MeshBuilder::MakeDefaultParams(PrimitiveType type)
+	{
+		switch (type)
+		{
+		case PrimitiveType::Sphere:   return SphereParams{};
+		case PrimitiveType::Grid:     return GridParams{};
+		case PrimitiveType::Cube:     return CubeParams{};
+		case PrimitiveType::Cylinder: return CylinderParams{};
+		case PrimitiveType::Cone:     return ConeParams{};
+		case PrimitiveType::Torus:    return TorusParams{};
+		case PrimitiveType::Quad:     return QuadParams{};
+		case PrimitiveType::None:
+		default:                      return std::monostate{};
+		}
+	}
+
+	Monsi::Reference<Monsi::Mesh> MeshBuilder::Create(const SphereParams& p, const Reference<Material>& mat)
+	{
+		auto mesh = CreateSphere(p.radius, p.rings, p.sectors, mat);
+		mesh->SetPrimitiveParams(p);
+		return mesh;
+	}
+
+	Monsi::Reference<Monsi::Mesh> MeshBuilder::Create(const CubeParams& p, const Reference<Material>& mat)
+	{
+		auto mesh = CreateCube(p.size, mat);
+		mesh->SetPrimitiveParams(p);
+		return mesh;
+	}
+
+	Monsi::Reference<Monsi::Mesh> MeshBuilder::Create(const GridParams& p, const Reference<Material>& mat)
+	{
+		auto mesh = CreateGrid(p.width, p.depth, p.columns, p.rows, mat);
+		mesh->SetPrimitiveParams(p);
+		return mesh;
+	}
+
+	Monsi::Reference<Monsi::Mesh> MeshBuilder::Create(const CylinderParams& p, const Reference<Material>& mat)
+	{
+		auto mesh = CreateCylinder(p.radius, p.height, p.sectors, mat);
+		mesh->SetPrimitiveParams(p);
+		return mesh;
+	}
+
+	Monsi::Reference<Monsi::Mesh> MeshBuilder::Create(const ConeParams& p, const Reference<Material>& mat)
+	{
+		auto mesh = CreateCone(p.radius, p.height, p.sectors, mat);
+		mesh->SetPrimitiveParams(p);
+		return mesh;
+	}
+
+	Monsi::Reference<Monsi::Mesh> MeshBuilder::Create(const TorusParams& p, const Reference<Material>& mat)
+	{
+		auto mesh = CreateTorus(p.majorRadius, p.minorRadius, p.majorSegments, p.minorSegments, mat);
+		mesh->SetPrimitiveParams(p);
+		return mesh;
+	}
+
+	Monsi::Reference<Monsi::Mesh> MeshBuilder::Create(const QuadParams& p, const Reference<Material>& mat)
+	{
+		auto mesh = CreateQuad(p.width, p.height, mat);
+		mesh->SetPrimitiveParams(p);
+		return mesh;
+	}
+
 }

@@ -194,23 +194,23 @@ namespace Monsi {
 					else {
 						if (!m_Selected.HasComponent<MeshComponent>()) {
 							if (ImGui::MenuItem("Sphere")) {
-								m_Selected.AddComponent<MeshComponent>(MeshBuilder::CreateSphere(1.0f, 32, 32, Monsi::CreateReference<Monsi::Material>()));
+								m_Selected.AddComponent<MeshComponent>(MeshBuilder::Create(SphereParams{}, Monsi::CreateReference<Monsi::Material>()));
 								ImGui::CloseCurrentPopup();
 							}
 							if (ImGui::MenuItem("Torus")) {
-								m_Selected.AddComponent<MeshComponent>(MeshBuilder::CreateTorus(2.5f, 0.5f, 32, 16, Monsi::CreateReference<Monsi::Material>()));
+								m_Selected.AddComponent<MeshComponent>(MeshBuilder::Create(TorusParams{}, Monsi::CreateReference<Monsi::Material>()));
 								ImGui::CloseCurrentPopup();
 							}
 							if (ImGui::MenuItem("Cube")) {
-								m_Selected.AddComponent<MeshComponent>(MeshBuilder::CreateCube(1.0f, Monsi::CreateReference<Monsi::Material>()));
+								m_Selected.AddComponent<MeshComponent>(MeshBuilder::Create(CubeParams{}, Monsi::CreateReference<Monsi::Material>()));
 								ImGui::CloseCurrentPopup();
 							}
 							if (ImGui::MenuItem("Cylinder")) {
-								m_Selected.AddComponent<MeshComponent>(MeshBuilder::CreateCylinder(2.5f, 8, 32, Monsi::CreateReference<Monsi::Material>()));
+								m_Selected.AddComponent<MeshComponent>(MeshBuilder::Create(CylinderParams{}, Monsi::CreateReference<Monsi::Material>()));
 								ImGui::CloseCurrentPopup();
 							}
 							if (ImGui::MenuItem("Cone")) {
-								m_Selected.AddComponent<MeshComponent>(MeshBuilder::CreateCone(2.5f, 8, 32, Monsi::CreateReference<Monsi::Material>()));
+								m_Selected.AddComponent<MeshComponent>(MeshBuilder::Create(ConeParams{}, Monsi::CreateReference<Monsi::Material>()));
 								ImGui::CloseCurrentPopup();
 							}
 						}

@@ -9,7 +9,7 @@ namespace Monsi {
 		LoadModel(filepath);
 	}
 
-	Model::Model(const std::string& filepath, ModelImportSettings settings)
+	Model::Model(const std::string& filepath, const ModelImportSettings& settings)
 	{
 		LoadModel(filepath, settings);
 	}
@@ -19,8 +19,9 @@ namespace Monsi {
 		LoadModel(filepath, ModelImportSettings{});
 	}
 
-	void Model::LoadModel(const std::string& filepath, ModelImportSettings settings)
+	void Model::LoadModel(const std::string& filepath, const ModelImportSettings& settings)
 	{
+		m_ModelSettings = settings;
 		Assimp::Importer importer;
 		unsigned int flags = aiProcess_Triangulate;
 

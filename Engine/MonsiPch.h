@@ -5,6 +5,7 @@
 #include <vector>
 #include <array>
 #include <algorithm>
+#include <variant>
 #include <type_traits>
 #include <string>
 #include <sstream>

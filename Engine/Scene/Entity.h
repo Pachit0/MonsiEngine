@@ -9,7 +9,7 @@ namespace Monsi {
 	public:
 		Entity() = default;
 		Entity(entt::entity handle, Scene* scene);
-		Entity(const Entity& other) = default; // explicitly showing that we have a copy constructor
+		Entity(const Entity& other) = default;
 
 		template<typename Component>
 		bool HasComponent() {

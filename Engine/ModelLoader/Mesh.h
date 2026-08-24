@@ -6,10 +6,15 @@
 #include "VertexArray.h"
 #include "Shader.h"
 #include "Material.h"
+#include "PrimitiveParams.h"
 
 #include <glm/glm.hpp>
 
 namespace Monsi {
+
+	enum class PrimitiveType {
+		None = 0, Sphere, Grid, Cube, Cylinder, Cone, Torus, Quad
+	};
 
 	struct Vertex_t
 	{
@@ -35,7 +40,11 @@ namespace Monsi {
 		void SetDiffuseMap(const Reference<Texture2D>& tex) { m_Material->DiffuseMap = tex; }
 		void SetSpecularMap(const Reference<Texture2D>& tex) { m_Material->SpecularMap = tex; }
 		void SetNormalMap(const Reference<Texture2D>& tex) { m_Material->NormalMap = tex; }
+		void SetPrimitiveType(const PrimitiveType& type) { m_Type = type; }
+		void SetPrimitiveParams(const PrimitiveParams& params) { m_Params = params; }
 
+		const PrimitiveParams& GetPrimitiveParams() const { return m_Params; }
+		const PrimitiveType& GetPrimitiveType() const { return m_Type; }
 		float GetShininess() const { return m_Material->Shininess; }
 		const Reference<Material>& GetMaterial() const { return m_Material; }
 		const glm::vec3& GetAmbientColor() const { return m_Material->AmbientColor; }
@@ -56,6 +65,12 @@ namespace Monsi {
 		Reference<VertexArray> m_VertexArray;
 		Reference<VertexBuffer> m_VertexBuffer;
 		Reference<IndexBuffer> m_IndexBuffer;
+
+	private:
+		PrimitiveType m_Type = PrimitiveType::None;
+		PrimitiveParams m_Params;
+
+		friend class MeshBuilder;
 	};
 
 }

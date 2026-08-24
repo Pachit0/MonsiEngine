@@ -51,12 +51,19 @@ void Sandbox3D::OnLayerAttach()
 	m_ShpereMaterial->SpecularColor = glm::vec3(0.628f, 0.555f, 0.366f);
 	m_ShpereMaterial->Shininess = 51.2f;
 
-	m_SphereTest = Monsi::MeshBuilder::CreateSphere(1.0f, 32, 32, Monsi::CreateReference<Monsi::Material>(m_ShpereMaterial));
-	m_TorusTest = Monsi::MeshBuilder::CreateTorus(2.5f, 0.5f, 32, 16, Monsi::CreateReference<Monsi::Material>(m_ShpereMaterial));
-	m_ConeTest = Monsi::MeshBuilder::CreateCone(2.5f, 8, 32, Monsi::CreateReference<Monsi::Material>(m_ShpereMaterial));
-	m_CylinderTest = Monsi::MeshBuilder::CreateCylinder(2.5f, 8, 32, Monsi::CreateReference<Monsi::Material>(m_ShpereMaterial));
-	m_QuadTest = Monsi::MeshBuilder::CreateQuad(0.5f, 0.5f, Monsi::CreateReference<Monsi::Material>(m_ShpereMaterial));
-	m_CubeTest = Monsi::MeshBuilder::CreateCube(0.5f, Monsi::CreateReference<Monsi::Material>(m_ShpereMaterial));
+	Monsi::SphereParams sphereParams = { 1.0f, 32, 32 };
+	Monsi::TorusParams torusParams = { 2.5f, 0.5f, 32, 16 };
+	Monsi::ConeParams coneParams = { 2.5f, 8, 32 };
+	Monsi::CylinderParams cylinderParams = { 2.5f, 8, 32 };
+	Monsi::QuadParams quadParams = { 0.5f, 0.5f };
+	Monsi::CubeParams cubeParams = { 0.5f };
+
+	m_SphereTest = Monsi::MeshBuilder::Create(sphereParams, Monsi::CreateReference<Monsi::Material>(m_ShpereMaterial));
+	m_TorusTest = Monsi::MeshBuilder::Create(torusParams, Monsi::CreateReference<Monsi::Material>(m_ShpereMaterial));
+	m_ConeTest = Monsi::MeshBuilder::Create(coneParams, Monsi::CreateReference<Monsi::Material>(m_ShpereMaterial));
+	m_CylinderTest = Monsi::MeshBuilder::Create(cylinderParams, Monsi::CreateReference<Monsi::Material>(m_ShpereMaterial));
+	m_QuadTest = Monsi::MeshBuilder::Create(quadParams, Monsi::CreateReference<Monsi::Material>(m_ShpereMaterial));
+	m_CubeTest = Monsi::MeshBuilder::Create(cubeParams, Monsi::CreateReference<Monsi::Material>(m_ShpereMaterial));
 
 	m_CameraEntity = m_Scene->CreateEntity("Camera");
 	auto& cameraComponent = m_CameraEntity.AddComponent<Monsi::CameraComponent>();
@@ -64,7 +71,6 @@ void Sandbox3D::OnLayerAttach()
 	cameraComponent.Primary = true;
 
 	m_MainLightEntity = m_Scene->CreateEntity("Directional Light");
-	m_MainLightEntity.AddComponent<Monsi::MeshComponent>(Monsi::MeshBuilder::CreateSphere(1.0f, 32, 32, Monsi::CreateReference<Monsi::Material>(m_ShpereMaterial)));
 	auto& mainLight = m_MainLightEntity.AddComponent<Monsi::DirectionalLightComponent>();
 	mainLight.Direction = glm::vec3(0.0f, -1.0f, 0.0f);
 	mainLight.Color = MonsiColors::White;

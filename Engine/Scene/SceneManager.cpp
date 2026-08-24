@@ -2,7 +2,7 @@
 #include "SceneManager.h"
 #include "Entity.h"
 #include "Components.h"
-#include "MeshBuilder.h" //temporary
+#include "MeshBuilder.h"
 #include <yaml-cpp/yaml.h>
 
 namespace YAML {
@@ -79,6 +79,130 @@ namespace YAML {
 			rhs.x = node[1].as<float>();
 			rhs.y = node[2].as<float>();
 			rhs.z = node[3].as<float>();
+			return true;
+		}
+	};
+
+	template<>
+	struct convert<Monsi::SphereParams> {
+		static Node encode(const Monsi::SphereParams& rhs) {
+			Node node;
+			node["Radius"] = rhs.radius;
+			node["Rings"] = rhs.rings;
+			node["Sectors"] = rhs.sectors;
+			return node;
+		}
+		static bool decode(const Node& node, Monsi::SphereParams& rhs) {
+			if (!node.IsMap()) return false;
+			rhs.radius = node["Radius"].as<float>();
+			rhs.rings = node["Rings"].as<uint32_t>();
+			rhs.sectors = node["Sectors"].as<uint32_t>();
+			return true;
+		}
+	};
+
+	template<>
+	struct convert<Monsi::GridParams> {
+		static Node encode(const Monsi::GridParams& rhs) {
+			Node node;
+			node["Width"] = rhs.width;
+			node["Depth"] = rhs.depth;
+			node["Columns"] = rhs.columns;
+			node["Rows"] = rhs.rows;
+			return node;
+		}
+		static bool decode(const Node& node, Monsi::GridParams& rhs) {
+			if (!node.IsMap()) return false;
+			rhs.width = node["Width"].as<float>();
+			rhs.depth = node["Depth"].as<float>();
+			rhs.columns = node["Columns"].as<uint32_t>();
+			rhs.rows = node["Rows"].as<uint32_t>();
+			return true;
+		}
+	};
+
+	template<>
+	struct convert<Monsi::CubeParams> {
+		static Node encode(const Monsi::CubeParams& rhs) {
+			Node node;
+			node["Size"] = rhs.size;
+			return node;
+		}
+		static bool decode(const Node& node, Monsi::CubeParams& rhs) {
+			if (!node.IsMap()) return false;
+			rhs.size = node["Size"].as<float>();
+			return true;
+		}
+	};
+
+	template<>
+	struct convert<Monsi::CylinderParams> {
+		static Node encode(const Monsi::CylinderParams& rhs) {
+			Node node;
+			node["Radius"] = rhs.radius;
+			node["Height"] = rhs.height;
+			node["Sectors"] = rhs.sectors;
+			return node;
+		}
+		static bool decode(const Node& node, Monsi::CylinderParams& rhs) {
+			if (!node.IsMap()) return false;
+			rhs.radius = node["Radius"].as<float>();
+			rhs.height = node["Height"].as<float>();
+			rhs.sectors = node["Sectors"].as<uint32_t>();
+			return true;
+		}
+	};
+
+	template<>
+	struct convert<Monsi::ConeParams> {
+		static Node encode(const Monsi::ConeParams& rhs) {
+			Node node;
+			node["Radius"] = rhs.radius;
+			node["Height"] = rhs.height;
+			node["Sectors"] = rhs.sectors;
+			return node;
+		}
+		static bool decode(const Node& node, Monsi::ConeParams& rhs) {
+			if (!node.IsMap()) return false;
+			rhs.radius = node["Radius"].as<float>();
+			rhs.height = node["Height"].as<float>();
+			rhs.sectors = node["Sectors"].as<uint32_t>();
+			return true;
+		}
+	};
+
+	template<>
+	struct convert<Monsi::TorusParams> {
+		static Node encode(const Monsi::TorusParams& rhs) {
+			Node node;
+			node["MajorRadius"] = rhs.majorRadius;
+			node["MinorRadius"] = rhs.minorRadius;
+			node["MajorSegments"] = rhs.majorSegments;
+			node["MinorSegments"] = rhs.minorSegments;
+			return node;
+		}
+		static bool decode(const Node& node, Monsi::TorusParams& rhs) {
+			if (!node.IsMap()) return false;
+			rhs.majorRadius = node["MajorRadius"].as<float>();
+			rhs.minorRadius = node["MinorRadius"].as<float>();
+			rhs.majorSegments = node["MajorSegments"].as<uint32_t>();
+			rhs.minorSegments = node["MinorSegments"].as<uint32_t>();
+			return true;
+		}
+	};
+
+	template<>
+	struct convert<Monsi::QuadParams> {
+		static Node encode(const Monsi::QuadParams& rhs) {
+			Node node;
+			node["Width"] = rhs.width;
+			node["Height"] = rhs.height;
+			return node;
+		}
+		static bool decode(const Node& node, Monsi::QuadParams& rhs) {
+			if (!node.IsMap()) return false;
+			rhs.width = node["Width"].as<float>();
+			rhs.height = node["Height"].as<float>();
 			return true;
 		}
 	};
@@ -163,6 +287,26 @@ namespace Monsi {
 			auto& mc = entity.GetComponent<MeshComponent>();
 			out << YAML::Key << "MeshComponent";
 			out << YAML::BeginMap;
+
+			out << YAML::Key << "PrimitiveType" << YAML::Value << (int)mc.MeshAsset->GetPrimitiveType();
+			out << YAML::Key << "AmbientColor" << YAML::Value << mc.MeshAsset->GetMaterial()->AmbientColor;
+			out << YAML::Key << "DiffuseColor" << YAML::Value << mc.MeshAsset->GetMaterial()->DiffuseColor;
+			out << YAML::Key << "SpecularColor" << YAML::Value << mc.MeshAsset->GetMaterial()->SpecularColor;
+			out << YAML::Key << "Shininess" << YAML::Value << mc.MeshAsset->GetMaterial()->Shininess;
+
+			out << YAML::Key << "PrimitiveParams";
+			out << YAML::Value;
+			std::visit([&out](auto&& p) {
+				using T = std::decay_t<decltype(p)>;
+				if constexpr (std::is_same_v<T, std::monostate>) {
+					out << YAML::Null;
+				}
+				else {
+					YAML::Node node(p);
+					out << node;
+				}
+				}, mc.MeshAsset->GetPrimitiveParams());
+
 			out << YAML::EndMap;
 		}
 
@@ -171,6 +315,9 @@ namespace Monsi {
 			out << YAML::Key << "ModelComponent";
 			out << YAML::BeginMap;
 			out << YAML::Key << "AssetPath" << YAML::Value << mc.ModelAsset->GetFilePath();
+			out << YAML::Key << "CalcTangentSpace" << YAML::Value << mc.ModelAsset->GetModelSettings().CalcTangentSpace;
+			out << YAML::Key << "FlipUVs" << YAML::Value << mc.ModelAsset->GetModelSettings().FlipUVs;
+			out << YAML::Key << "GenSmoothNormals" << YAML::Value << mc.ModelAsset->GetModelSettings().GenSmoothNormals;
 			out << YAML::EndMap;
 		}
 
@@ -182,7 +329,7 @@ namespace Monsi {
 			out << YAML::Key << "AssetPath";
 			out << YAML::BeginSeq;
 			for (int i = 0; i < 6; i++) {
-				out  << YAML::Value << filePath[i];
+				out << YAML::Value << filePath[i];
 			}
 			out << YAML::EndSeq;
 			out << YAML::EndMap;
@@ -224,7 +371,7 @@ namespace Monsi {
 		std::stringstream strStream;
 		strStream << stream.rdbuf();
 		YAML::Node data = YAML::Load(strStream.str());
-		
+
 		if (!data["Scene"]) return false;
 
 		std::string sceneName = data["Scene"].as<std::string>();
@@ -234,7 +381,7 @@ namespace Monsi {
 		if (entities) {
 			for (auto entityNode : entities) {
 				uint64_t uuid = entityNode["Entity_ID"].as<uint64_t>();
-				
+
 				std::string name;
 				auto tagComponentNode = entityNode["TagComponent"];
 				if (tagComponentNode) {
@@ -297,19 +444,94 @@ namespace Monsi {
 
 				auto meshComponentNode = entityNode["MeshComponent"];
 				if (meshComponentNode) {
-					Reference<Material> test = CreateReference<Material>();
-					test->AmbientColor = glm::vec3(0.3f, 0.3f, 0.3f);
-					test->DiffuseColor = glm::vec3(0.3f, 0.3f, 0.3f);
-					test->SpecularColor = glm::vec3(0.3f, 0.3f, 0.3f);
-					test->Shininess = 33.3f;
-					deserializedEntity.AddComponent<MeshComponent>(MeshBuilder::CreateCube(0.5f, test));
+					Reference<Material> material = CreateReference<Material>();
+					material->AmbientColor = meshComponentNode["AmbientColor"].as<glm::vec3>();
+					material->DiffuseColor = meshComponentNode["DiffuseColor"].as<glm::vec3>();
+					material->SpecularColor = meshComponentNode["SpecularColor"].as<glm::vec3>();
+					material->Shininess = meshComponentNode["Shininess"].as<float>();
+
+					auto type = (PrimitiveType)meshComponentNode["PrimitiveType"].as<int>();
+					auto paramsNode = meshComponentNode["PrimitiveParams"];
+
+					PrimitiveParams params = MeshBuilder::MakeDefaultParams(type);
+
+					switch (type) {
+					case PrimitiveType::Sphere: {
+						SphereParams p;
+						p.radius = paramsNode["Radius"].as<float>();
+						p.rings = paramsNode["Rings"].as<uint32_t>();
+						p.sectors = paramsNode["Sectors"].as<uint32_t>();
+						params = p;
+						break;
+					}
+					case PrimitiveType::Grid: {
+						GridParams p;
+						p.width = paramsNode["Width"].as<float>();
+						p.depth = paramsNode["Depth"].as<float>();
+						p.columns = paramsNode["Columns"].as<uint32_t>();
+						p.rows = paramsNode["Rows"].as<uint32_t>();
+						params = p;
+						break;
+					}
+					case PrimitiveType::Cube: {
+						CubeParams p;
+						p.size = paramsNode["Size"].as<float>();
+						params = p;
+						break;
+					}
+					case PrimitiveType::Cone: {
+						ConeParams p;
+						p.height = paramsNode["Height"].as<float>();
+						p.radius = paramsNode["Radius"].as<float>();
+						p.sectors = paramsNode["Sectors"].as<uint32_t>();
+						params = p;
+						break;
+					}
+					case PrimitiveType::Cylinder: {
+						CylinderParams p;
+						p.height = paramsNode["Height"].as<float>();
+						p.radius = paramsNode["Radius"].as<float>();
+						p.sectors = paramsNode["Sectors"].as<uint32_t>();
+						params = p;
+						break;
+					}
+					case PrimitiveType::Quad: {
+						QuadParams p;
+						p.height = paramsNode["Height"].as<float>();
+						p.width = paramsNode["Width"].as<float>();
+						params = p;
+						break;
+					}
+					case PrimitiveType::Torus: {
+						TorusParams p;
+						p.majorRadius = paramsNode["MajorRadius"].as<float>();
+						p.minorRadius = paramsNode["MinorRadius"].as<float>();
+						p.majorSegments = paramsNode["MajorSegments"].as<uint32_t>();
+						p.minorSegments = paramsNode["MinorSegments"].as<uint32_t>();
+						params = p;
+						break;
+					}
+					case PrimitiveType::None: {
+						break;
+					}
+					default: ENGINE_LOG_ERROR("PrimitiveParams Error!"); break;
+					}
+
+					auto& mc = deserializedEntity.AddComponent<MeshComponent>();
+					mc = MeshBuilder::CreateFromParams(params, material);
 				}
 
 				auto modelComponentNode = entityNode["ModelComponent"];
 				if (modelComponentNode) {
+					ModelImportSettings settings;
 					std::string assetPath = modelComponentNode["AssetPath"].as<std::string>();
-					Reference<Monsi::Model> test = CreateReference<Monsi::Model>(assetPath);
-					auto& mc = deserializedEntity.AddComponent<ModelComponent>(test);
+					settings.CalcTangentSpace = modelComponentNode["CalcTangentSpace"].as<bool>();
+					settings.FlipUVs = modelComponentNode["FlipUVs"].as<bool>();
+					settings.GenSmoothNormals = modelComponentNode["GenSmoothNormals"].as<bool>();
+
+					Reference<Monsi::Model> model = CreateReference<Monsi::Model>(assetPath, settings);
+
+					auto& mc = deserializedEntity.AddComponent<ModelComponent>(model);
 				}
 
 				auto skyBoxComponentNode = entityNode["SkyBoxComponent"];
