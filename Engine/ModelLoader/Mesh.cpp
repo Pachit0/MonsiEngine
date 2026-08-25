@@ -5,6 +5,8 @@
 
 namespace Monsi {
 
+	uint64_t Mesh::s_NextId = 1;
+
 	Mesh::Mesh(const std::vector<Vertex_t>& vertices, const std::vector<unsigned int>& indices, const Reference<Material>& material)
 		: m_Vertices(vertices), m_Indices(indices), m_Material(material)
 	{

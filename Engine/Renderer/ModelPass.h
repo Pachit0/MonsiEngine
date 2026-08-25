@@ -5,6 +5,7 @@
 #include "VertexArray.h"
 #include "Shader.h"
 #include "Texture.h"
+#include <memory>
 #include <unordered_set>
 #include <unordered_map>
 
@@ -25,9 +26,13 @@ namespace Monsi {
 		void DrawMesh(const Mesh* meshPtr, const glm::mat4& transform, const glm::vec4& color);
 		void DrawMesh(const Mesh* meshPtr, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation);
 
+		void ClearBatches();
+
 	private:
 		void Flush();
 		void RegisterMesh(const Mesh* mesh);
+
+		void PruneStaleBatches();
 
 	private:
 		struct ModelInstanceData
@@ -39,6 +44,7 @@ namespace Monsi {
 		struct MeshBatch
 		{
 			const Mesh* MeshPtr = nullptr;
+			std::weak_ptr<void> LifetimeToken;
 			std::vector<ModelInstanceData> InstanceData;
 			bool WarnedOverflow = false;
 		};
@@ -47,7 +53,7 @@ namespace Monsi {
 
 		static constexpr uint32_t DefaultBatchReserve = 64;
 
-		std::unordered_map<const Mesh*, MeshBatch> m_MeshBatches;
+		std::unordered_map<uint64_t, MeshBatch> m_MeshBatches;
 		std::vector<MeshBatch*> m_FlushList;
 
 		Reference<VertexBuffer> m_InstanceVBO;

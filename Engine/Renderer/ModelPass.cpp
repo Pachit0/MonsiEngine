@@ -35,6 +35,25 @@ namespace Monsi {
 		m_MeshBatches.clear();
 	}
 
+	void ModelPass::ClearBatches()
+	{
+		m_MeshBatches.clear();
+		m_FlushList.clear();
+	}
+
+	void ModelPass::PruneStaleBatches()
+	{
+		for (auto it = m_MeshBatches.begin(); it != m_MeshBatches.end(); )
+		{
+			if (it->second.LifetimeToken.expired()) {
+				it = m_MeshBatches.erase(it);
+			}
+			else {
+				++it;
+			}
+		}
+	}
+
 	void ModelPass::RegisterMesh(const Mesh* mesh)
 	{
 		auto& vao = mesh->GetVertexArray();
@@ -54,7 +73,9 @@ namespace Monsi {
 			lighting->Bind(m_Shader);
 		}
 
-		for (auto& [meshPtr, batch] : m_MeshBatches)
+		PruneStaleBatches();
+
+		for (auto& [meshId, batch] : m_MeshBatches)
 		{
 			batch.InstanceData.clear();
 		}
@@ -99,12 +120,14 @@ namespace Monsi {
 
 	void ModelPass::DrawMesh(const Mesh* meshPtr, const glm::mat4& transform, const glm::vec4& color)
 	{
-		auto& batch = m_MeshBatches[meshPtr];
+		uint64_t meshId = meshPtr->GetId();
+		auto& batch = m_MeshBatches[meshId];
 
 		if (!batch.MeshPtr)
 		{
 			RegisterMesh(meshPtr);
 			batch.MeshPtr = meshPtr;
+			batch.LifetimeToken = meshPtr->GetLifetimeToken();
 			batch.InstanceData.reserve(DefaultBatchReserve);
 		}
 
@@ -120,7 +143,7 @@ namespace Monsi {
 		m_Shader->setMat4("u_ViewProjection", m_ViewProjection);
 
 		m_FlushList.clear();
-		for (auto& [meshPtr, batch] : m_MeshBatches)
+		for (auto& [meshId, batch] : m_MeshBatches)
 		{
 			if (!batch.InstanceData.empty())
 				m_FlushList.push_back(&batch);
