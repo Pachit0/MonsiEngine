@@ -8,6 +8,7 @@
 #include "MeshBuilder.h"
 #include "Components.h"
 #include "glm/gtc/type_ptr.hpp"
+#include "MeshInvalidationTracker.h"
 #include "SceneCamera.h"
 
 namespace Monsi {
@@ -270,7 +271,13 @@ namespace Monsi {
 
 		if (entityDeleted)
 		{
+			if (entity.HasComponent<MeshComponent>())
+			{
+				MeshInvalidationTracker::MarkDirty();
+			}
+
 			m_Scene->RemoveEntity(entity);
+
 			if (m_Selected == entity)
 				m_Selected = {};
 		}

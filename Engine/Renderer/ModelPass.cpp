@@ -4,6 +4,7 @@
 #include "RenderCommand.h"
 #include "Lighting.h"
 #include "Material.h"
+#include "MeshInvalidationTracker.h"
 #include <glm/ext/matrix_transform.hpp>
 
 namespace Monsi {
@@ -73,7 +74,10 @@ namespace Monsi {
 			lighting->Bind(m_Shader);
 		}
 
-		PruneStaleBatches();
+		if (MeshInvalidationTracker::GetState() == true) {
+			PruneStaleBatches();
+			MeshInvalidationTracker::ReleaseDirty();
+		}
 
 		for (auto& [meshId, batch] : m_MeshBatches)
 		{
