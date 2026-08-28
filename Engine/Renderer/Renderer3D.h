@@ -3,6 +3,7 @@
 #include "Texture.h"
 #include "ModelLoader.h"
 #include "Lighting.h"
+#include "ShadowMap.h"
 #include <glm/glm.hpp>
 
 namespace Monsi {
@@ -21,9 +22,10 @@ namespace Monsi {
 		static void DrawMesh(const Mesh* meshPtr, const glm::mat4& transform, const glm::vec4& color);
 
 		static void DrawSkyBox(const glm::mat4& view, const glm::mat4& projection, const Reference<CubeMapTexture>& skyboxTexture);
+		static void DrawShadowMap(const glm::mat4& view, const glm::mat4& projection, const Reference<ShadowMap>& shadowMap);
 
 		static void SetSceneLighting(const SceneLighting& lighting);
-
+        static void SetShadowMapData(const glm::mat4& lightSpaceMatrix, const Reference<ShadowMap>& shadowMap);
 // 	       Deprecated methods - will be removed
 // 	       static void DrawCube(const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation);
 // 	       static void DrawCube(const glm::vec3& position,const glm::vec3& size, Reference<Texture2D> texture,const glm::vec3& rotation);

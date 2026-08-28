@@ -25,6 +25,7 @@ namespace Monsi {
 		const void setVec4(const std::string& name, const glm::vec4& value) override;
 		const void setMat4(const std::string& name, const glm::mat4& value) override;
 		const void setFloat(const std::string& name, float value) override;
+		void BindUniformBlock(const std::string& name, uint32_t bindingPoint) const override;
 
 		void UploadBool(const std::string& name, bool value);
 		void UploadInt(const std::string& name, int value);

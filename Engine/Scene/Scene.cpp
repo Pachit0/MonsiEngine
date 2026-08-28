@@ -8,11 +8,21 @@
 #include "Components.h"
 #include "Entity.h"
 #include "RenderInitializator.h"
+#include "ShadowMap.h"
 
 namespace Monsi {
 
+// 	namespace {
+// 		constexpr uint32_t kShadowMapResolution = 2048;
+// 		constexpr float kShadowDistance = 50.0f;
+// 		constexpr float kShadowOrthoSize = 25.0f;
+// 		constexpr float kShadowNearPlane = 0.1f;
+// 		constexpr float kShadowFarPlane = 100.0f;
+// 	}
+
 	Scene::Scene()
 	{
+	/*	m_ShadowMap = ShadowMap::Create(kShadowMapResolution, kShadowMapResolution);*/
 	}
 
 	Scene::~Scene()
@@ -94,6 +104,18 @@ namespace Monsi {
 				sceneLighting.MainLight.Color = light.Color;
 				sceneLighting.MainLight.Intensity = light.Intensity;
 			}
+
+// 			glm::vec3 lightPos = cameraPosition - sceneLighting.MainLight.Direction * kShadowDistance;
+// 			glm::mat4 lightView = glm::lookAt(lightPos, cameraPosition, glm::vec3(0.0f, 1.0f, 0.0f));
+// 			glm::mat4 lightProj = glm::ortho(
+// 				-kShadowOrthoSize, kShadowOrthoSize,
+// 				-kShadowOrthoSize, kShadowOrthoSize,
+// 				kShadowNearPlane, kShadowFarPlane
+// 			);
+// 			glm::mat4 lightSpaceMatrix = lightProj * lightView;
+
+// 			Renderer3D::DrawShadowMap(lightView, lightProj, m_ShadowMap);
+// 			Renderer3D::SetShadowMapData(lightSpaceMatrix, m_ShadowMap);
 
 			auto PointLightView = m_Registry.view<TransformComponent, PointLightComponent>();
 			for (auto entity : PointLightView)

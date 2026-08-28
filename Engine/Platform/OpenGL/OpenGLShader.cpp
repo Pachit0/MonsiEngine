@@ -145,6 +145,15 @@ namespace Monsi {
 		return result;
 	}
 
+	void OpenGLShader::BindUniformBlock(const std::string& name, uint32_t bindingPoint) const
+	{
+		uint32_t blockIndex = glGetUniformBlockIndex(m_ID, name.c_str());
+		if (blockIndex != GL_INVALID_INDEX)
+		{
+			glUniformBlockBinding(m_ID, blockIndex, bindingPoint);
+		}
+	}
+
 	int OpenGLShader::GetUniformLocation(const std::string& name)
 	{
 		auto it = m_UniformLocationCache.find(name);

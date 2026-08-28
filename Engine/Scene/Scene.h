@@ -2,6 +2,7 @@
 
 #include "entt.hpp"
 #include "TimeStep.h"
+#include "ShadowMap.h"
 
 namespace Monsi {
 	class Entity;
@@ -25,6 +26,8 @@ namespace Monsi {
 		uint32_t m_ViewportWidth = 0;
 		uint32_t m_ViewportHeight = 0;
 		entt::registry m_Registry;
+
+		Reference<ShadowMap> m_ShadowMap;
 
 		friend class Entity;
 		friend class SceneManager;

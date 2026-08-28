@@ -56,7 +56,7 @@ namespace Monsi {
 
 	void SkyBoxPass::DrawSkybox(const glm::mat4& view, const glm::mat4& projection, const Reference<CubeMapTexture>& skyboxTexture)
 	{
-		glDisable(GL_CULL_FACE); //there is probably a better way, this is a quick solution
+		glDisable(GL_CULL_FACE);
 		glm::mat4 staticView = glm::mat4(glm::mat3(view));
 		glm::mat4 viewProj = projection * staticView;
 

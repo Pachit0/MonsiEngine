@@ -10,8 +10,8 @@ namespace Monsi {
 		case RendererAPI::API::None: ENGINE_ASSERT(false, "RendererAPI::None is not supported!") return nullptr;
 		case RendererAPI::API::OpenGL: return std::make_shared<OpenGLShader>(name, vertexPath, fragmentPath);
 		}
-	ENGINE_ASSERT(false, "Unknown Shader!");
-	return nullptr;
+		ENGINE_ASSERT(false, "Unknown Shader!");
+		return nullptr;
 	}
 
 	Reference<Shader> Shader::Create(const std::string& filePath) {
@@ -58,5 +58,4 @@ namespace Monsi {
 	{
 		return m_ShaderMap.find(name) != m_ShaderMap.end();
 	}
-
 }

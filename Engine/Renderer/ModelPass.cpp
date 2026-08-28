@@ -90,6 +90,18 @@ namespace Monsi {
 		Flush();
 	}
 
+	void ModelPass::SetShadowMapData(const glm::mat4& lightSpaceMatrix, const Reference<ShadowMap>& shadowMap)
+	{
+		if (!shadowMap)
+			return;
+
+		m_Shader->Bind();
+		m_Shader->setMat4("u_LightSpaceMatrix", lightSpaceMatrix);
+
+		shadowMap->BindDepthTexture(ShadowMapTextureSlot);
+		m_Shader->setInt("u_ShadowMap", ShadowMapTextureSlot);
+	}
+
 	void ModelPass::DrawModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color)
 	{
 		DrawModel(model, position, size, color, glm::vec3(0.0f));

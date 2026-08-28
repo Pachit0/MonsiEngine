@@ -8,11 +8,13 @@ layout(location = 3) in mat4 a_InstanceTransform;
 layout(location = 7) in vec4 a_InstanceColor;
 
 uniform mat4 u_ViewProjection;
+uniform mat4 u_LightSpaceMatrix;
 
 out vec2 TexCoords;
 out vec4 InstanceColor;
 out vec3 v_FragPos;
 out vec3 v_Normal;
+out vec4 v_FragPosLightSpace;
 
 void main()
 {
@@ -23,6 +25,7 @@ void main()
     v_FragPos = vec3(worldPos);
 
     v_Normal = mat3(a_InstanceTransform) * a_Normal;
+    v_FragPosLightSpace = u_LightSpaceMatrix * worldPos;
 
     gl_Position = u_ViewProjection * worldPos;
 }
@@ -64,10 +67,13 @@ uniform PointLight u_PointLights[32];
 uniform vec3 u_ViewPos;
 uniform sampler2D texture_diffuse1;
 
+uniform sampler2DShadow u_ShadowMap;
+
 in vec2 TexCoords;
 in vec4 InstanceColor;
 in vec3 v_FragPos;
 in vec3 v_Normal;
+in vec4 v_FragPosLightSpace;
 
 out vec4 FragColor;
 
@@ -106,6 +112,20 @@ vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewD
     return (diffuse + specular) * attenuation;
 }
 
+float CalculateShadow(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir)
+{
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    projCoords = projCoords * 0.5 + 0.5;
+
+    if (projCoords.z > 1.0)
+        return 0.0;
+
+    float bias = max(0.002 * (1.0 - dot(normal, lightDir)), 0.0007);
+
+    float lit = texture(u_ShadowMap, vec3(projCoords.xy, projCoords.z - bias));
+    return 1.0 - lit;
+}
+
 void main()
 {
     vec4 texColor = texture(texture_diffuse1, TexCoords) * InstanceColor;
@@ -119,9 +139,10 @@ void main()
     vec3 viewDir = normalize(u_ViewPos - v_FragPos);
     
     vec3 lightResult = material.ambient;
-    
-    lightResult += CalculateDirectionalLight(u_MainLight, norm, viewDir);
-    
+
+    float shadow = CalculateShadow(v_FragPosLightSpace, norm, normalize(-u_MainLight.Direction));
+    lightResult += (1.0 - shadow) * CalculateDirectionalLight(u_MainLight, norm, viewDir);
+
     for(int i = 0; i < u_PointLightCount; i++) {
         lightResult += CalculatePointLight(u_PointLights[i], norm, v_FragPos, viewDir);
     }
