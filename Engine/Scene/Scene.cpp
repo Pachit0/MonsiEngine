@@ -9,20 +9,12 @@
 #include "Entity.h"
 #include "RenderInitializator.h"
 #include "ShadowMap.h"
+#include "glad/glad.h"
 
 namespace Monsi {
 
-// 	namespace {
-// 		constexpr uint32_t kShadowMapResolution = 2048;
-// 		constexpr float kShadowDistance = 50.0f;
-// 		constexpr float kShadowOrthoSize = 25.0f;
-// 		constexpr float kShadowNearPlane = 0.1f;
-// 		constexpr float kShadowFarPlane = 100.0f;
-// 	}
-
 	Scene::Scene()
 	{
-	/*	m_ShadowMap = ShadowMap::Create(kShadowMapResolution, kShadowMapResolution);*/
 	}
 
 	Scene::~Scene()
@@ -105,18 +97,6 @@ namespace Monsi {
 				sceneLighting.MainLight.Intensity = light.Intensity;
 			}
 
-// 			glm::vec3 lightPos = cameraPosition - sceneLighting.MainLight.Direction * kShadowDistance;
-// 			glm::mat4 lightView = glm::lookAt(lightPos, cameraPosition, glm::vec3(0.0f, 1.0f, 0.0f));
-// 			glm::mat4 lightProj = glm::ortho(
-// 				-kShadowOrthoSize, kShadowOrthoSize,
-// 				-kShadowOrthoSize, kShadowOrthoSize,
-// 				kShadowNearPlane, kShadowFarPlane
-// 			);
-// 			glm::mat4 lightSpaceMatrix = lightProj * lightView;
-
-// 			Renderer3D::DrawShadowMap(lightView, lightProj, m_ShadowMap);
-// 			Renderer3D::SetShadowMapData(lightSpaceMatrix, m_ShadowMap);
-
 			auto PointLightView = m_Registry.view<TransformComponent, PointLightComponent>();
 			for (auto entity : PointLightView)
 			{
@@ -164,6 +144,38 @@ namespace Monsi {
 			{
 				auto [transform, model] = modelGroup.get<TransformComponent, ModelComponent>(entity);
 				Renderer3D::DrawModel(model.ModelAsset, transform.GetTransform(), glm::vec4(1.0f));
+			}
+
+			auto shadowMapView = m_Registry.view<ShadowMapComponent>();
+			for (auto entity : shadowMapView) {
+				auto& shadowMapComp = shadowMapView.get<ShadowMapComponent>(entity);
+				if (shadowMapComp.Shadow) {
+
+					const auto& settings = shadowMapComp.Settings;
+
+					if (m_ShadowMapFramebufferWidth != shadowMapComp.Settings.Width || m_ShadowMapFramebufferHeight != shadowMapComp.Settings.Height) {
+						m_ShadowMapFramebufferHeight = shadowMapComp.Settings.Height;
+						m_ShadowMapFramebufferWidth = shadowMapComp.Settings.Width;
+
+						Renderer3D::ResizeShadowMap(settings.Width, settings.Height, shadowMapComp.Shadow);
+					}
+
+					glm::vec3 lightPos = cameraPosition - sceneLighting.MainLight.Direction * settings.LightDistance;
+
+					glm::vec3 lightDir = glm::normalize(sceneLighting.MainLight.Direction);
+					glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f);
+
+					if (std::abs(lightDir.y) > 0.999f) {
+						upVector = glm::vec3(0.0f, 0.0f, 1.0f);
+					}
+
+					glm::mat4 lightView = glm::lookAt(lightPos, cameraPosition, upVector);
+					glm::mat4 lightProjection = glm::ortho(-settings.OrthoSize, settings.OrthoSize, -settings.OrthoSize, settings.OrthoSize, settings.NearPlane, settings.FarPlane);
+					glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+
+					Renderer3D::DrawShadowMap(lightView, lightProjection, shadowMapComp.Shadow);
+					Renderer3D::SetShadowMapData(lightSpaceMatrix, shadowMapComp.Shadow);
+				}
 			}
 
 			Renderer3D::End3D();
@@ -235,5 +247,12 @@ namespace Monsi {
 	void Scene::OnAddComponent<SkyBoxComponent>(Entity entity, SkyBoxComponent& component) {}
 
 	template<>
+	void Scene::OnAddComponent<ShadowMapComponent>(Entity entity, ShadowMapComponent& component) {
+		m_ShadowMapFramebufferWidth = component.Settings.Width;
+		m_ShadowMapFramebufferHeight = component.Settings.Height;
+	}
+
+	template<>
 	void Scene::OnAddComponent<NativeScriptComponent>(Entity entity, NativeScriptComponent& component) {}
+
 }

@@ -35,6 +35,11 @@ namespace Monsi {
 		m_Commands.push_back(cmd);
 	}
 
+	void ShadowMapPass::ResizeShadowMap(uint32_t width, uint32_t height, const Reference<ShadowMap>& shadowMap)
+	{
+		shadowMap->Resize(width, height);
+	}
+
 	void ShadowMapPass::Clear()
 	{
 		m_Commands.clear();

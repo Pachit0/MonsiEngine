@@ -25,9 +25,10 @@ namespace Monsi {
 	private:
 		uint32_t m_ViewportWidth = 0;
 		uint32_t m_ViewportHeight = 0;
-		entt::registry m_Registry;
 
-		Reference<ShadowMap> m_ShadowMap;
+		uint32_t m_ShadowMapFramebufferWidth = 0;
+		uint32_t m_ShadowMapFramebufferHeight = 0;
+		entt::registry m_Registry;
 
 		friend class Entity;
 		friend class SceneManager;

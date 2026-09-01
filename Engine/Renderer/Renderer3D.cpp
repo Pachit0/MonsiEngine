@@ -56,13 +56,13 @@ namespace Monsi {
 
 	void Renderer3D::DrawModel(const Reference<Model>& model, const glm::mat4& transform, const glm::vec4& color)
 	{
-		s_Data.Model->DrawModel(model, transform, color);
+		s_Data.Model->SubmitModel(model, transform, color);
 		s_Data.ShadowMap->SubmitModel(model, transform);
 	}
 
 	void Renderer3D::DrawMesh(const Mesh* meshPtr, const glm::mat4& transform, const glm::vec4& color)
 	{
-		s_Data.Model->DrawMesh(meshPtr, transform, color);
+		s_Data.Model->SubmitMesh(meshPtr, transform, color);
 		s_Data.ShadowMap->SubmitMesh(meshPtr, transform);
 	}
 
@@ -79,6 +79,11 @@ namespace Monsi {
 	void Renderer3D::SetShadowMapData(const glm::mat4& lightSpaceMatrix, const Reference<ShadowMap>& shadowMap)
 	{
 		s_Data.Model->SetShadowMapData(lightSpaceMatrix, shadowMap);
+	}
+
+	void Renderer3D::ResizeShadowMap(uint32_t width, uint32_t height, const Reference<ShadowMap>& shadowMap)
+	{
+		s_Data.ShadowMap->ResizeShadowMap(width, height, shadowMap);
 	}
 
 	void Renderer3D::SetSceneLighting(const SceneLighting& lighting)

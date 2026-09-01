@@ -122,7 +122,18 @@ float CalculateShadow(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir)
 
     float bias = max(0.002 * (1.0 - dot(normal, lightDir)), 0.0007);
 
-    float lit = texture(u_ShadowMap, vec3(projCoords.xy, projCoords.z - bias));
+    vec2 texelSize = 1.0 / textureSize(u_ShadowMap, 0);
+    float lit = 0.0;
+    for (int x = -1; x <= 1; ++x)
+    {
+        for (int y = -1; y <= 1; ++y)
+        {
+            vec2 offset = vec2(x, y) * texelSize;
+            lit += texture(u_ShadowMap, vec3(projCoords.xy + offset, projCoords.z - bias));
+        }
+    }
+    lit /= 9.0;
+
     return 1.0 - lit;
 }
 

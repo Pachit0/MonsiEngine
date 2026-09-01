@@ -17,6 +17,8 @@ namespace Monsi {
 		void SubmitModel(const Reference<Model>& model, const glm::mat4& transform);
 		void SubmitMesh(const Mesh* meshPtr, const glm::mat4& transform);
 
+		void ResizeShadowMap(uint32_t width, uint32_t height, const Reference<ShadowMap>& shadowMap);
+
 		void DrawShadowMap(const glm::mat4& lightViewProjection, const Reference<ShadowMap>& shadowMap);
 
 		void Clear();

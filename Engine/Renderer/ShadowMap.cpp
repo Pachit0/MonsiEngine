@@ -10,12 +10,7 @@ namespace Monsi {
 	{
 		switch (Renderer::GetRendererAPI()) {
 			case RendererAPI::API::None: ENGINE_ASSERT(false, "RendererAPI::None!"); return nullptr;
-			case RendererAPI::API::OpenGL:
-			{
-				Reference<OpenGLShadowMap> shadowMap = CreateReference<OpenGLShadowMap>();
-				shadowMap->Init(width, height);
-				return shadowMap;
-			}
+			case RendererAPI::API::OpenGL: return CreateReference<OpenGLShadowMap>(width, height);
 		}
 
 		ENGINE_ASSERT(false, "Unknown RendererAPI!");

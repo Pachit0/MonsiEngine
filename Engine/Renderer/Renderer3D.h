@@ -26,14 +26,7 @@ namespace Monsi {
 
 		static void SetSceneLighting(const SceneLighting& lighting);
         static void SetShadowMapData(const glm::mat4& lightSpaceMatrix, const Reference<ShadowMap>& shadowMap);
-// 	       Deprecated methods - will be removed
-// 	       static void DrawCube(const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation);
-// 	       static void DrawCube(const glm::vec3& position,const glm::vec3& size, Reference<Texture2D> texture,const glm::vec3& rotation);
-        
-
-//         static void DrawModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color);
-//         static void DrawModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation);
-// 		   static void DrawMesh(const Mesh* meshPtr, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation);
+        static void ResizeShadowMap(uint32_t width, uint32_t height, const Reference<ShadowMap>& shadowMap);
     };
 
 }

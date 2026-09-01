@@ -26,6 +26,8 @@ private:
 	Monsi::Reference<Monsi::Texture2D> m_MonsiTest;
 	Monsi::Reference<Monsi::CubeMapTexture> m_SkyBoxTest;
 	Monsi::Reference<Monsi::SkyBoxPass> m_SkyBoxPass;
+	Monsi::Reference<Monsi::ShadowMap> m_ShadowMap;
+
 	Monsi::Reference<Monsi::Mesh> m_SphereTest;
 	Monsi::Reference<Monsi::Mesh> m_CubeTest;
 	Monsi::Reference<Monsi::Mesh> m_TorusTest;
@@ -47,6 +49,7 @@ private:
 	Monsi::Entity m_ConeEntity;
 	Monsi::Entity m_CylinderEntity;
 	Monsi::Entity m_QuadEntity;
+	Monsi::Entity m_ShadowMapEntity;
 
 	Monsi::SceneHierarchyUnit m_Unit;
 	glm::vec3 m_SpherePosition;

@@ -215,6 +215,19 @@ namespace Monsi {
 								ImGui::CloseCurrentPopup();
 							}
 						}
+
+						bool sceneHasShadowMap = !m_Scene->m_Registry.view<ShadowMapComponent>().empty();
+
+						if (!sceneHasShadowMap && !m_Selected.HasComponent<ShadowMapComponent>()) {
+							if (ImGui::MenuItem("ShadowMap")) {
+								m_Selected.AddComponent<ShadowMapComponent>(ShadowMap::Create(4096, 4096));
+								ImGui::CloseCurrentPopup();
+							}
+						} else if (sceneHasShadowMap && !m_Selected.HasComponent<ShadowMapComponent>()) {
+							ImGui::BeginDisabled();
+							ImGui::MenuItem("ShadowMap (Already in Scene)");
+							ImGui::EndDisabled();
+						}
 					}
 					ImGui::EndMenu();
 				}
@@ -329,6 +342,42 @@ namespace Monsi {
 
 		DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [](auto& component) {
 			ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
+			});
+
+		DrawComponent<ShadowMapComponent>("ShadowMap", entity, [](auto& component) {
+			ImGui::DragFloat("Size", &component.Settings.OrthoSize);
+			ImGui::DragFloat("Distance", &component.Settings.LightDistance);
+			ImGui::DragFloat("Near", &component.Settings.NearPlane);
+			ImGui::DragFloat("Far", &component.Settings.FarPlane);
+
+			const int resolutions[] = { 512, 1024, 2048, 4096, 8192 };
+			const char* resolutionLabels[] = { "512x512", "1024x1024", "2048x2048", "4096x4096", "8192x8192" };
+
+			std::string currentLabel = std::to_string(component.Settings.Width) + "x" + std::to_string(component.Settings.Height);
+			int currentIndex = -1;
+
+			for (int i = 0; i < 5; i++) {
+				if (component.Settings.Width == resolutions[i] && component.Settings.Height == resolutions[i]) {
+					currentIndex = i;
+					currentLabel = resolutionLabels[i];
+					break;
+				}
+			}
+
+			if (ImGui::BeginCombo("Resolution", currentLabel.c_str())) {
+				for (int i = 0; i < 5; i++) {
+					bool isSelected = (currentIndex == i);
+					if (ImGui::Selectable(resolutionLabels[i], isSelected)) {
+						component.Settings.Width = resolutions[i];
+						component.Settings.Height = resolutions[i];
+					}
+
+					if (isSelected) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
 			});
 
 		DrawComponent<SkyBoxComponent>("Skybox", entity, [](auto& component) {

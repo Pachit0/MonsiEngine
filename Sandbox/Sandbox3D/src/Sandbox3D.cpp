@@ -15,7 +15,7 @@ m_ViewportFocused(false), m_ViewportHovered(false), m_SpherePosition({ -5.0f, 3.
 void Sandbox3D::OnLayerAttach()
 {
 	m_Scene = Monsi::CreateReference<Monsi::Scene>();
-
+	
 	Monsi::FrameBufferSpec spec;
 	spec.Width = 1600;
 	spec.Height = 900;
@@ -44,6 +44,8 @@ void Sandbox3D::OnLayerAttach()
 
 	m_SkyBoxEntity = m_Scene->CreateEntity("SkyBox", false);
 	m_SkyBoxEntity.AddComponent<Monsi::SkyBoxComponent>(m_SkyBoxPass, m_SkyBoxTest);
+	
+	m_ShadowMap = Monsi::ShadowMap::Create(8192, 8192);
 
 	m_ShpereMaterial = Monsi::CreateReference<Monsi::Material>();
 	m_ShpereMaterial->AmbientColor = glm::vec3(0.247f, 0.199f, 0.074f);
@@ -81,6 +83,9 @@ void Sandbox3D::OnLayerAttach()
 	pointLight.Color = MonsiColors::Mint;
 	pointLight.Intensity = 1.0f;
 	pointLight.Radius = 10.0f;
+
+	m_ShadowMapEntity = m_Scene->CreateEntity("ShadowMap", false);
+	m_ShadowMapEntity.AddComponent<Monsi::ShadowMapComponent>(m_ShadowMap);
 
 	m_BackpackEntity = m_Scene->CreateEntity("Backpack");
 	m_BackpackEntity.AddComponent<Monsi::ModelComponent>(m_Backpack);
@@ -177,6 +182,8 @@ void Sandbox3D::OnLayerDetach()
 }
 
 void Sandbox3D::OnImGuiDraw() {
+	ImGuiStyle& style = ImGui::GetStyle();
+	style.WindowMinSize.x = 400.0f;
 
 	ImGui::BeginMainMenuBar();
 	if (ImGui::BeginMenu("File"))
@@ -208,12 +215,8 @@ void Sandbox3D::OnImGuiDraw() {
 	}
 	ImGui::EndMainMenuBar();
 
-	ImGuiStyle& style = ImGui::GetStyle();
-
 	float windowMinSizeWidth = style.WindowMinSize.x;
 	float windowMinSizeHeight = style.WindowMinSize.y;
-
-	style.WindowMinSize.x = 400.0f;
 
 	ImGuiViewport* viewport = ImGui::GetMainViewport();
 	ImGuiID dockspace_id = ImGui::GetID("MyDockspace");

@@ -250,6 +250,19 @@ namespace Monsi {
 			out << YAML::EndMap;
 		}
 
+		if (entity.HasComponent<ShadowMapComponent>()) {
+			auto& smc = entity.GetComponent<ShadowMapComponent>();
+			out << YAML::Key << "ShadowMapComponent";
+			out << YAML::BeginMap;
+			out << YAML::Key << "Width" << YAML::Value << smc.Settings.Width;
+			out << YAML::Key << "Height" << YAML::Value << smc.Settings.Height;
+			out << YAML::Key << "LightDistance" << YAML::Value << smc.Settings.LightDistance;
+			out << YAML::Key << "Near" << YAML::Value << smc.Settings.NearPlane;
+			out << YAML::Key << "Far" << YAML::Value << smc.Settings.FarPlane;
+			out << YAML::Key << "OrthoSize" << YAML::Value << smc.Settings.OrthoSize;
+			out << YAML::EndMap;
+		}
+
 		if (entity.HasComponent<PointLightComponent>()) {
 			auto& plc = entity.GetComponent<PointLightComponent>();
 			out << YAML::Key << "PointLightComponent";
@@ -440,6 +453,22 @@ namespace Monsi {
 						cc.Camera.SetOrthographicNearClip(cameraNode["OrthographicNear"].as<float>());
 						cc.Camera.SetOrthographicFarClip(cameraNode["OrthographicFar"].as<float>());
 					}
+				}
+
+				auto shadowMapComponent = entityNode["ShadowMapComponent"];
+				if (shadowMapComponent) {
+					auto width = shadowMapComponent["Width"].as<uint32_t>();
+					auto height = shadowMapComponent["Height"].as<uint32_t>();
+
+					auto& smr = ShadowMap::Create(width, height);
+					auto& smc = deserializedEntity.AddComponent<ShadowMapComponent>(smr);
+
+					smc.Settings.Width = width;
+					smc.Settings.Height = height;
+					smc.Settings.LightDistance = shadowMapComponent["LightDistance"].as<float>();
+					smc.Settings.NearPlane = shadowMapComponent["Near"].as<float>();
+					smc.Settings.FarPlane = shadowMapComponent["Far"].as<float>();
+					smc.Settings.OrthoSize = shadowMapComponent["OrthoSize"].as<float>();
 				}
 
 				auto meshComponentNode = entityNode["MeshComponent"];

@@ -22,12 +22,11 @@ namespace Monsi {
 
 		void SetShadowMapData(const glm::mat4& lightSpaceMatrix, const Reference<ShadowMap>& shadowMap);
 
-		void DrawModel(const Reference<Model>& model, const glm::mat4& transform, const glm::vec4& color);
-		void DrawModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color);
-		void DrawModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation);
-
-		void DrawMesh(const Mesh* meshPtr, const glm::mat4& transform, const glm::vec4& color);
-		void DrawMesh(const Mesh* meshPtr, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation);
+		void SubmitModel(const Reference<Model>& model, const glm::mat4& transform, const glm::vec4& color);
+		void SubmitModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color);
+		void SubmitModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation);
+		void SubmitMesh(const Mesh* meshPtr, const glm::mat4& transform, const glm::vec4& color);
+		void SubmitMesh(const Mesh* meshPtr, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation);
 
 		void ClearBatches();
 

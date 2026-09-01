@@ -29,6 +29,7 @@ namespace Monsi {
 
 		m_Shader->Bind();
 		m_Shader->setInt("texture_diffuse1", 0);
+		m_Shader->setInt("u_ShadowMap", ShadowMapTextureSlot);
 	}
 
 	void ModelPass::Shutdown()
@@ -102,21 +103,21 @@ namespace Monsi {
 		m_Shader->setInt("u_ShadowMap", ShadowMapTextureSlot);
 	}
 
-	void ModelPass::DrawModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color)
+	void ModelPass::SubmitModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color)
 	{
-		DrawModel(model, position, size, color, glm::vec3(0.0f));
+		SubmitModel(model, position, size, color, glm::vec3(0.0f));
 	}
 
-	void ModelPass::DrawModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation)
+	void ModelPass::SubmitModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation)
 	{
 		const auto& meshes = model->GetMeshes();
 		for (size_t i = 0; i < meshes.size(); i++)
 		{
-			DrawMesh(&meshes[i], position, size, color, rotation);
+			SubmitMesh(&meshes[i], position, size, color, rotation);
 		}
 	}
 
-	void ModelPass::DrawMesh(const Mesh* meshPtr, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation)
+	void ModelPass::SubmitMesh(const Mesh* meshPtr, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation)
 	{
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position);
 		if (rotation.x != 0.0f) transform = glm::rotate(transform, glm::radians(rotation.x), glm::vec3(1, 0, 0));
@@ -124,17 +125,17 @@ namespace Monsi {
 		if (rotation.z != 0.0f) transform = glm::rotate(transform, glm::radians(rotation.z), glm::vec3(0, 0, 1));
 		transform = glm::scale(transform, size);
 
-		DrawMesh(meshPtr, transform, color);
+		SubmitMesh(meshPtr, transform, color);
 	}
 
-	void ModelPass::DrawModel(const Reference<Model>& model, const glm::mat4& transform, const glm::vec4& color)
+	void ModelPass::SubmitModel(const Reference<Model>& model, const glm::mat4& transform, const glm::vec4& color)
 	{
 		const auto& meshes = model->GetMeshes();
 		for (size_t i = 0; i < meshes.size(); i++)
-			DrawMesh(&meshes[i], transform, color);
+			SubmitMesh(&meshes[i], transform, color);
 	}
 
-	void ModelPass::DrawMesh(const Mesh* meshPtr, const glm::mat4& transform, const glm::vec4& color)
+	void ModelPass::SubmitMesh(const Mesh* meshPtr, const glm::mat4& transform, const glm::vec4& color)
 	{
 		uint64_t meshId = meshPtr->GetId();
 		auto& batch = m_MeshBatches[meshId];

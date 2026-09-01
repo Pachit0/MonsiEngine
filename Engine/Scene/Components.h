@@ -5,6 +5,7 @@
 
 #include "SceneCamera.h"
 #include "SkyBoxPass.h"
+#include "ShadowMap.h"
 #include "Mesh.h"
 #include "ModelLoader.h"
 #include "ScriptableEntity.h"
@@ -23,6 +24,7 @@ namespace Monsi {
 
 	struct ModelComponent {
 		Reference<Model> ModelAsset;
+		ModelImportSettings Settings;
 
 		ModelComponent() = default;
 		ModelComponent(const ModelComponent& other) = default;
@@ -36,6 +38,16 @@ namespace Monsi {
 		SkyBoxComponent() = default;
 		SkyBoxComponent(const SkyBoxComponent& other) = default;
 		SkyBoxComponent(const Reference<SkyBoxPass>& skybox, const Reference<CubeMapTexture>& texture = nullptr) : SkyBox(skybox), SkyboxTexture(texture) {}
+	};
+
+
+	struct ShadowMapComponent {
+		Reference<ShadowMap> Shadow;
+		ShadowMapSettings Settings;
+
+		ShadowMapComponent() = default;
+		ShadowMapComponent(const ShadowMapComponent& other) = default;
+		ShadowMapComponent(const Reference<ShadowMap>& shadow) : Shadow(shadow) {}
 	};
 
 	struct DirectionalLightComponent {
