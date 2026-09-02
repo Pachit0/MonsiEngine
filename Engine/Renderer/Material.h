@@ -21,6 +21,7 @@ namespace Monsi {
 		glm::vec3 DiffuseColor = glm::vec3(1.0f);
 		glm::vec3 SpecularColor = glm::vec3(1.0f);
 		float Shininess = 32.0f;
+		bool DoubleSided = false;
 
 		Reference<Texture2D> DiffuseMap;
 		Reference<Texture2D> SpecularMap;

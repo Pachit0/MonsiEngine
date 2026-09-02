@@ -13,6 +13,7 @@ namespace Monsi {
 		DiffuseColor = other->DiffuseColor;
 		SpecularColor = other->SpecularColor;
 		Shininess = other->Shininess;
+		DoubleSided = other->DoubleSided;
 
 		DiffuseMap = other->DiffuseMap;
 		SpecularMap = other->SpecularMap;

@@ -10,7 +10,6 @@ public:
 	}
 
 	~SandboxApp3D() override = default;
-
 };
 
 Monsi::Application* Monsi::CreateApplication() {

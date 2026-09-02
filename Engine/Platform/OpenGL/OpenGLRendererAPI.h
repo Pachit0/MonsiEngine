@@ -10,6 +10,7 @@ namespace Monsi {
 		void SetViewport(uint32_t x, uint32_t y, uint32_t widht, uint32_t height) override;
 		void SetClearColor(const glm::vec4& color) override;
 		void Clear() override;
+		void SetCullFaces(bool state) override;
 
 		void SetDepthFunc(DepthComp comp) override;
 

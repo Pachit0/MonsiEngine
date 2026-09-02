@@ -245,6 +245,7 @@ void Sandbox3D::OnImGuiDraw() {
 		ImGui::DockBuilderDockWindow("Hierarchy", dock_id_left_top);
 		ImGui::DockBuilderDockWindow("Properties", dock_id_left_bottom);
 		ImGui::DockBuilderDockWindow("Info", dock_id_left_bottom);
+		ImGui::DockBuilderDockWindow("Settings", dock_id_left_bottom);
 
 		if (ImGuiDockNode* node = ImGui::DockBuilderGetNode(dock_id_main)) {
 			node->LocalFlags |= ImGuiDockNodeFlags_NoTabBar;
@@ -260,6 +261,15 @@ void Sandbox3D::OnImGuiDraw() {
 	ImGui::Text("Renderer3D stats:");
 	ImGui::Text("FPS: %.1f", m_FPS);
 	ImGui::Text("Frame Time: %.3f ms", (1.0f / m_FPS) * 1000.0f);
+
+	ImGui::End();
+
+	ImGui::Begin("Settings");
+	static bool vsync = Monsi::Application::Get().GetWindow().IsVSync();
+	
+	if (ImGui::Checkbox("VSync", &vsync)) {
+		Monsi::Application::Get().GetWindow().SetVSync(vsync);
+	}
 
 	ImGui::End();
 

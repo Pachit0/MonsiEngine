@@ -206,10 +206,13 @@ namespace Monsi {
 					{
 						m_WhiteTexture->Bind(0);
 					}
+
+					RenderCommand::SetCullFaces(!material->DoubleSided);
 				}
 				else
 				{
 					m_WhiteTexture->Bind(0);
+					RenderCommand::SetCullFaces(true);
 				}
 
 				lastMaterial = material;

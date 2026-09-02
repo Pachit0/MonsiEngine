@@ -26,6 +26,10 @@ namespace Monsi {
 			s_RendererAPI->Clear();
 		}
 
+		inline static void SetCullFaces(bool state) {
+			s_RendererAPI->SetCullFaces(state);
+		}
+
 		inline static void DrawIndexed(const Reference<VertexArray>& vertexArray, uint32_t count = 0) {
 			s_RendererAPI->DrawIndexed(vertexArray, count);
 		}

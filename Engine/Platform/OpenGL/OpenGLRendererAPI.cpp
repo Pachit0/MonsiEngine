@@ -35,6 +35,16 @@ namespace Monsi {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
+	void OpenGLRendererAPI::SetCullFaces(bool state)
+	{
+		if (state) {
+			glEnable(GL_CULL_FACE);
+		}
+		else {
+			glDisable(GL_CULL_FACE);
+		}
+	}
+
 	void OpenGLRendererAPI::SetDepthFunc(DepthComp comp)
 	{
 		ENGINE_PROFILER_FUNCTION();

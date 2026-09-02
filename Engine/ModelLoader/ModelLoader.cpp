@@ -112,6 +112,10 @@ namespace Monsi {
 			if (material->Get(AI_MATKEY_SHININESS, shininess) == AI_SUCCESS)
 				meshMaterial->Shininess = shininess;
 
+			int twoSided = 0;
+			if (material->Get(AI_MATKEY_TWOSIDED, twoSided) == AI_SUCCESS)
+				meshMaterial->DoubleSided = (twoSided != 0);
+
 			meshMaterial->DiffuseMap = LoadMaterialTexture(material, aiTextureType_DIFFUSE);
 			meshMaterial->SpecularMap = LoadMaterialTexture(material, aiTextureType_SPECULAR);
 			meshMaterial->NormalMap = LoadMaterialTexture(material, aiTextureType_HEIGHT);

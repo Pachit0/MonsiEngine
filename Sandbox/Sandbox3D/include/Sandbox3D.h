@@ -54,7 +54,7 @@ private:
 	Monsi::SceneHierarchyUnit m_Unit;
 	glm::vec3 m_SpherePosition;
 
-private: //fps counter
+private:
 	float m_FPS = 0.0f;
 	float m_FrameTimeAccumulator = 0.0f;
 	int m_FrameCount = 0;
