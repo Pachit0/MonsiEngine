@@ -153,7 +153,7 @@ void Sandbox3D::OnLayerUpdate(Monsi::TimeStep timestep)
 
 	m_FrameBuffer->Bind();
 
-	Monsi::RenderCommand::SetClearColor({ 0.5f, 0.0f, 0.05f, 1.0f });
+	Monsi::RenderCommand::SetClearColor({ 0.5f, 0.5f, 0.5f, 1.0f });
 	Monsi::RenderCommand::Clear();
 
 	m_Scene->OnUpdate(timestep);
