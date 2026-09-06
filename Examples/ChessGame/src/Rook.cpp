@@ -10,7 +10,8 @@ std::vector<MovePoint> Rook::move(int x, int y, Figure* board[8][8]) {
 
 	// right
 	for (int i = x + 1; i < 8; i++) {
-		if (board[y][i]) {
+		board[y][i]->setIsUnderAttack(board[y][i]->getIsUnderAttack() == getColor() ? 0 : getColor());
+		if (board[y][i]->getColor()) {
 			if (board[y][i]->getColor() != getColor())
 				moves.push_back({ i, y });
 			break;
@@ -20,7 +21,8 @@ std::vector<MovePoint> Rook::move(int x, int y, Figure* board[8][8]) {
 
 	// left
 	for (int i = x - 1; i >= 0; i--) {
-		if (board[y][i]) {
+		board[y][i]->setIsUnderAttack(board[y][i]->getIsUnderAttack() == getColor() ? 0 : getColor());
+		if (board[y][i]->getColor()) {
 			if (board[y][i]->getColor() != getColor())
 				moves.push_back({ i, y });
 			break;
@@ -30,7 +32,8 @@ std::vector<MovePoint> Rook::move(int x, int y, Figure* board[8][8]) {
 
 	// up
 	for (int i = y + 1; i < 8; i++) {
-		if (board[i][x]) {
+		board[i][x]->setIsUnderAttack(board[i][x]->getIsUnderAttack() == getColor() ? 0 : getColor());
+		if (board[i][x]->getColor()) {
 			if (board[i][x]->getColor() != getColor())
 				moves.push_back({ x, i });
 			break;
@@ -40,7 +43,8 @@ std::vector<MovePoint> Rook::move(int x, int y, Figure* board[8][8]) {
 
 	// down
 	for (int i = y - 1; i >= 0; i--) {
-		if (board[i][x]) {
+		board[i][x]->setIsUnderAttack(board[i][x]->getIsUnderAttack() == getColor() ? 0 : getColor());
+		if (board[i][x]->getColor()) {
 			if (board[i][x]->getColor() != getColor())
 				moves.push_back({ x, i });
 			break;

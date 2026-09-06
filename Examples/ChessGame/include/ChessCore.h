@@ -2,6 +2,7 @@
 
 #include "Board.h"
 #include "Figure.h"
+#include "NullFigure.h"
 #include "Pawn.h"
 #include "Rook.h"
 #include "King.h"
