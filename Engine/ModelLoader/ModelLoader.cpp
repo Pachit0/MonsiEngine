@@ -9,33 +9,19 @@ namespace Monsi {
 		LoadModel(filepath);
 	}
 
-	Model::Model(const std::string& filepath, ModelImportSettings settings)
+	Model::Model(const std::string& filepath, const ModelImportSettings& settings)
 	{
 		LoadModel(filepath, settings);
 	}
 
 	void Model::LoadModel(const std::string& filepath)
 	{
-		Assimp::Importer importer;
-		unsigned int flags = aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace;
-
-		const aiScene* scene = importer.ReadFile(filepath, flags);
-
-		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
-		{
-			ENGINE_LOG_ERROR("ASSIMP ERROR: {0}", importer.GetErrorString());
-			ENGINE_ASSERT(false, "Model load failed!");
-			return;
-		}
-
-		m_Directory = filepath.substr(0, filepath.find_last_of("/\\"));
-		m_Meshes.reserve(scene->mNumMeshes);
-
-		processNode(scene->mRootNode, scene);
+		LoadModel(filepath, ModelImportSettings{});
 	}
 
-	void Model::LoadModel(const std::string& filepath, ModelImportSettings settings)
+	void Model::LoadModel(const std::string& filepath, const ModelImportSettings& settings)
 	{
+		m_ModelSettings = settings;
 		Assimp::Importer importer;
 		unsigned int flags = aiProcess_Triangulate;
 
@@ -52,6 +38,7 @@ namespace Monsi {
 			return;
 		}
 
+		m_FilePath = filepath;
 		m_Directory = filepath.substr(0, filepath.find_last_of("/\\"));
 		m_Meshes.reserve(scene->mNumMeshes);
 
@@ -124,6 +111,10 @@ namespace Monsi {
 			float shininess = 32.0f;
 			if (material->Get(AI_MATKEY_SHININESS, shininess) == AI_SUCCESS)
 				meshMaterial->Shininess = shininess;
+
+			int twoSided = 0;
+			if (material->Get(AI_MATKEY_TWOSIDED, twoSided) == AI_SUCCESS)
+				meshMaterial->DoubleSided = (twoSided != 0);
 
 			meshMaterial->DiffuseMap = LoadMaterialTexture(material, aiTextureType_DIFFUSE);
 			meshMaterial->SpecularMap = LoadMaterialTexture(material, aiTextureType_SPECULAR);

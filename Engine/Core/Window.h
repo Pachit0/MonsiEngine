@@ -13,7 +13,7 @@ namespace Monsi {
 			: Width(width), Height(height), Title(WindowTitle) { }
 	};
 
-	class ENGINE_API Window {
+	class Window {
 	public:
 		using CallbackFn = std::function<void(Event&)>;
 

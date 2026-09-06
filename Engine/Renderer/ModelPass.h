@@ -2,9 +2,11 @@
 
 #include "ModelLoader.h"
 #include "Lighting.h"
+#include "ShadowMap.h"
 #include "VertexArray.h"
 #include "Shader.h"
 #include "Texture.h"
+#include <memory>
 #include <unordered_set>
 #include <unordered_map>
 
@@ -18,14 +20,21 @@ namespace Monsi {
 		void BeginScene(const glm::mat4& viewProj, const glm::vec3& viewPos, const Reference<LightingBuffer>& lighting);
 		void EndScene();
 
-		void DrawModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color);
-		void DrawModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation);
+		void SetShadowMapData(const glm::mat4& lightSpaceMatrix, const Reference<ShadowMap>& shadowMap);
 
-		void DrawMesh(const Mesh* meshPtr, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation);
+		void SubmitModel(const Reference<Model>& model, const glm::mat4& transform, const glm::vec4& color);
+		void SubmitModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color);
+		void SubmitModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation);
+		void SubmitMesh(const Mesh* meshPtr, const glm::mat4& transform, const glm::vec4& color);
+		void SubmitMesh(const Mesh* meshPtr, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation);
+
+		void ClearBatches();
 
 	private:
 		void Flush();
 		void RegisterMesh(const Mesh* mesh);
+
+		void PruneStaleBatches();
 
 	private:
 		struct ModelInstanceData
@@ -37,19 +46,17 @@ namespace Monsi {
 		struct MeshBatch
 		{
 			const Mesh* MeshPtr = nullptr;
+			std::weak_ptr<void> LifetimeToken;
 			std::vector<ModelInstanceData> InstanceData;
-
-			ModelInstanceData* Instances = nullptr;
-			ModelInstanceData* Cursor = nullptr;
+			bool WarnedOverflow = false;
 		};
 
 		static constexpr uint32_t MaxInstances = 10000;
+		static constexpr uint32_t DefaultBatchReserve = 64;
+		static constexpr uint32_t ShadowMapTextureSlot = 3;
 
-		std::unordered_map<const Mesh*, MeshBatch> m_MeshBatches;
-		std::unordered_set<const Mesh*> m_RegisteredMeshes;
-
-		ModelInstanceData* m_InstanceBuffer = nullptr;
-		ModelInstanceData* m_BufferCursor = nullptr;
+		std::unordered_map<uint64_t, MeshBatch> m_MeshBatches;
+		std::vector<MeshBatch*> m_FlushList;
 
 		Reference<VertexBuffer> m_InstanceVBO;
 		Reference<Shader> m_Shader;

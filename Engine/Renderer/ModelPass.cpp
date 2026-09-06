@@ -1,16 +1,16 @@
 #include "MonsiPch.h"
+#include <algorithm>
 #include "ModelPass.h"
 #include "RenderCommand.h"
 #include "Lighting.h"
 #include "Material.h"
+#include "MeshInvalidationTracker.h"
 #include <glm/ext/matrix_transform.hpp>
 
 namespace Monsi {
 
 	void ModelPass::Init()
 	{
-		m_InstanceBuffer = new ModelInstanceData[MaxInstances];
-
 		m_Shader = Shader::Create(SHADER_PATH "ModelShader.glsl");
 
 		m_InstanceVBO = VertexBuffer::Create(MaxInstances * sizeof(ModelInstanceData));
@@ -29,13 +29,31 @@ namespace Monsi {
 
 		m_Shader->Bind();
 		m_Shader->setInt("texture_diffuse1", 0);
+		m_Shader->setInt("u_ShadowMap", ShadowMapTextureSlot);
 	}
 
 	void ModelPass::Shutdown()
 	{
-		delete[] m_InstanceBuffer;
-		m_InstanceBuffer = nullptr;
-		m_RegisteredMeshes.clear();
+		m_MeshBatches.clear();
+	}
+
+	void ModelPass::ClearBatches()
+	{
+		m_MeshBatches.clear();
+		m_FlushList.clear();
+	}
+
+	void ModelPass::PruneStaleBatches()
+	{
+		for (auto it = m_MeshBatches.begin(); it != m_MeshBatches.end(); )
+		{
+			if (it->second.LifetimeToken.expired()) {
+				it = m_MeshBatches.erase(it);
+			}
+			else {
+				++it;
+			}
+		}
 	}
 
 	void ModelPass::RegisterMesh(const Mesh* mesh)
@@ -43,7 +61,6 @@ namespace Monsi {
 		auto& vao = mesh->GetVertexArray();
 		vao->Bind();
 		vao->AddVertexBuffer(m_InstanceVBO);
-		m_RegisteredMeshes.insert(mesh);
 	}
 
 	void ModelPass::BeginScene(const glm::mat4& viewProj, const glm::vec3& viewPos, const Reference<LightingBuffer>& lighting)
@@ -58,8 +75,15 @@ namespace Monsi {
 			lighting->Bind(m_Shader);
 		}
 
-		m_MeshBatches.clear();
-		m_BufferCursor = m_InstanceBuffer;
+		if (MeshInvalidationTracker::GetState() == true) {
+			PruneStaleBatches();
+			MeshInvalidationTracker::ReleaseDirty();
+		}
+
+		for (auto& [meshId, batch] : m_MeshBatches)
+		{
+			batch.InstanceData.clear();
+		}
 	}
 
 	void ModelPass::EndScene()
@@ -67,38 +91,61 @@ namespace Monsi {
 		Flush();
 	}
 
-	void ModelPass::DrawModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color)
+	void ModelPass::SetShadowMapData(const glm::mat4& lightSpaceMatrix, const Reference<ShadowMap>& shadowMap)
 	{
-		DrawModel(model, position, size, color, glm::vec3(0.0f));
+		if (!shadowMap)
+			return;
+
+		m_Shader->Bind();
+		m_Shader->setMat4("u_LightSpaceMatrix", lightSpaceMatrix);
+
+		shadowMap->BindDepthTexture(ShadowMapTextureSlot);
+		m_Shader->setInt("u_ShadowMap", ShadowMapTextureSlot);
 	}
 
-	void ModelPass::DrawModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation)
+	void ModelPass::SubmitModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color)
+	{
+		SubmitModel(model, position, size, color, glm::vec3(0.0f));
+	}
+
+	void ModelPass::SubmitModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation)
 	{
 		const auto& meshes = model->GetMeshes();
 		for (size_t i = 0; i < meshes.size(); i++)
 		{
-			DrawMesh(&meshes[i], position, size, color, rotation);
+			SubmitMesh(&meshes[i], position, size, color, rotation);
 		}
 	}
 
-	void ModelPass::DrawMesh(const Mesh* meshPtr, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation)
+	void ModelPass::SubmitMesh(const Mesh* meshPtr, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation)
 	{
-		if (m_RegisteredMeshes.find(meshPtr) == m_RegisteredMeshes.end())
-		{
-			RegisterMesh(meshPtr);
-		}
-
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position);
 		if (rotation.x != 0.0f) transform = glm::rotate(transform, glm::radians(rotation.x), glm::vec3(1, 0, 0));
 		if (rotation.y != 0.0f) transform = glm::rotate(transform, glm::radians(rotation.y), glm::vec3(0, 1, 0));
 		if (rotation.z != 0.0f) transform = glm::rotate(transform, glm::radians(rotation.z), glm::vec3(0, 0, 1));
 		transform = glm::scale(transform, size);
 
-		auto& batch = m_MeshBatches[meshPtr];
+		SubmitMesh(meshPtr, transform, color);
+	}
+
+	void ModelPass::SubmitModel(const Reference<Model>& model, const glm::mat4& transform, const glm::vec4& color)
+	{
+		const auto& meshes = model->GetMeshes();
+		for (size_t i = 0; i < meshes.size(); i++)
+			SubmitMesh(&meshes[i], transform, color);
+	}
+
+	void ModelPass::SubmitMesh(const Mesh* meshPtr, const glm::mat4& transform, const glm::vec4& color)
+	{
+		uint64_t meshId = meshPtr->GetId();
+		auto& batch = m_MeshBatches[meshId];
 
 		if (!batch.MeshPtr)
 		{
+			RegisterMesh(meshPtr);
 			batch.MeshPtr = meshPtr;
+			batch.LifetimeToken = meshPtr->GetLifetimeToken();
+			batch.InstanceData.reserve(DefaultBatchReserve);
 		}
 
 		batch.InstanceData.push_back({ transform, color });
@@ -112,27 +159,63 @@ namespace Monsi {
 		m_Shader->Bind();
 		m_Shader->setMat4("u_ViewProjection", m_ViewProjection);
 
-		for (auto& [meshPtr, batch] : m_MeshBatches)
+		m_FlushList.clear();
+		for (auto& [meshId, batch] : m_MeshBatches)
 		{
-			uint32_t count = (uint32_t)batch.InstanceData.size();
-			if (count == 0)
-				continue;
+			if (!batch.InstanceData.empty())
+				m_FlushList.push_back(&batch);
+		}
 
-			auto& mesh = *batch.MeshPtr;
-			const auto& material = mesh.GetMaterial();
-
-			if (material)
+		std::sort(m_FlushList.begin(), m_FlushList.end(),
+			[](const MeshBatch* a, const MeshBatch* b)
 			{
-				material->Bind(m_Shader);
+				return a->MeshPtr->GetMaterial().get() < b->MeshPtr->GetMaterial().get();
+			});
 
-				if (!material->DiffuseMap)
+		Material* lastMaterial = nullptr;
+
+		for (MeshBatch* batchPtr : m_FlushList)
+		{
+			auto& batch = *batchPtr;
+			uint32_t count = (uint32_t)batch.InstanceData.size();
+
+			if (count > MaxInstances)
+			{
+				if (!batch.WarnedOverflow)
 				{
-					m_WhiteTexture->Bind(0);
+					ENGINE_LOG_WARN("ModelPass::Flush - mesh batch has {0} instances, exceeding MaxInstances ({1}). Clamping.", count, MaxInstances);
+					batch.WarnedOverflow = true;
 				}
+				count = MaxInstances;
 			}
 			else
 			{
-				m_WhiteTexture->Bind(0);
+				batch.WarnedOverflow = false;
+			}
+
+			auto& mesh = *batch.MeshPtr;
+			Material* material = mesh.GetMaterial().get();
+
+			if (material != lastMaterial)
+			{
+				if (material)
+				{
+					material->Bind(m_Shader);
+
+					if (!material->DiffuseMap)
+					{
+						m_WhiteTexture->Bind(0);
+					}
+
+					RenderCommand::SetCullFaces(!material->DoubleSided);
+				}
+				else
+				{
+					m_WhiteTexture->Bind(0);
+					RenderCommand::SetCullFaces(true);
+				}
+
+				lastMaterial = material;
 			}
 
 			m_InstanceVBO->SetData(batch.InstanceData.data(), count * sizeof(ModelInstanceData));

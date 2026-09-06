@@ -14,11 +14,13 @@ namespace Monsi {
 
 		glCullFace(GL_FRONT);
 		glFrontFace(GL_CW);
+
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
 
 		glEnable(GL_MULTISAMPLE);
 		glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+		glEnable(GL_LINE_SMOOTH);
 	}
 
 	void OpenGLRendererAPI::SetViewport(uint32_t x, uint32_t y, uint32_t widht, uint32_t height) {
@@ -31,6 +33,16 @@ namespace Monsi {
 
 	void OpenGLRendererAPI::Clear() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+
+	void OpenGLRendererAPI::SetCullFaces(bool state)
+	{
+		if (state) {
+			glEnable(GL_CULL_FACE);
+		}
+		else {
+			glDisable(GL_CULL_FACE);
+		}
 	}
 
 	void OpenGLRendererAPI::SetDepthFunc(DepthComp comp)
@@ -47,14 +59,12 @@ namespace Monsi {
 	void OpenGLRendererAPI::DrawIndexed(const Reference<VertexArray>& vertexArray, uint32_t indexCount) {
 		uint32_t count = indexCount ? indexCount : vertexArray->GetIndexBuffer()->GetCount();
 		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
-		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	void OpenGLRendererAPI::DrawIndexedInstanced(const Reference<VertexArray>& vertexArray, uint32_t indexCount, uint32_t instanceCount)
 	{
 		uint32_t count = indexCount ? indexCount : vertexArray->GetIndexBuffer()->GetCount();
 		glDrawElementsInstanced(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr, instanceCount);
-		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 }

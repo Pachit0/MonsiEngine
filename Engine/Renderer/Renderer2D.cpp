@@ -527,6 +527,12 @@ namespace Monsi {
 		s_Data.batchStats.QuadCount++;
 	}
 
+	void Renderer2D::drawQuad(const glm::mat4& transform, const Reference<SubTexture2D>& subTexture, const glm::vec4& color, float scale)
+	{
+		ENGINE_PROFILER_FUNCTION();
+		EmplaceQuadVertices(transform, subTexture->GetTextureCoords(), color, GetTextureIndex(subTexture->GetTexture()), scale);
+	}
+
 	void Renderer2D::drawQuadRotated(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, float rotation)
 	{
 		drawQuadRotated({ position.x, position.y, 0.0f }, size, color, rotation);
@@ -669,6 +675,42 @@ namespace Monsi {
 	Renderer2D::BatchStatistics Renderer2D::GetBatchStatistics()
 	{
 		return s_Data.batchStats;
+	}
+
+	float Renderer2D::GetTextureIndex(const Reference<Texture2D>& texture)
+	{
+		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++) {
+			if (*s_Data.TextureSlots[i].get() == *texture.get())
+				return static_cast<float>(i);
+		}
+
+		if (s_Data.TextureSlotIndex >= Renderer2DData::MaxTextureSlots) {
+			FlushResetBatch();
+		}
+
+		float index = static_cast<float>(s_Data.TextureSlotIndex);
+		s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;
+		s_Data.TextureSlotIndex++;
+		return index;
+	}
+
+	void Renderer2D::EmplaceQuadVertices(const glm::mat4& transform, const glm::vec2* texCoords, const glm::vec4& color, float texIndex, float scale)
+	{
+		if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndicesPerDrawCall) {
+			FlushResetBatch();
+		}
+
+		for (uint32_t i = 0; i < 4; i++) {
+			s_Data.QuadVertexBufferItr->Position = transform * s_Data.QuadVertexPositions[i];
+			s_Data.QuadVertexBufferItr->Color = color;
+			s_Data.QuadVertexBufferItr->TexIndex = texIndex;
+			s_Data.QuadVertexBufferItr->Scale = scale;
+			s_Data.QuadVertexBufferItr->TexCoord = texCoords[i];
+			s_Data.QuadVertexBufferItr++;
+		}
+
+		s_Data.QuadIndexCount += 6;
+		s_Data.batchStats.QuadCount++;
 	}
 
 	void Renderer2D::FlushResetBatch()

@@ -21,7 +21,9 @@ target_link_libraries( ChessGame PRIVATE
     Engine
 )
 
-target_compile_options( ChessGame PRIVATE /GR)
+if(MSVC)
+    target_compile_options( ChessGame PRIVATE /GR)
+endif()
 
 if(PRODUCTION_BUILD)	
 

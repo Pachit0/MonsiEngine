@@ -3,8 +3,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <debug/instrumentor.h>
-#include <Entity.h>
-#include <glfw/glfw3.h>
+#include <GLFW/glfw3.h>
 
 namespace Monsi {
 	
@@ -38,6 +37,10 @@ namespace Monsi {
 		entity.AddComponent<SpriteRendererComponent>(glm::vec4{ 0.5f, 1.0f, 1.0f, 1.0f });
 		m_SquareEntity = entity;
 
+		entity = m_ActiveScene->CreateEntity("Square Two");
+		entity.AddComponent<SpriteRendererComponent>(glm::vec4{ 0.0f, 0.5f, 0.5f, 1.0f });
+		m_SquareTwoEntity = entity;
+
 		m_CameraEntity = m_ActiveScene->CreateEntity("Camera Entity");
 		m_CameraEntity.AddComponent<CameraComponent>();
 
@@ -46,6 +49,31 @@ namespace Monsi {
 		cc.Primary = false;
 
 		m_Unit.SetContext(m_ActiveScene);
+
+		class CameraControllerClass : public ScriptableEntity
+		{
+		public:
+			void OnCreate()
+			{
+			}
+
+			void OnDestroy()
+			{
+			}
+
+			void OnUpdate(TimeStep ts)
+			{
+				auto& translation = GetComponent<TransformComponent>().Translation;
+				float speed = 15.0f;
+
+				if (Input::KeyPressed(MONSI_KEY_W)) translation.y += speed * ts;
+				if (Input::KeyPressed(MONSI_KEY_S)) translation.y -= speed * ts;
+				if (Input::KeyPressed(MONSI_KEY_A)) translation.x -= speed * ts;
+				if (Input::KeyPressed(MONSI_KEY_D)) translation.x += speed * ts;
+			}
+		};
+
+		m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraControllerClass>();
 	}
 
 	void EditorLayer::OnLayerUpdate(TimeStep timestep) {
@@ -124,7 +152,7 @@ namespace Monsi {
 			ImGui::DockBuilderFinish(dockspace_id);
 		}
 
-		ImGui::Begin("Properties");
+		ImGui::Begin("Info");
 
 		auto batchStats = Renderer2D::GetBatchStatistics();
 
@@ -133,21 +161,6 @@ namespace Monsi {
 		ImGui::Text("Quad Total Count: %d", batchStats.QuadCount);
 		ImGui::Text("Quad Vertices: %d", batchStats.GetVertexCount());
 		ImGui::Text("Quad Indices: %d", batchStats.GetIndexCount());
-		
-
-		if (m_SquareEntity) {
-			ImGui::Separator();
-			ImGui::Text("%s", m_SquareEntity.GetComponent<TagComponent>().Tag.c_str());
-
-			auto& sqColor = m_SquareEntity.GetComponent<SpriteRendererComponent>().Color;
-			ImGui::ColorEdit4("Square Color", glm::value_ptr(sqColor));
-		}
-
-		ImGui::DragFloat3("Camera Transform", glm::value_ptr(m_CameraEntity.GetComponent<TransformComponent>().Transform[3]));
-		if (ImGui::Checkbox("Camera Switch", &m_PrimaryCamera)) {
-			m_CameraEntity.GetComponent<CameraComponent>().Primary = m_PrimaryCamera;
-			m_SecondCameraEntity.GetComponent<CameraComponent>().Primary = !m_PrimaryCamera;
-		}
 
 		ImGui::End();
 

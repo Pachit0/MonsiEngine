@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Renderer/RenderCommand.h"
-#include "Renderer/RenderFactory.h"
+#include "Renderer/RenderInitializator.h"
 #include "OrthographicCamera.h"
 #include "Shader.h"
 

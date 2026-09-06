@@ -5,10 +5,10 @@
 ## Features In Development
 
 - ECS (currently developing)
+- Better UI (currently developing)
 - File dialogs
 - Gizmos
 - Play Button
-- Quaternions for camera rotation
 - Indirect instancing
 - Bindless rendering
 

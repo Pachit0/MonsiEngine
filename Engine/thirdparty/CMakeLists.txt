@@ -65,3 +65,8 @@ file(GLOB IMPLOT_SRC
 add_library(implot STATIC ${IMPLOT_SRC})
 target_include_directories(implot PUBLIC implot)
 target_link_libraries(implot PUBLIC imgui)
+
+# yaml-cpp
+set(YAML_MSVC_SHARED_RT ON CACHE BOOL "" FORCE)
+add_subdirectory(yaml-cpp)
+target_link_libraries(Engine PUBLIC yaml-cpp::yaml-cpp)

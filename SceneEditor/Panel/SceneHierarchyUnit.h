@@ -4,7 +4,7 @@
 #include "Core/Logger.h"
 #include "Scene/Scene.h"
 #include "Entity.h"
-
+#include <glm/glm.hpp>
 
 namespace Monsi {
 
@@ -18,12 +18,12 @@ namespace Monsi {
 		void OnImGuiRender();
 	private:
 		void DrawEntityNode(Entity entity);
+		void DrawComponents(Entity entity);
 
 	private:
-		friend class Scene;
 		Reference<Scene> m_Scene;
-
 		Entity m_Selected;
+		glm::vec3 preUIEuler = glm::vec3(0.0f);
 	};
 
 

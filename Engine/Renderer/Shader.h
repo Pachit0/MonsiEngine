@@ -21,6 +21,8 @@ namespace Monsi {
 		virtual const void setVec4(const std::string& name, const glm::vec4& value) = 0;
 		virtual const void setMat4(const std::string& name, const glm::mat4& value) = 0;
 
+		virtual void BindUniformBlock(const std::string& name, uint32_t bindingPoint) const = 0;
+
 		static Reference<Shader> Create(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath);
 		static Reference<Shader> Create(const std::string& filePath);
 	};
@@ -34,7 +36,7 @@ namespace Monsi {
 		Reference<Shader> Get(const std::string& name);
 
 		bool Exists(const std::string& name) const;
-	
+
 	private:
 		std::unordered_map<std::string, Reference<Shader>> m_ShaderMap;
 	};

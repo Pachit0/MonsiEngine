@@ -9,7 +9,7 @@ namespace Monsi {
 	public:
 		Entity() = default;
 		Entity(entt::entity handle, Scene* scene);
-		Entity(const Entity& other) = default; // explicitly showing that we have a copy constructor
+		Entity(const Entity& other) = default;
 
 		template<typename Component>
 		bool HasComponent() {
@@ -19,8 +19,9 @@ namespace Monsi {
 		template<typename Component, typename... Args>
 		Component& AddComponent(Args&&... args) {
 			ENGINE_ASSERT(!HasComponent<Component>(), "The component is already in this entity!");
-
-			return m_Scene->m_Registry.emplace<Component>(m_Handle, std::forward<Args>(args)...);
+			Component& component = m_Scene->m_Registry.emplace<Component>(m_Handle, std::forward<Args>(args)...);
+			m_Scene->OnAddComponent<Component>(*this, component);
+			return component;
 		}
 
 		template<typename Component>
@@ -36,8 +37,9 @@ namespace Monsi {
 			m_Scene->m_Registry.remove<Component>(m_Handle);
 		}
 
-		operator bool() const { return m_Handle != entt::null; }
-		operator uint32_t() { return (uint32_t)m_Handle; }
+		operator bool() const { return m_Handle != entt::null && m_Scene != nullptr; }
+		operator uint32_t() const { return (uint32_t)m_Handle; }
+		operator entt::entity() const { return m_Handle; }
 		bool operator==(const Entity& other) const { return m_Handle == other.m_Handle && m_Scene == other.m_Scene;	}
 		bool operator!=(const Entity& other) const { return !(*this == other); }
 

@@ -11,7 +11,7 @@ namespace Monsi {
 	class OpenGLShader : public Shader {
 	public:
 		OpenGLShader(const std::string& filePath);
-		OpenGLShader(const std::string& name ,const std::string& vertexPath, const std::string& fragmentPath);
+		OpenGLShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath);
 		virtual ~OpenGLShader();
 
 		void Bind() const override;
@@ -25,6 +25,7 @@ namespace Monsi {
 		const void setVec4(const std::string& name, const glm::vec4& value) override;
 		const void setMat4(const std::string& name, const glm::mat4& value) override;
 		const void setFloat(const std::string& name, float value) override;
+		void BindUniformBlock(const std::string& name, uint32_t bindingPoint) const override;
 
 		void UploadBool(const std::string& name, bool value);
 		void UploadInt(const std::string& name, int value);
@@ -40,8 +41,13 @@ namespace Monsi {
 		void UploadMat3(const std::string& name, const glm::mat3& mat);
 		void UploadMat4(const std::string& name, const glm::mat4& mat);
 	private:
+		int GetUniformLocation(const std::string& name);
+
+	private:
 		uint32_t m_ID;
 		std::string m_Name;
+
+		std::unordered_map<std::string, int> m_UniformLocationCache;
 
 		std::string ReadFile(const std::string& filePath);
 		std::unordered_map<GLenum, std::string> PreProcess(const std::string& source);

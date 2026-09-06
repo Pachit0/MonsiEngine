@@ -31,6 +31,7 @@ namespace Monsi {
 
 		Reference<Scene> m_ActiveScene;
 		Entity m_SquareEntity;
+		Entity m_SquareTwoEntity;
 		Entity m_CameraEntity;
 		Entity m_SecondCameraEntity;
 

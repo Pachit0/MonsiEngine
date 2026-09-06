@@ -4,7 +4,7 @@
 
 namespace Monsi {
 
-	class ENGINE_API Input {
+	class Input {
 	public:
 		static bool KeyPressed(int keycode);
 		static bool MouseButtonPressed(int button);

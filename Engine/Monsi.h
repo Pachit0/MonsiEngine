@@ -17,9 +17,10 @@
 // Scene
 #include "Scene/Scene.h"
 #include "Scene/Entity.h"
+#include "Scene/ScriptableEntity.h"
 #include "Scene/Components.h"
 
-// Model
+//  Model & Mesh
 #include "ModelLoader/ModelLoader.h"
 #include "ModelLoader/MeshBuilder.h"
 
@@ -39,5 +40,8 @@
 #include "Renderer/Lighting.h"
 
 //	CameraControls
-#include "OrthographicControl.h"
-#include "PerspectiveControl.h"
+#include "Renderer/OrthographicControl.h"
+#include "Renderer/PerspectiveControl.h"
+
+//  Scripts
+#include "Scripts/CameraControllerScript.h"

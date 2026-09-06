@@ -1,0 +1,56 @@
+Scene: Name
+Entities:
+  - Entity_ID: 1337420
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [1, 0, 0, 0]
+      Scale: [1, 1, 1]
+  - Entity_ID: 1337420
+    TagComponent:
+      Tag: ShadowMap
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [1, 0, 0, 0]
+      Scale: [1, 1, 1]
+    ShadowMapComponent:
+      Width: 4096
+      Height: 4096
+      LightDistance: 50
+      Near: -10
+      Far: 1000
+      OrthoSize: 256
+  - Entity_ID: 1337420
+    TagComponent:
+      Tag: Camera
+    TransformComponent:
+      Translation: [2.0472252, 9.998198, 12.568369]
+      Rotation: [-0.94866794, 0.31557962, -0.019872742, -0.006610777]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Primary: true
+      FixedAspectRatio: false
+      Camera:
+        ProjectionType: 1
+        PerspectiveFOV: 0.7853982
+        PerspectiveNear: 0.01
+        PerspectiveFar: 1000
+        OrthographicSize: 250
+        OrthographicNear: -1000
+        OrthographicFar: 1000
+  - Entity_ID: 1337420
+    TagComponent:
+      Tag: Cube
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [1, 0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshComponent:
+      PrimitiveType: 3
+      AmbientColor: [0.1, 0.1, 0.1]
+      DiffuseColor: [1, 1, 1]
+      SpecularColor: [1, 1, 1]
+      Shininess: 32
+      PrimitiveParams:
+        Size: 1

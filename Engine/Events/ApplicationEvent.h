@@ -7,7 +7,7 @@
 
 namespace Monsi {
 
-	class ENGINE_API WindowResizeEvent : public Event {
+	class WindowResizeEvent : public Event {
 	public:
 		WindowResizeEvent(unsigned int width, unsigned int height) : m_Width(width), m_Height(height) {}
 		
@@ -36,7 +36,7 @@ namespace Monsi {
 		EVENT_CLASS_CATEGORY(CategoryApplication)
 	};
 
-	class ENGINE_API AppEventTick : public Event {
+	class AppEventTick : public Event {
 	public:
 		AppEventTick(){
 		
@@ -46,7 +46,7 @@ namespace Monsi {
 		EVENT_CLASS_TYPE(AppTick)
 	};
 
-	class ENGINE_API AppEventRender : public Event {
+	class AppEventRender : public Event {
 	public:
 		AppEventRender(){
 		
@@ -56,7 +56,7 @@ namespace Monsi {
 		EVENT_CLASS_TYPE(AppRender)
 	};
 
-	class ENGINE_API AppEventUpdate : public Event {
+	class AppEventUpdate : public Event {
 	public:
 		AppEventUpdate(){
 		

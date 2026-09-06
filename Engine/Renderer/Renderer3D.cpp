@@ -1,19 +1,18 @@
 #include "MonsiPch.h"
 #include "Renderer3D.h"
-#include "CubePass.h"
 #include "ModelPass.h"
 #include "SkyBoxPass.h"
+#include "ShadowMapPass.h"
 #include "ColorPalette.h"
-
 
 namespace Monsi {
 
 	struct Renderer3DData {
 
-		Reference<CubePass> Cube;
 		Reference<ModelPass> Model;
 		Reference<LightingBuffer> Lighting;
-		Reference< SkyBoxPass> SkyBox;
+		Reference<SkyBoxPass> SkyBox;
+		Reference<ShadowMapPass> ShadowMap;
 		SceneLighting SceneLight;
 	};
 
@@ -21,13 +20,13 @@ namespace Monsi {
 
 	void Renderer3D::Init()
 	{
-		s_Data.Cube = CreateReference<CubePass>();
-		s_Data.Cube->Init();
 		s_Data.Model = CreateReference<ModelPass>();
 		s_Data.Model->Init();
 		s_Data.Lighting = CreateReference<LightingBuffer>();
 		s_Data.SkyBox = CreateReference<SkyBoxPass>();
 		s_Data.SkyBox->Init();
+		s_Data.ShadowMap = CreateReference<ShadowMapPass>();
+		s_Data.ShadowMap->Init();
 		s_Data.Lighting->SetLighting(s_Data.SceneLight);
 	}
 
@@ -36,49 +35,35 @@ namespace Monsi {
 		s_Data.Model->Shutdown();
 		s_Data.Model.reset();
 
-		s_Data.Cube->Shutdown();
-		s_Data.Cube.reset();
-
 		s_Data.SkyBox->Shutdown();
 		s_Data.SkyBox.reset();
+
+		s_Data.ShadowMap->Shutdown();
+		s_Data.ShadowMap.reset();
 	}
 
-	void Renderer3D::Begin3D(const PerspectiveControl& camera)
+	void Renderer3D::Begin3D(const glm::mat4& viewProjection, const glm::vec3& cameraPosition)
 	{
-		s_Data.Cube->BeginScene(camera.GetCamera().GetViewProjectionMatrix(), camera.GetCamera().GetPosition(), s_Data.Lighting);
-		s_Data.Model->BeginScene(camera.GetCamera().GetViewProjectionMatrix(), camera.GetCamera().GetPosition(), s_Data.Lighting);
+		s_Data.Model->BeginScene(viewProjection, cameraPosition, s_Data.Lighting);
 	}
 
 	void Renderer3D::End3D()
 	{
-		s_Data.Cube->EndScene();
 		s_Data.Model->EndScene();
 		s_Data.Lighting->Clear();
+		s_Data.ShadowMap->Clear();
 	}
 
-	void Renderer3D::DrawCube(const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation)
+	void Renderer3D::DrawModel(const Reference<Model>& model, const glm::mat4& transform, const glm::vec4& color)
 	{
-		s_Data.Cube->DrawCube(position, size, color, rotation);
+		s_Data.Model->SubmitModel(model, transform, color);
+		s_Data.ShadowMap->SubmitModel(model, transform);
 	}
 
-	void Renderer3D::DrawCube(const glm::vec3& position, const glm::vec3& size, Reference<Texture2D> texture, const glm::vec3& rotation)
+	void Renderer3D::DrawMesh(const Mesh* meshPtr, const glm::mat4& transform, const glm::vec4& color)
 	{
-		s_Data.Cube->DrawCube(position, size, texture, rotation);
-	}
-
-	void Renderer3D::DrawModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color)
-	{
-		s_Data.Model->DrawModel(model, position, size, color);
-	}
-
-	void Renderer3D::DrawModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation)
-	{
-		s_Data.Model->DrawModel(model, position, size, color, rotation);
-	}
-
-	void Renderer3D::DrawMesh(const Mesh* meshPtr, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation)
-	{
-		s_Data.Model->DrawMesh(meshPtr, position, size, color, rotation);
+		s_Data.Model->SubmitMesh(meshPtr, transform, color);
+		s_Data.ShadowMap->SubmitMesh(meshPtr, transform);
 	}
 
 	void Renderer3D::DrawSkyBox(const glm::mat4& view, const glm::mat4& projection, const Reference<CubeMapTexture>& skyboxTexture)
@@ -86,15 +71,25 @@ namespace Monsi {
 		s_Data.SkyBox->DrawSkybox(view, projection, skyboxTexture);
 	}
 
+	void Renderer3D::DrawShadowMap(const glm::mat4& view, const glm::mat4& projection, const Reference<ShadowMap>& shadowMap)
+	{
+		s_Data.ShadowMap->DrawShadowMap(projection * view, shadowMap);
+	}
+
+	void Renderer3D::SetShadowMapData(const glm::mat4& lightSpaceMatrix, const Reference<ShadowMap>& shadowMap)
+	{
+		s_Data.Model->SetShadowMapData(lightSpaceMatrix, shadowMap);
+	}
+
+	void Renderer3D::ResizeShadowMap(uint32_t width, uint32_t height, const Reference<ShadowMap>& shadowMap)
+	{
+		s_Data.ShadowMap->ResizeShadowMap(width, height, shadowMap);
+	}
+
 	void Renderer3D::SetSceneLighting(const SceneLighting& lighting)
 	{
 		s_Data.SceneLight = lighting;
 		s_Data.Lighting->SetLighting(lighting);
-	}
-
-	void Renderer3D::AddPointLight(const glm::vec3& position, const glm::vec3& color, float intensity, float radius)
-	{
-		s_Data.Lighting->AddPointLighting(position, color, intensity, radius);
 	}
 
 }

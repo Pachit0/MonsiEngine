@@ -9,16 +9,30 @@
     #endif
 #elif defined(__linux__)
     #define MONSI_PLATFORM_LINUX
-    #error "Linux not supported yet!"
 #endif
 
 #ifdef MONSI_BUILD_DEBUG
     #define MONSI_ENABLE_ASSERTS
 #endif
 
+#if defined(_MSC_VER)
+    #define DEBUG_BREAK() __debugbreak()
+#elif defined(__GNUC__) || defined(__clang__)
+    #if defined(__x86_64__) || defined(__i386__)
+        #define DEBUG_BREAK() __asm__ volatile("int $3")
+    #elif defined(__aarch64__) || defined(__arm__)
+        #define DEBUG_BREAK() __asm__ volatile("brk #0")
+    #else
+        #include <signal.h>
+        #define DEBUG_BREAK() raise(SIGTRAP)
+    #endif
+#else
+    #define DEBUG_BREAK()
+#endif
+
 #ifdef MONSI_ENABLE_ASSERTS
-    #define CLIENT_ASSERT(x, ...) if(!(x)) { CLIENT_LOG_ERROR("Assert fail: {0}", __VA_ARGS__); __debugbreak(); }
-    #define ENGINE_ASSERT(x, ...) if(!(x)) { ENGINE_LOG_ERROR("Assert fail: {0}", __VA_ARGS__); __debugbreak(); }
+    #define CLIENT_ASSERT(x, ...) if(!(x)) { CLIENT_LOG_ERROR("Assert fail: {0}", __VA_ARGS__); DEBUG_BREAK(); }
+    #define ENGINE_ASSERT(x, ...) if(!(x)) { ENGINE_LOG_ERROR("Assert fail: {0}", __VA_ARGS__); DEBUG_BREAK(); }
 #else
     #define CLIENT_ASSERT(x, ...)
     #define ENGINE_ASSERT(x, ...)
@@ -67,5 +81,19 @@ namespace Monsi{
         #define ENGINE_API
     #endif
 #else
-    #error Monsi supports only Windows!
+	#define ENGINE_API
+#endif
+
+#ifdef MONSI_PLATFORM_LINUX // placeholder
+    #if ENGINE_LINK_DYNAMICALLY
+        #ifdef ENGINE_BUILD_DLL
+            #define ENGINE_API __declspec(dllexport)
+        #else
+            #define ENGINE_API __declspec(dllimport)
+        #endif
+    #else
+        #define ENGINE_API
+    #endif
+#else
+	#define ENGINE_API
 #endif

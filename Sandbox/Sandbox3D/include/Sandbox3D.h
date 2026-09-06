@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Monsi.h>
+#include "SceneHierarchyUnit.h"
 
 class Sandbox3D : public Monsi::Layer {
 public:
@@ -12,7 +13,14 @@ public:
 	void OnLayerDetach() override;
 	void OnImGuiDraw() override;
 	void OnLayerEvent(Monsi::Event& event) override;
+private:
+	bool OnKeyPressed(Monsi::KeyEventPressed& event);
 
+	void SceneSaveAs();
+	void SceneSave();
+	void SceneNew();
+	void SceneOpenAs();
+	void SceneOpen();
 private:
 	glm::vec2 m_ViewportSize;
 	bool m_ViewportFocused;
@@ -24,23 +32,37 @@ private:
 
 	Monsi::Reference<Monsi::Texture2D> m_MonsiTest;
 	Monsi::Reference<Monsi::CubeMapTexture> m_SkyBoxTest;
+	Monsi::Reference<Monsi::SkyBoxPass> m_SkyBoxPass;
+	Monsi::Reference<Monsi::ShadowMap> m_ShadowMap;
+
 	Monsi::Reference<Monsi::Mesh> m_SphereTest;
+	Monsi::Reference<Monsi::Mesh> m_CubeTest;
+	Monsi::Reference<Monsi::Mesh> m_TorusTest;
+	Monsi::Reference<Monsi::Mesh> m_CylinderTest;
+	Monsi::Reference<Monsi::Mesh> m_ConeTest;
+	Monsi::Reference<Monsi::Mesh> m_QuadTest;
 	Monsi::Reference<Monsi::Material> m_ShpereMaterial;
-	Monsi::SceneLighting m_SceneLighting;
 
-	Monsi::PerspectiveControl m_CameraControl;
+	Monsi::Reference<Monsi::Scene> m_Scene;
+	Monsi::Entity m_CameraPerspectiveEntity;
+	Monsi::Entity m_CameraOrthogonalEntity;
+	Monsi::Entity m_SkyBoxEntity;
+	Monsi::Entity m_MainLightEntity;
+	Monsi::Entity m_PointLightEntity;
+	Monsi::Entity m_BackpackEntity;
+	Monsi::Entity m_SponzaEntity;
+	Monsi::Entity m_SphereEntity;
+	Monsi::Entity m_CubeEntity;
+	Monsi::Entity m_TorusEntity;
+	Monsi::Entity m_ConeEntity;
+	Monsi::Entity m_CylinderEntity;
+	Monsi::Entity m_QuadEntity;
+	Monsi::Entity m_ShadowMapEntity;
 
+	Monsi::SceneHierarchyUnit m_Unit;
 	glm::vec3 m_SpherePosition;
 
-	glm::vec3 m_LightPointPosition;
-	glm::vec4 m_LightPointColor;
-	float m_Intensity;
-	float m_Radius;
-
-	float m_DeltaTime;
-	float m_lastFrame;
-
-private: //fps counter
+private:
 	float m_FPS = 0.0f;
 	float m_FrameTimeAccumulator = 0.0f;
 	int m_FrameCount = 0;

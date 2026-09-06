@@ -179,19 +179,22 @@ namespace Monsi {
 
 }
 
-#ifdef ENGINE_PROFILER
-#define  ENGINE_PROFILER_BEGIN(name, filepath) ::Monsi::Instrumentor::Get().BeginSession(name, filepath)
-#define  ENGINE_PROFILER_END() ::Monsi::Instrumentor::Get().EndSession()
-#define  ENGINE_PROFILER_SCOPE(name) ::Monsi::InstrumentationTimer ENGINE_CONCAT(timerOn, __LINE__)(name);
-#define  ENGINE_PROFILER_FUNCTION() ENGINE_PROFILER_SCOPE(__FUNCSIG__)
-//this macro uses Engine_Concat because timerOn##__LINE__ will expand literally to timerOn__LINE__ and not the line number
-//the reason being that the preprocessor won't read it correctly *sigh*
-#define ENGINE_PROFILER_SCOPE_LAMBDA(name) ::Monsi::Timer ENGINE_CONCAT(timerOn, __LINE__)(name, [&](TimeProfilerResult result) { m_TimeResults.emplace_back(result); })
-
+#if defined(ENGINE_PROFILER)
+	#define  ENGINE_PROFILER_BEGIN(name, filepath) ::Monsi::Instrumentor::Get().BeginSession(name, filepath)
+	#define  ENGINE_PROFILER_END() ::Monsi::Instrumentor::Get().EndSession()
+	#define  ENGINE_PROFILER_SCOPE(name) ::Monsi::InstrumentationTimer ENGINE_CONCAT(timerOn, __LINE__)(name);
+		#if defined(_WIN32)
+			#define ENGINE_PROFILER_FUNCTION() ENGINE_PROFILER_SCOPE(__FUNCSIG__)
+		#elif defined(__linux__)
+			#define ENGINE_PROFILER_FUNCTION() ENGINE_PROFILER_SCOPE(__PRETTY_FUNCTION__) 
+		#endif
+	//this macro uses Engine_Concat because timerOn##__LINE__ will expand literally to timerOn__LINE__ and not the line number
+	//the reason being that the preprocessor won't read it correctly *sigh*
+	#define ENGINE_PROFILER_SCOPE_LAMBDA(name) ::Monsi::Timer ENGINE_CONCAT(timerOn, __LINE__)(name, [&](TimeProfilerResult result) { m_TimeResults.emplace_back(result); })
 #else
-#define  ENGINE_PROFILER_BEGIN(name, filepath)
-#define  ENGINE_PROFILER_END()
-#define  ENGINE_PROFILER_SCOPE(name) 
-#define  ENGINE_PROFILER_FUNCTION() 
-#define  ENGINE_PROFILER_SCOPE_LAMBDA(name)
+	#define  ENGINE_PROFILER_BEGIN(name, filepath)
+	#define  ENGINE_PROFILER_END()
+	#define  ENGINE_PROFILER_SCOPE(name) 
+	#define  ENGINE_PROFILER_FUNCTION() 
+	#define  ENGINE_PROFILER_SCOPE_LAMBDA(name)
 #endif

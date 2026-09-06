@@ -27,6 +27,7 @@ file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/ImGui/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/debug/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/ModelLoader/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Scripts/*.h"
 )
 
 file(GLOB THIRD_PARTY_HEADERS
@@ -38,9 +39,7 @@ set(ALL_HEADERS ${HEADERS} ${THIRD_PARTY_HEADERS})
 
 add_library(Engine STATIC ${ALL_SOURCES} ${ALL_HEADERS})
 
-if(WIN32)
-    target_compile_definitions(Engine PRIVATE GLFW_INCLUDE_NONE MONSI_BUILD_DEBUG ENGINE_PROFILER)
-endif()
+target_compile_definitions(Engine PRIVATE GLFW_INCLUDE_NONE MONSI_BUILD_DEBUG ENGINE_PROFILER)
 
 add_subdirectory(thirdparty)
 
@@ -74,7 +73,10 @@ target_link_libraries(Engine
 )
 
 if(WIN32)
-target_link_libraries(Engine PUBLIC opengl32)
+    target_link_libraries(Engine PUBLIC opengl32)
+else(CMAKE_SYSTEM_NAME MATCHES "Linux")
+    find_package(X11 REQUIRED)
+    target_link_libraries(Engine PUBLIC GL ${X11_LIBRARIES})
 endif()
 
 if(PRODUCTION_BUILD)	
@@ -82,6 +84,7 @@ if(PRODUCTION_BUILD)
     target_compile_definitions(Engine PUBLIC SHADER_PATH="./assets/Shader")
     target_compile_definitions(Engine PUBLIC TEXTURE_PATH="./assets/Textures")
     target_compile_definitions(Engine PUBLIC MODEL_PATH="./assets/Models")
+    target_compile_definitions(Engine PUBLIC FONT_PATH="./assets/Fonts")
     target_compile_definitions(Engine PUBLIC PRODUCTION_BUILD=1) 
 
 else()
@@ -89,5 +92,6 @@ else()
     target_compile_definitions(Engine PUBLIC SHADER_PATH="${CMAKE_CURRENT_SOURCE_DIR}/../Sandbox/assets/Shader/")
     target_compile_definitions(Engine PUBLIC TEXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/../Sandbox/assets/Textures/")
     target_compile_definitions(Engine PUBLIC MODEL_PATH="${CMAKE_CURRENT_SOURCE_DIR}/../Sandbox/assets/Models/")
+    target_compile_definitions(Engine PUBLIC FONT_PATH="${CMAKE_CURRENT_SOURCE_DIR}/../Sandbox/assets/Fonts/")
 
 endif()

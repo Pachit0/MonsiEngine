@@ -1,52 +1,87 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "SceneCamera.h"
+#include "SkyBoxPass.h"
+#include "ShadowMap.h"
 #include "Mesh.h"
 #include "ModelLoader.h"
+#include "ScriptableEntity.h"
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/quaternion.hpp>
 
 namespace Monsi {
 
-// 	struct MeshComponent {
-// 		enum class Primitive { None = 0, Cube, Sphere, Capsule, Quad };
-// 
-// 		Reference<Model> ModelAsset;
-// 		Primitive Type = Primitive::None;
-// 
-// 		MeshComponent() = default;
-// 		MeshComponent(const MeshComponent& other) = default;
-// 		MeshComponent(const std::string& filepath) : ModelAsset(CreateReference<Model>(filepath)) {}
-// 		MeshComponent(Primitive primitiveType) : Type(primitiveType) {}
-// 	};
-// 
-// 	struct MaterialComponent {
-// 		Reference<Texture2D> Texture;
-// 		glm::vec4 TintColor = glm::vec4(1.0f);
-// 
-// 		MaterialComponent() = default;
-// 		MaterialComponent(const MaterialComponent& other) = default;
-// 		MaterialComponent(const Reference<Texture2D>& texture) : Texture(texture) {}
-// 	};
-// 
-// 	struct LightComponent {
-// 		glm::vec3 Direction = { 0.0f, -1.0f, 0.0f };
-// 		glm::vec3 Color = { 1.0f, 1.0f, 1.0f };
-// 		float Intensity = 1.0f;
-// 
-// 		LightComponent() = default;
-// 		LightComponent(const LightComponent& other) = default;
-// 	};
+	struct MeshComponent {
+		Reference<Mesh>  MeshAsset;
+
+		MeshComponent() = default;
+		MeshComponent(const MeshComponent& other) = default;
+		MeshComponent(const Reference<Mesh>& mesh) : MeshAsset(mesh) {}
+	};
+
+	struct ModelComponent {
+		Reference<Model> ModelAsset;
+		ModelImportSettings Settings;
+
+		ModelComponent() = default;
+		ModelComponent(const ModelComponent& other) = default;
+		ModelComponent(const Reference<Model>& model) : ModelAsset(model) {}
+	};
+
+	struct SkyBoxComponent {
+		Reference<SkyBoxPass> SkyBox;
+		Reference<CubeMapTexture> SkyboxTexture;
+
+		SkyBoxComponent() = default;
+		SkyBoxComponent(const SkyBoxComponent& other) = default;
+		SkyBoxComponent(const Reference<SkyBoxPass>& skybox, const Reference<CubeMapTexture>& texture = nullptr) : SkyBox(skybox), SkyboxTexture(texture) {}
+	};
+
+
+	struct ShadowMapComponent {
+		Reference<ShadowMap> Shadow;
+		ShadowMapSettings Settings;
+
+		ShadowMapComponent() = default;
+		ShadowMapComponent(const ShadowMapComponent& other) = default;
+		ShadowMapComponent(const Reference<ShadowMap>& shadow) : Shadow(shadow) {}
+	};
+
+	struct DirectionalLightComponent {
+		glm::vec3 Color = { 1.0f, 1.0f, 1.0f };
+		glm::vec3 Direction = { 0.0f, -1.0f, 0.0f };
+		float Intensity = 1.0f;
+
+		DirectionalLightComponent() = default;
+		DirectionalLightComponent(const DirectionalLightComponent& other) = default;
+	};
+
+	struct PointLightComponent {
+		glm::vec3 Color = { 1.0f, 1.0f, 1.0f };
+		float Intensity = 1.0f;
+		float Radius = 10.0f;
+
+		PointLightComponent() = default;
+		PointLightComponent(const PointLightComponent& other) = default;
+	};
 
 	struct TransformComponent {
-		glm::mat4 Transform = glm::mat4(1.0f);
+		glm::vec3 Translation = glm::vec3{ 0.0f, 0.0f, 0.0f };
+		glm::quat Rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+		glm::vec3 Scale = glm::vec3{ 1.0f, 1.0f, 1.0f };
 
 		TransformComponent() = default;
 		TransformComponent(const TransformComponent& other) = default;
-		TransformComponent(const glm::mat4& transform) : Transform(transform) {}
+		TransformComponent(const glm::vec3& translation) : Translation(translation) {}
 
-		operator const glm::mat4& () { return Transform; }
-		operator const glm::mat4& () const { return Transform; }
+		glm::mat4 GetTransform() const {
+			return glm::translate(glm::mat4(1.0f), Translation)
+				* glm::mat4_cast(Rotation)
+				* glm::scale(glm::mat4(1.0f), Scale);
+		}
 	};
 
 	struct SpriteRendererComponent {
@@ -73,5 +108,26 @@ namespace Monsi {
 
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent& other) = default;
+	};
+
+	struct NativeScriptComponent
+	{
+		ScriptableEntity* Instance = nullptr;
+
+		ScriptableEntity*(*InstantiateFuncPtr)();
+		void (*DestroyInstanceFuncPtr)(NativeScriptComponent*);
+
+		template<typename T>
+		void Bind()
+		{
+			InstantiateFuncPtr = []() { return static_cast<ScriptableEntity*>(new T()); };
+			DestroyInstanceFuncPtr = [](NativeScriptComponent* nativeScript) { delete nativeScript->Instance; nativeScript->Instance = nullptr; };
+		}
+
+		template<typename T>
+		T* GetScriptAs()
+		{
+			return dynamic_cast<T*>(Instance);
+		}
 	};
 }

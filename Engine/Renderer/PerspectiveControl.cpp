@@ -12,7 +12,31 @@ namespace Monsi {
 		: m_AspectRatio(aspectRatio),
 		m_CameraRotationFlag(rotationFlag),
 		m_Camera(m_FOV, aspectRatio, m_NearClip, m_FarClip),
-		m_CameraPosition({ 0.0f,0.0f,3.0f }),
+		m_CameraPosition({ 0.0f,0.0f,0.3f }),
+		m_CameraFront({ 0.0f,0.0f,-1.0f }),
+		m_CameraUp({ 0.0f,1.0f,0.0f }),
+		m_CameraRight({ 1.0f,0.0f,0.0f })
+	{
+		UpdateCameraVectors();
+		m_Camera.SetPosition(m_CameraPosition);
+	}
+	PerspectiveControl::PerspectiveControl(const glm::vec3& position, float aspectRatio, bool rotationFlag)
+		: m_AspectRatio(aspectRatio),
+		m_CameraRotationFlag(rotationFlag),
+		m_Camera(m_FOV, aspectRatio, m_NearClip, m_FarClip),
+		m_CameraPosition(position),
+		m_CameraFront({ 0.0f,0.0f,-1.0f }),
+		m_CameraUp({ 0.0f,1.0f,0.0f }),
+		m_CameraRight({ 1.0f,0.0f,0.0f })
+	{
+		UpdateCameraVectors();
+		m_Camera.SetPosition(m_CameraPosition);
+	}
+	PerspectiveControl::PerspectiveControl(const glm::vec3& position, const glm::vec3& direction, float aspectRatio, bool rotationFlag)
+		: m_AspectRatio(aspectRatio),
+		m_CameraRotationFlag(rotationFlag),
+		m_Camera(m_FOV, aspectRatio, m_NearClip, m_FarClip),
+		m_CameraPosition(position),
 		m_CameraFront({ 0.0f,0.0f,-1.0f }),
 		m_CameraUp({ 0.0f,1.0f,0.0f }),
 		m_CameraRight({ 1.0f,0.0f,0.0f })
