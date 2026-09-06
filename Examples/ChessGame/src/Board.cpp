@@ -124,8 +124,6 @@ bool Board::move(Pos from, Pos to)
 		}
 	}
 
-	m_Board[from.y][from.x]->move(to.x, to.y, m_Board);
-
 	if (piece->getColor() == m_CurrentTurn) {
 		if (piece->getColor() == WKingPtr->getColor() && (WKingPtr->getIsUnderAttack() == BLACK || WKingPtr->getIsUnderAttack() > BLACK)) {
 			delete m_Board[from.y][from.x];
@@ -154,6 +152,20 @@ bool Board::move(Pos from, Pos to)
 	m_Board[to.y][to.x] = piece;
 	m_Board[from.y][from.x] = new NullFigure(NULL_COLOR);
 
+	//en passant possibility check
+	if (m_EnPassant) {
+		if (m_Board[to.y + (m_CurrentTurn == WHITE ? -1 : 1)][to.x]->getEnPassant() && piece->getType() == PAWN) {// if it was taken
+			delete m_Board[to.y + (m_CurrentTurn == WHITE ? -1 : 1)][to.x]; 	//en passant additional capture
+			m_Board[to.y + (m_CurrentTurn == WHITE ? -1 : 1)][to.x] = new NullFigure(NULL_COLOR);
+		}
+		m_EnPassant->setEnPassant(false);
+		m_EnPassant = nullptr; //remove possibility if it was both taken and not taken
+	}
+	if ((from.y + to.y) % 2 == 0 && piece->getType() == PAWN) {
+		m_EnPassant = piece;
+		piece->setEnPassant(true);
+
+	}
 	//set whatever squares are under attack with move method
 
 	//reevaluate the board

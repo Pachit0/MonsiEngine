@@ -16,6 +16,7 @@ public:
 	Figure* get(int x, int y) { return m_Board[y][x]; }
 	Figure* WKingPtr;
 	Figure* BKingPtr;
+	Figure* m_EnPassant = {}; // points to a pawn can be taken with en passant
 private:
 	Figure* m_Board[8][8] = {}; //evals everything to nullptr
 	FigureColor m_CurrentTurn;

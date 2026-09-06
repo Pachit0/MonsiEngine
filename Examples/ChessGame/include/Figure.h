@@ -35,10 +35,15 @@ public:
 
 	virtual FigureType getType() const = 0;
 	virtual std::vector<MovePoint> move(int x, int y, Figure* board[8][8]) = 0;
-
+	void setFirstMove() { m_FirstMove = false; }
+	bool getFirstMove() { return m_FirstMove; }
+	void setEnPassant(bool setEnPassant) { m_EnPassant = setEnPassant; }
+	bool getEnPassant() { return m_EnPassant; }
 protected:
 	FigureColor m_Color;
 
 	//since board is made from array of figures it must hold info is the square under attack;
 	int m_IsUnderAttack;
+	bool m_FirstMove;
+	bool m_EnPassant;
 };

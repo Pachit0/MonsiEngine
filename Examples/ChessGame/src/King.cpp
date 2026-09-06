@@ -1,6 +1,6 @@
 #include "King.h"
 
-King::King(FigureColor Color) : Figure(Color) {
+King::King(FigureColor Color) : Figure(Color){
 
 }
 
@@ -79,5 +79,15 @@ std::vector<MovePoint> King::move(int x, int y, Figure* board[8][8]) {
 				if (board[y - 1][x + 1]->getColor() != getColor())
 					moves.push_back({ x + 1, y - 1 });
 	}
+
+	// Castle king side
+	/*if (!m_FirstMove && board[0][8]->getType() == ROOK&&)// cant move pieces here !!!!!!!!!
+	if (y - 1 >= 0 && x + 1 < 8) {
+		board[y - 1][x + 1]->setIsUnderAttack(board[y - 1][x + 1]->getIsUnderAttack() == getColor() ? 0 : getColor());
+
+		if (!board[y - 1][x + 1]->getIsUnderAttack() || board[y - 1][x + 1]->getIsUnderAttack() == getColor())
+			if (board[y - 1][x + 1]->getColor() != getColor())
+				moves.push_back({ x + 1, y - 1 });
+	}*/
 	return moves;
 }
