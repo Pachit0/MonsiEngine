@@ -384,13 +384,13 @@ namespace Monsi {
 			ImGui::Text("A cute skybox");
 			});
 
-		DrawComponent<DirectionalLightComponent>("Directional Light", entity, [entity](auto& component) {
+		DrawComponent<DirectionalLightComponent>("Directional Light", entity, [](auto& component) {
 			DrawVec3Control("Direction", component.Direction);
 			ImGui::ColorEdit3("Color", glm::value_ptr(component.Color));
 			ImGui::DragFloat("Intensity", &component.Intensity);
 			});
 
-		DrawComponent<PointLightComponent>("Point Light", entity, [entity](auto& component) {
+		DrawComponent<PointLightComponent>("Point Light", entity, [](auto& component) {
 			ImGui::ColorEdit3("Color", glm::value_ptr(component.Color));
 			ImGui::DragFloat("Radius", &component.Radius);
 			ImGui::DragFloat("Intensity", &component.Intensity);
@@ -439,7 +439,7 @@ namespace Monsi {
 			ImGui::Text("Yaw: %.2f  Pitch: %.2f  Roll: %.2f", scriptYawPitchRoll.x, scriptYawPitchRoll.y, scriptYawPitchRoll.z);
 			});
 
-		DrawComponent<CameraComponent>("Camera", entity, [](auto& component) {
+		DrawComponent<CameraComponent>("Camera", entity, [this,entity](auto& component) {
 			const char* projectionType[] = { "Orthographic", "Perspective" };
 			const char* currentProjection = projectionType[(int)component.Camera.GetProjectionType()];
 			if (ImGui::BeginCombo("Projection", currentProjection)) {
@@ -484,6 +484,19 @@ namespace Monsi {
 				float perspectiveNear = component.Camera.GetPerspectiveNear();
 				if (ImGui::DragFloat("Near", &perspectiveNear)) {
 					component.Camera.SetPerspectiveNear(perspectiveNear);
+				}
+			}
+			if (ImGui::Checkbox("Primary Camera", &component.Primary)) {
+				if (component.Primary) {
+					auto view = m_Scene->m_Registry.view<CameraComponent>();
+					for (auto entt : view)
+					{
+						if (entt != entity)
+						{
+							auto& otherCamera = view.get<CameraComponent>(entt);
+							otherCamera.Primary = false;
+						}
+					}
 				}
 			}
 			});

@@ -139,24 +139,27 @@ float CalculateShadow(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir)
 
 void main()
 {
-    vec4 texColor = texture(texture_diffuse1, TexCoords) * InstanceColor;
-    
+    vec4 texColor;
+    if (material.hasDiffuseMap > 0.5)
+        texColor = texture(texture_diffuse1, TexCoords) * InstanceColor;
+    else
+        texColor = vec4(material.diffuse, 1.0) * InstanceColor;
+
     if (texColor.a < 0.5)
-    {
         discard;
-    }
 
     vec3 norm = normalize(v_Normal);
     vec3 viewDir = normalize(u_ViewPos - v_FragPos);
-    
+
     vec3 lightResult = material.ambient;
 
     float shadow = CalculateShadow(v_FragPosLightSpace, norm, normalize(-u_MainLight.Direction));
+
     lightResult += (1.0 - shadow) * CalculateDirectionalLight(u_MainLight, norm, viewDir);
 
     for(int i = 0; i < u_PointLightCount; i++) {
         lightResult += CalculatePointLight(u_PointLights[i], norm, v_FragPos, viewDir);
     }
 
-    FragColor = vec4(texColor.rgb * lightResult, texColor.a);
+    FragColor = vec4(texColor.rgb * lightResult, 1.0);
 }

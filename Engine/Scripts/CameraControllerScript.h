@@ -66,7 +66,7 @@ namespace Monsi {
 				if (Input::KeyPressed(MONSI_KEY_SPACE))
 					transform.Translation += up * velocity;
 
-				if (Input::KeyPressed(MONSI_KEY_LEFT_CONTROL))
+				if (Input::KeyPressed(MONSI_KEY_X))
 					transform.Translation -= up * velocity;
 			}
 

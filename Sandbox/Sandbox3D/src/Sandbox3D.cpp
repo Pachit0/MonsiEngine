@@ -6,6 +6,7 @@
 #include "ScriptableEntity.h"
 #include "TimeStep.h"
 #include "SceneManager.h"
+#include "PlatformUtilities.h"
 
 Sandbox3D::Sandbox3D() : Layer("Sandbox3D"), m_ViewportSize{ 0.0f,0.0f },
 m_ViewportFocused(false), m_ViewportHovered(false), m_SpherePosition({ -5.0f, 3.0f, 5.0f })
@@ -67,10 +68,14 @@ void Sandbox3D::OnLayerAttach()
 	m_QuadTest = Monsi::MeshBuilder::Create(quadParams, Monsi::CreateReference<Monsi::Material>(m_ShpereMaterial));
 	m_CubeTest = Monsi::MeshBuilder::Create(cubeParams, Monsi::CreateReference<Monsi::Material>(m_ShpereMaterial));
 
-	m_CameraEntity = m_Scene->CreateEntity("Camera");
-	auto& cameraComponent = m_CameraEntity.AddComponent<Monsi::CameraComponent>();
-	cameraComponent.Camera.SetPerspective(glm::radians(45.0f), 0.1f, 1000.0f);
-	cameraComponent.Primary = true;
+	m_CameraPerspectiveEntity = m_Scene->CreateEntity("Perspective Camera");
+	auto& cpc = m_CameraPerspectiveEntity.AddComponent<Monsi::CameraComponent>();
+	cpc.Camera.SetPerspective(glm::radians(45.0f), 0.1f, 1000.0f);
+	cpc.Primary = true;
+
+	m_CameraOrthogonalEntity = m_Scene->CreateEntity("Orthogonal Camera");
+	auto& coc = m_CameraOrthogonalEntity.AddComponent<Monsi::CameraComponent>();
+	coc.Primary = false;
 
 	m_MainLightEntity = m_Scene->CreateEntity("Directional Light");
 	auto& mainLight = m_MainLightEntity.AddComponent<Monsi::DirectionalLightComponent>();
@@ -121,7 +126,8 @@ void Sandbox3D::OnLayerAttach()
 
 	m_Unit.SetContext(m_Scene);
 
-	m_CameraEntity.AddComponent<Monsi::NativeScriptComponent>().Bind<Monsi::PerspectiveCameraControllerScript>();
+	m_CameraPerspectiveEntity.AddComponent<Monsi::NativeScriptComponent>().Bind<Monsi::PerspectiveCameraControllerScript>();
+	m_CameraOrthogonalEntity.AddComponent<Monsi::NativeScriptComponent>().Bind<Monsi::PerspectiveCameraControllerScript>();
 
 }
 
@@ -150,24 +156,6 @@ void Sandbox3D::OnLayerUpdate(Monsi::TimeStep timestep)
 	Monsi::RenderCommand::SetClearColor({ 0.5f, 0.0f, 0.05f, 1.0f });
 	Monsi::RenderCommand::Clear();
 
-	static float rotationStep = 0.0f;
-	rotationStep += timestep * 50.0f;
-	if (rotationStep >= 360.0f) rotationStep -= 360.0f;
-
-	static float totalTime = 0.0f;
-	totalTime += timestep;
-	glm::vec3 animatedSpherePos = m_SpherePosition;
-	animatedSpherePos.y += std::sin(totalTime * 2.0f) * 0.5f;
-
-	if (m_BackpackEntity.HasComponent<Monsi::TransformComponent>()) {
-		auto& backpackTransform = m_BackpackEntity.GetComponent<Monsi::TransformComponent>();
-		backpackTransform.Rotation = glm::angleAxis(glm::radians(rotationStep), glm::vec3(0.0f, 1.0f, 0.0f));
-	}
-
-	if (m_SphereEntity.HasComponent<Monsi::TransformComponent>()) {
-		m_SphereEntity.GetComponent<Monsi::TransformComponent>().Translation = animatedSpherePos;
-	}
-
 	m_Scene->OnUpdate(timestep);
 
 	m_FrameBuffer->Unbind();
@@ -191,13 +179,25 @@ void Sandbox3D::OnImGuiDraw() {
 		if (ImGui::MenuItem("Exit")) {
 			Monsi::Application::Get().CloseApp();
 		}
-		if (ImGui::MenuItem("Save")) {
-			Monsi::SceneManager manager(m_Scene);
-			manager.SaveScene("manager.mscene");
+
+		if (ImGui::MenuItem("Save", "Ctrl+S")) {
+			SceneSave();
 		}
-		if (ImGui::MenuItem("Load")) {
-			Monsi::SceneManager manager(m_Scene);
-			manager.LoadScene("manager.mscene");
+
+		if (ImGui::MenuItem("Save As", "Ctrl+Shift+S")) {
+			SceneSaveAs();
+		}
+
+		if (ImGui::MenuItem("Open", "Ctrl+O")) {
+			SceneOpen();
+		}
+
+		if (ImGui::MenuItem("Open As", "Ctrl+Shift+O")) {
+			SceneOpenAs();
+		}
+
+		if (ImGui::MenuItem("New Scene", "Ctrl+N")) {
+			SceneNew();
 		}
 
 		ImGui::EndMenu();
@@ -241,11 +241,11 @@ void Sandbox3D::OnImGuiDraw() {
 		ImGuiID dock_id_left_bottom;
 		ImGui::DockBuilderSplitNode(dock_id_left, ImGuiDir_Up, 0.5f, &dock_id_left_top, &dock_id_left_bottom);
 
-		ImGui::DockBuilderDockWindow("Viewport", dock_id_main);
-		ImGui::DockBuilderDockWindow("Hierarchy", dock_id_left_top);
-		ImGui::DockBuilderDockWindow("Properties", dock_id_left_bottom);
-		ImGui::DockBuilderDockWindow("Info", dock_id_left_bottom);
-		ImGui::DockBuilderDockWindow("Settings", dock_id_left_bottom);
+		ImGui::DockBuilderDockWindow("Viewport",	dock_id_main);
+		ImGui::DockBuilderDockWindow("Hierarchy",	dock_id_left_top);
+		ImGui::DockBuilderDockWindow("Properties",	dock_id_left_bottom);
+		ImGui::DockBuilderDockWindow("Info",		dock_id_left_bottom);
+		ImGui::DockBuilderDockWindow("Settings",	dock_id_left_bottom);
 
 		if (ImGuiDockNode* node = ImGui::DockBuilderGetNode(dock_id_main)) {
 			node->LocalFlags |= ImGuiDockNodeFlags_NoTabBar;
@@ -291,4 +291,90 @@ void Sandbox3D::OnImGuiDraw() {
 
 void Sandbox3D::OnLayerEvent(Monsi::Event& event)
 {
+	Monsi::EventDispatcher dispatcher(event);
+	dispatcher.Dispatch<Monsi::KeyEventPressed>(ENGINE_BIND_EVENT_FN(Sandbox3D::OnKeyPressed));
+}
+
+bool Sandbox3D::OnKeyPressed(Monsi::KeyEventPressed& event)
+{
+	if (event.getRepeat()) return false;
+
+	bool ctrl = Monsi::Input::KeyPressed(MONSI_KEY_RIGHT_CONTROL) || Monsi::Input::KeyPressed(MONSI_KEY_LEFT_CONTROL);
+	bool shift = Monsi::Input::KeyPressed(MONSI_KEY_RIGHT_SHIFT) || Monsi::Input::KeyPressed(MONSI_KEY_LEFT_SHIFT);
+
+	switch (event.GetKeyCode())
+	{
+	case MONSI_KEY_S: {
+		if (ctrl && shift)
+		{
+			SceneSaveAs();
+		}
+
+		if (ctrl && !shift) {
+			SceneSave();
+		}
+		break;
+	}
+	case MONSI_KEY_N: {
+		if (ctrl) {
+			SceneNew();
+		}
+		break;
+	}
+	case MONSI_KEY_O: {
+		if (ctrl && shift) {
+			SceneOpenAs();
+		}
+		if (ctrl && !shift) {
+			SceneOpen();
+		}
+		break;
+	}
+
+	default:
+		break;
+	}
+
+	return true;
+}
+
+void Sandbox3D::SceneSaveAs()
+{
+	std::string path = Monsi::FileDialogs::SaveFile("Monsi Scene (*.monsi)\0*.monsi\0");
+	if (!path.empty()) {
+		Monsi::SceneManager manager(m_Scene);
+		manager.SaveScene(path);
+	}
+}
+
+void Sandbox3D::SceneSave()
+{
+	Monsi::SceneManager manager(m_Scene);
+	manager.SaveScene("scene.monsi");
+}
+
+void Sandbox3D::SceneNew()
+{
+	m_Scene = Monsi::CreateReference<Monsi::Scene>();
+	m_Scene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+	m_Unit.SetContext(m_Scene);
+}
+
+void Sandbox3D::SceneOpenAs()
+{
+	std::string path = Monsi::FileDialogs::OpenFile("Monsi Scene (*.monsi)\0*.monsi\0");
+	if (!path.empty()) {
+		m_Scene = Monsi::CreateReference<Monsi::Scene>();
+		m_Scene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		m_Unit.SetContext(m_Scene);
+
+		Monsi::SceneManager manager(m_Scene);
+		manager.LoadScene(path);
+	}
+}
+
+void Sandbox3D::SceneOpen()
+{
+	Monsi::SceneManager manager(m_Scene);
+	manager.LoadScene("scene.monsi");
 }

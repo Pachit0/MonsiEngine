@@ -1,0 +1,205 @@
+Scene: Name
+Entities:
+  - Entity_ID: 1337420
+    TagComponent:
+      Tag: Quad
+    TransformComponent:
+      Translation: [30, 1, 0]
+      Rotation: [1, 0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshComponent:
+      PrimitiveType: 7
+      AmbientColor: [0.247, 0.199, 0.074]
+      DiffuseColor: [0.751, 0.606, 0.226]
+      SpecularColor: [0.628, 0.555, 0.366]
+      Shininess: 51.2
+      PrimitiveParams:
+        Width: 0.5
+        Height: 0.5
+  - Entity_ID: 1337420
+    TagComponent:
+      Tag: Cone
+    TransformComponent:
+      Translation: [20, 5, 0]
+      Rotation: [1, 0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshComponent:
+      PrimitiveType: 5
+      AmbientColor: [0.247, 0.199, 0.074]
+      DiffuseColor: [0.751, 0.606, 0.226]
+      SpecularColor: [0.628, 0.555, 0.366]
+      Shininess: 51.2
+      PrimitiveParams:
+        Radius: 2.5
+        Height: 8
+        Sectors: 32
+  - Entity_ID: 1337420
+    TagComponent:
+      Tag: Cylinder
+    TransformComponent:
+      Translation: [10, 5, 0]
+      Rotation: [1, 0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshComponent:
+      PrimitiveType: 4
+      AmbientColor: [0.247, 0.199, 0.074]
+      DiffuseColor: [0.751, 0.606, 0.226]
+      SpecularColor: [0.628, 0.555, 0.366]
+      Shininess: 51.2
+      PrimitiveParams:
+        Radius: 2.5
+        Height: 8
+        Sectors: 32
+  - Entity_ID: 1337420
+    TagComponent:
+      Tag: Torus
+    TransformComponent:
+      Translation: [0, 1, 0]
+      Rotation: [1, 0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshComponent:
+      PrimitiveType: 6
+      AmbientColor: [0.247, 0.199, 0.074]
+      DiffuseColor: [0.751, 0.606, 0.226]
+      SpecularColor: [0.628, 0.555, 0.366]
+      Shininess: 51.2
+      PrimitiveParams:
+        MajorRadius: 2.5
+        MinorRadius: 0.5
+        MajorSegments: 32
+        MinorSegments: 16
+  - Entity_ID: 1337420
+    TagComponent:
+      Tag: Cube
+    TransformComponent:
+      Translation: [0, 5, 0]
+      Rotation: [1, 0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshComponent:
+      PrimitiveType: 3
+      AmbientColor: [0.247, 0.199, 0.074]
+      DiffuseColor: [0.751, 0.606, 0.226]
+      SpecularColor: [0.628, 0.555, 0.366]
+      Shininess: 51.2
+      PrimitiveParams:
+        Size: 0.5
+  - Entity_ID: 1337420
+    TagComponent:
+      Tag: Sphere
+    TransformComponent:
+      Translation: [-5, 3, 5]
+      Rotation: [1, 0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshComponent:
+      PrimitiveType: 1
+      AmbientColor: [0.247, 0.199, 0.074]
+      DiffuseColor: [0.751, 0.606, 0.226]
+      SpecularColor: [0.628, 0.555, 0.366]
+      Shininess: 51.2
+      PrimitiveParams:
+        Radius: 1
+        Rings: 32
+        Sectors: 32
+  - Entity_ID: 1337420
+    TagComponent:
+      Tag: Sponza
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [1, 0, 0, 0]
+      Scale: [0.05, 0.05, 0.05]
+    ModelComponent:
+      AssetPath: D:/Monsi Engine/Sandbox/Sandbox3D/../assets/Models/crytek_sponza/sponza.obj
+      CalcTangentSpace: true
+      FlipUVs: false
+      GenSmoothNormals: true
+  - Entity_ID: 1337420
+    TagComponent:
+      Tag: Backpack
+    TransformComponent:
+      Translation: [-50, 3, 0]
+      Rotation: [1, 0, 0, 0]
+      Scale: [1, 1, 1]
+    ModelComponent:
+      AssetPath: D:/Monsi Engine/Sandbox/Sandbox3D/../assets/Models/backpack/backpack.obj
+      CalcTangentSpace: true
+      FlipUVs: true
+      GenSmoothNormals: true
+  - Entity_ID: 1337420
+    TagComponent:
+      Tag: ShadowMap
+    ShadowMapComponent:
+      Width: 4096
+      Height: 4096
+      LightDistance: 50
+      Near: -10
+      Far: 1000
+      OrthoSize: 256
+  - Entity_ID: 1337420
+    TagComponent:
+      Tag: Point Light
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [1, 0, 0, 0]
+      Scale: [1, 1, 1]
+    PointLightComponent:
+      Color: [0.596, 0.984, 0.596]
+      Intensity: 1
+      Radius: 10
+  - Entity_ID: 1337420
+    TagComponent:
+      Tag: Directional Light
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [1, 0, 0, 0]
+      Scale: [1, 1, 1]
+    DirectionalLightComponent:
+      Color: [1, 1, 1]
+      Direction: [0, -1, 0]
+      Intensity: 1
+  - Entity_ID: 1337420
+    TagComponent:
+      Tag: Orthogonal Camera
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0.70710677, 0, -0.70710677, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Primary: false
+      FixedAspectRatio: false
+      Camera:
+        ProjectionType: 0
+        PerspectiveFOV: 0.7853982
+        PerspectiveNear: 0.01
+        PerspectiveFar: 1000
+        OrthographicSize: 250
+        OrthographicNear: -1000
+        OrthographicFar: 1000
+  - Entity_ID: 1337420
+    TagComponent:
+      Tag: Perspective Camera
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0.70710677, 0, -0.70710677, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Primary: true
+      FixedAspectRatio: false
+      Camera:
+        ProjectionType: 1
+        PerspectiveFOV: 0.7853982
+        PerspectiveNear: 0.1
+        PerspectiveFar: 1000
+        OrthographicSize: 250
+        OrthographicNear: -1000
+        OrthographicFar: 1000
+  - Entity_ID: 1337420
+    TagComponent:
+      Tag: SkyBox
+    SkyBoxComponent:
+      AssetPath:
+        - D:/Monsi Engine/Sandbox/Sandbox3D/../assets/Textures/right.png
+        - D:/Monsi Engine/Sandbox/Sandbox3D/../assets/Textures/left.png
+        - D:/Monsi Engine/Sandbox/Sandbox3D/../assets/Textures/top.png
+        - D:/Monsi Engine/Sandbox/Sandbox3D/../assets/Textures/bottom.png
+        - D:/Monsi Engine/Sandbox/Sandbox3D/../assets/Textures/front.png
+        - D:/Monsi Engine/Sandbox/Sandbox3D/../assets/Textures/back.png

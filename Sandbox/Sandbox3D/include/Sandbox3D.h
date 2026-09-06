@@ -13,7 +13,14 @@ public:
 	void OnLayerDetach() override;
 	void OnImGuiDraw() override;
 	void OnLayerEvent(Monsi::Event& event) override;
+private:
+	bool OnKeyPressed(Monsi::KeyEventPressed& event);
 
+	void SceneSaveAs();
+	void SceneSave();
+	void SceneNew();
+	void SceneOpenAs();
+	void SceneOpen();
 private:
 	glm::vec2 m_ViewportSize;
 	bool m_ViewportFocused;
@@ -37,7 +44,8 @@ private:
 	Monsi::Reference<Monsi::Material> m_ShpereMaterial;
 
 	Monsi::Reference<Monsi::Scene> m_Scene;
-	Monsi::Entity m_CameraEntity;
+	Monsi::Entity m_CameraPerspectiveEntity;
+	Monsi::Entity m_CameraOrthogonalEntity;
 	Monsi::Entity m_SkyBoxEntity;
 	Monsi::Entity m_MainLightEntity;
 	Monsi::Entity m_PointLightEntity;
