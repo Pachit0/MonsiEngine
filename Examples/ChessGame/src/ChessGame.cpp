@@ -188,11 +188,9 @@ void Chess::HandleInput()
 				{
 					Figure* movedPiece = m_Board.get(target.x, target.y);
 
-					Pawn* pawn = dynamic_cast<Pawn*>(movedPiece);
-
-					if (pawn)
+					if (movedPiece->getType())//not needed probably
 					{
-						pawn->setFirstMove();
+						movedPiece->setFirstMove();// all to be moved!!!
 					}
 
 					m_CurrentTurn = (m_CurrentTurn == WHITE) ? BLACK : WHITE;
