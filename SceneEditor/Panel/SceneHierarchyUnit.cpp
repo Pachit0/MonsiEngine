@@ -107,14 +107,14 @@ namespace Monsi {
 			ImGui::PopStyleVar(1);
 
 			ImGui::SameLine(contentRegionAvail.x - lineHeight * 0.25f);
-			ImGui::PushID(label.c_str());
 
+			ImGui::PushID(label.c_str());
 			if (ImGui::Button("...")) {
 				ImGui::OpenPopup("Settings");
 			}
-			ImGui::PopID();
 
 			bool RemoveComponent = false;
+
 			if (ImGui::BeginPopup("Settings")) {
 				if (isRemovable) {
 					if (ImGui::MenuItem("Remove Component")) {
@@ -123,6 +123,7 @@ namespace Monsi {
 				}
 				ImGui::EndPopup();
 			}
+			ImGui::PopID();
 
 			if (opened) {
 				function(component);
@@ -163,7 +164,7 @@ namespace Monsi {
 
 		if (ImGui::BeginPopupContextWindow(0, ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems)) {
 			if (ImGui::MenuItem("Create Empty Entity")) {
-				m_Scene->CreateEntity("Empty Entity");
+				m_Scene->CreateEntityEmpty();
 			}
 			ImGui::EndPopup();
 		}
@@ -228,20 +229,51 @@ namespace Monsi {
 							ImGui::MenuItem("ShadowMap (Already in Scene)");
 							ImGui::EndDisabled();
 						}
+
+						if (!m_Selected.HasComponent<PointLightComponent>()) {
+							if(ImGui::MenuItem("Point light")){
+								m_Selected.AddComponent<PointLightComponent>();
+								ImGui::CloseCurrentPopup();
+							}
+
+						}
+
+						if (!m_Selected.HasComponent<DirectionalLightComponent>()) {
+							if (ImGui::MenuItem("Directional light")) {
+								m_Selected.AddComponent<DirectionalLightComponent>();
+								ImGui::CloseCurrentPopup();
+							}
+						}
+
+						if (!m_Selected.HasComponent<TransformComponent>()) {
+							if (ImGui::MenuItem("Transform")) {
+								m_Selected.AddComponent<TransformComponent>();
+								ImGui::CloseCurrentPopup();
+							}
+						}
+
+						if (!m_Selected.HasComponent<TagComponent>()) {
+							if (ImGui::MenuItem("Tag")) {
+								m_Selected.AddComponent<TagComponent>();
+								ImGui::CloseCurrentPopup();
+							}
+						}
 					}
 					ImGui::EndMenu();
 				}
 
-				if (!m_Selected.HasComponent<NativeScriptComponent>()) {
-					if (ImGui::BeginMenu("Add Script")) {
-						if (m_Selected.HasComponent<CameraComponent>()) {
+				if (m_Selected.HasComponent<CameraComponent>()) {
+					if (!m_Selected.HasComponent<NativeScriptComponent>()) {
+						if (ImGui::BeginMenu("Add Script")) {
+							if (m_Selected.HasComponent<CameraComponent>()) {
 
-							if (ImGui::MenuItem("Camera Controller")) {
-								m_Selected.AddComponent<Monsi::NativeScriptComponent>().Bind<Monsi::PerspectiveCameraControllerScript>();
-								ImGui::CloseCurrentPopup();
+								if (ImGui::MenuItem("Camera Controller")) {
+									m_Selected.AddComponent<Monsi::NativeScriptComponent>().Bind<Monsi::PerspectiveCameraControllerScript>();
+									ImGui::CloseCurrentPopup();
+								}
 							}
+							ImGui::EndMenu();
 						}
-						ImGui::EndMenu();
 					}
 				}
 

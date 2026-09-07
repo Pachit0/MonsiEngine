@@ -36,7 +36,12 @@ namespace Monsi {
 
 	Entity Scene::CreateEntityEmpty()
 	{
-		return { m_Registry.create(), this };
+		Entity e{ m_Registry.create(), this };
+
+		auto& tag = e.AddComponent<TagComponent>();
+		tag.Tag = "Empty Entity";
+
+		return e;
 	}
 
 
@@ -88,10 +93,10 @@ namespace Monsi {
 			glm::mat4 viewProj = mainCamera->GetProjectionMatrix() * glm::inverse(cameraTransform);
 
 			SceneLighting sceneLighting;
-			auto DirectionalLightView = m_Registry.view<TransformComponent, DirectionalLightComponent>();
+			auto DirectionalLightView = m_Registry.view<DirectionalLightComponent>();
 			for (auto entity : DirectionalLightView)
 			{
-				auto [transform, light] = DirectionalLightView.get<TransformComponent, DirectionalLightComponent>(entity);
+				auto light = DirectionalLightView.get<DirectionalLightComponent>(entity);
 				sceneLighting.MainLight.Direction = light.Direction;
 				sceneLighting.MainLight.Color = light.Color;
 				sceneLighting.MainLight.Intensity = light.Intensity;
@@ -146,10 +151,13 @@ namespace Monsi {
 				Renderer3D::DrawModel(model.ModelAsset, transform.GetTransform(), glm::vec4(1.0f));
 			}
 
+			bool hasShadowMap = false;
+
 			auto shadowMapView = m_Registry.view<ShadowMapComponent>();
 			for (auto entity : shadowMapView) {
 				auto& shadowMapComp = shadowMapView.get<ShadowMapComponent>(entity);
 				if (shadowMapComp.Shadow) {
+					hasShadowMap = true;
 
 					const auto& settings = shadowMapComp.Settings;
 
@@ -176,6 +184,10 @@ namespace Monsi {
 					Renderer3D::DrawShadowMap(lightView, lightProjection, shadowMapComp.Shadow);
 					Renderer3D::SetShadowMapData(lightSpaceMatrix, shadowMapComp.Shadow);
 				}
+			}
+
+			if (!hasShadowMap) { // temporary fallback
+				Renderer3D::SetShadowMapData(glm::mat4(1.0f), nullptr);
 			}
 
 			Renderer3D::End3D();
