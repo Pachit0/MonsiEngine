@@ -65,6 +65,8 @@ namespace Monsi {
 
 	void ModelPass::BeginScene(const glm::mat4& viewProj, const glm::vec3& viewPos, const Reference<LightingBuffer>& lighting)
 	{
+		m_Stats = {};
+
 		m_ViewProjection = viewProj;
 		m_Shader->Bind();
 		m_Shader->setMat4("u_ViewProjection", m_ViewProjection);
@@ -140,12 +142,14 @@ namespace Monsi {
 		uint64_t meshId = meshPtr->GetId();
 		auto& batch = m_MeshBatches[meshId];
 
-		if (!batch.MeshPtr)
+		if (batch.MeshPtr != meshPtr)
 		{
 			RegisterMesh(meshPtr);
 			batch.MeshPtr = meshPtr;
 			batch.LifetimeToken = meshPtr->GetLifetimeToken();
+			batch.InstanceData.clear();
 			batch.InstanceData.reserve(DefaultBatchReserve);
+			batch.WarnedOverflow = false;
 		}
 
 		batch.InstanceData.push_back({ transform, color });
@@ -162,8 +166,13 @@ namespace Monsi {
 		m_FlushList.clear();
 		for (auto& [meshId, batch] : m_MeshBatches)
 		{
-			if (!batch.InstanceData.empty())
-				m_FlushList.push_back(&batch);
+			if (batch.InstanceData.empty())
+				continue;
+
+			if (batch.LifetimeToken.expired())
+				continue;
+
+			m_FlushList.push_back(&batch);
 		}
 
 		std::sort(m_FlushList.begin(), m_FlushList.end(),
@@ -173,6 +182,7 @@ namespace Monsi {
 			});
 
 		Material* lastMaterial = nullptr;
+		bool firstBatch = true;
 
 		for (MeshBatch* batchPtr : m_FlushList)
 		{
@@ -196,7 +206,7 @@ namespace Monsi {
 			auto& mesh = *batch.MeshPtr;
 			Material* material = mesh.GetMaterial().get();
 
-			if (material != lastMaterial)
+			if (firstBatch || material != lastMaterial)
 			{
 				if (material)
 				{
@@ -216,6 +226,7 @@ namespace Monsi {
 				}
 
 				lastMaterial = material;
+				firstBatch = false;
 			}
 
 			m_InstanceVBO->SetData(batch.InstanceData.data(), count * sizeof(ModelInstanceData));
@@ -224,6 +235,10 @@ namespace Monsi {
 			vao->Bind();
 
 			RenderCommand::DrawIndexedInstanced(vao, mesh.GetIndexCount(), count);
+
+			m_Stats.DrawCalls++;
+			m_Stats.Instances += count;
+			m_Stats.Triangles += (mesh.GetIndexCount() / 3) * count;
 		}
 	}
 

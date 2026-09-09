@@ -27,5 +27,6 @@ namespace Monsi {
 	class CubeMapTexture : public Texture {
 	public:
 		static Reference<CubeMapTexture> Create(const std::array<std::string, 6>& ResourcePaths);
+		static Reference<CubeMapTexture> Create(const std::string& ResourcePath);
 	};
 }

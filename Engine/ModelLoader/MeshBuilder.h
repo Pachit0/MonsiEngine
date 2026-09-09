@@ -8,13 +8,13 @@ namespace Monsi {
 
 	class MeshBuilder {
 	public:
-		static Reference<Mesh> MeshBuilder::Create(const SphereParams& p, const Reference<Material>& mat);
-		static Reference<Mesh> MeshBuilder::Create(const CubeParams& p, const Reference<Material>& mat);
-		static Reference<Mesh> MeshBuilder::Create(const GridParams& p, const Reference<Material>& mat);
-		static Reference<Mesh> MeshBuilder::Create(const CylinderParams& p, const Reference<Material>& mat);
-		static Reference<Mesh> MeshBuilder::Create(const ConeParams& p, const Reference<Material>& mat);
-		static Reference<Mesh> MeshBuilder::Create(const TorusParams& p, const Reference<Material>& mat);
-		static Reference<Mesh> MeshBuilder::Create(const QuadParams& p, const Reference<Material>& mat);
+		static Reference<Mesh> Create(const SphereParams& p, const Reference<Material>& mat);
+		static Reference<Mesh> Create(const CubeParams& p, const Reference<Material>& mat);
+		static Reference<Mesh> Create(const GridParams& p, const Reference<Material>& mat);
+		static Reference<Mesh> Create(const CylinderParams& p, const Reference<Material>& mat);
+		static Reference<Mesh> Create(const ConeParams& p, const Reference<Material>& mat);
+		static Reference<Mesh> Create(const TorusParams& p, const Reference<Material>& mat);
+		static Reference<Mesh> Create(const QuadParams& p, const Reference<Material>& mat);
 
 		static Reference<Mesh> CreateFromParams(const PrimitiveParams& params, const Reference<Material>& material);
 		static PrimitiveParams MakeDefaultParams(PrimitiveType type);

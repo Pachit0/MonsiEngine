@@ -6,11 +6,6 @@
 
 namespace Monsi {
 
-	SkyBoxPass::SkyBoxPass(const std::array<std::string, 6>& paths)
-	{
-		m_FilePath = paths;
-	}
-
 	void SkyBoxPass::Init()
 	{
 		m_SkyboxVA = VertexArray::Create();
@@ -69,6 +64,9 @@ namespace Monsi {
 
 		m_SkyboxVA->Bind();
 		RenderCommand::DrawIndexed(m_SkyboxVA, 36);
+
+		m_Stats.DrawCalls = 1;
+		m_Stats.Triangles = 36 / 3;
 
 		RenderCommand::SetDepthFunc(DepthComp::LESS);
 		glEnable(GL_CULL_FACE);

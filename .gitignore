@@ -1,5 +1,6 @@
 /out
 build/
 /.vs
+/Old
 CMakeSettings.json
 CppProperties.json

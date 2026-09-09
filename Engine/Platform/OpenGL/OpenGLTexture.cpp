@@ -15,6 +15,7 @@ namespace Monsi {
 			data = stbi_load(ResourcePath.c_str(), &width, &height, &channels, 0);
 			ENGINE_LOG_INFO("Channels {0}", channels);
 		}
+
 		ENGINE_ASSERT(data, "Failed to load image!");
 		m_Width = width;
 		m_Height = height;

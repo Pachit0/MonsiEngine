@@ -7,7 +7,7 @@ namespace Monsi {
 	struct ShadowMapSettings {
 		uint32_t Width = 4096, Height = 4096;
 		float OrthoSize = 256.0f;
-		float LightDistance = 50.0f;
+		float LightDistance = 512.0f;
 		float NearPlane = -10.0f;
 		float FarPlane = 1000.0f;
 	};

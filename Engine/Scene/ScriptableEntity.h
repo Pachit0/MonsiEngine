@@ -13,6 +13,12 @@ namespace Monsi {
 		{
 			return m_Entity.GetComponent<T>();
 		}
+
+		void Init(Entity entity)
+		{
+			m_Entity = entity;
+			OnCreate();
+		}
 		
 	protected:
 		virtual void OnCreate() {}
@@ -22,6 +28,7 @@ namespace Monsi {
 	private:
 		Entity m_Entity;
 		friend class Scene;
+		friend class SceneHierarchyUnit;
 	};
 
 }

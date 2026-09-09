@@ -7,6 +7,7 @@ namespace Monsi {
 
 	class OpenGLCubeMapTexture : public CubeMapTexture {
 	public:
+		OpenGLCubeMapTexture(const std::string& ResourcePath);
 		OpenGLCubeMapTexture(const std::array<std::string, 6>& ResourcePaths);
 		virtual ~OpenGLCubeMapTexture();
 

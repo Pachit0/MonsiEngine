@@ -89,6 +89,8 @@ namespace Monsi {
 
 		if (renderType == RenderTypeEnum::Renderer3D)
 		{
+			Renderer3D::ResetStats();
+
 			glm::vec3 cameraPos = cameraPosition;
 			glm::mat4 viewProj = mainCamera->GetProjectionMatrix() * glm::inverse(cameraTransform);
 
@@ -116,7 +118,7 @@ namespace Monsi {
 			for (auto entity : skyboxView)
 			{
 				auto& skybox = skyboxView.get<SkyBoxComponent>(entity);
-				if (skybox.SkyBox)
+				if (skybox.SkyboxTexture)
 				{
 					glm::mat4 skyboxViewMatrix = glm::mat4(glm::mat3(glm::inverse(cameraTransform)));
 
@@ -131,7 +133,7 @@ namespace Monsi {
 						projMatrix = mainCamera->GetProjectionMatrix();
 					}
 
-					skybox.SkyBox->DrawSkybox(skyboxViewMatrix, projMatrix, skybox.SkyboxTexture);
+					Renderer3D::DrawSkyBox(skyboxViewMatrix, projMatrix, skybox.SkyboxTexture);
 				}
 			}
 
@@ -186,7 +188,7 @@ namespace Monsi {
 				}
 			}
 
-			if (!hasShadowMap) { // temporary fallback
+			if (!hasShadowMap) {
 				Renderer3D::SetShadowMapData(glm::mat4(1.0f), nullptr);
 			}
 

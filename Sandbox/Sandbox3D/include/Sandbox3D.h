@@ -30,7 +30,6 @@ private:
 	Monsi::Reference<Monsi::Model> m_Backpack;
 	Monsi::Reference<Monsi::Model> m_Sponza;
 
-	Monsi::Reference<Monsi::Texture2D> m_MonsiTest;
 	Monsi::Reference<Monsi::CubeMapTexture> m_SkyBoxTest;
 	Monsi::Reference<Monsi::SkyBoxPass> m_SkyBoxPass;
 	Monsi::Reference<Monsi::ShadowMap> m_ShadowMap;

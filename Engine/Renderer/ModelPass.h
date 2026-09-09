@@ -30,6 +30,15 @@ namespace Monsi {
 
 		void ClearBatches();
 
+		struct Stats
+		{
+			uint32_t DrawCalls = 0;
+			uint32_t Instances = 0;
+			uint32_t Triangles = 0;
+		};
+		const Stats& GetStats() const { return m_Stats; }
+		void ResetStats() { m_Stats = {}; }
+
 	private:
 		void Flush();
 		void RegisterMesh(const Mesh* mesh);
@@ -63,6 +72,8 @@ namespace Monsi {
 		Reference<Texture2D> m_WhiteTexture;
 
 		glm::mat4 m_ViewProjection;
+
+		Stats m_Stats;
 	};
 
 }

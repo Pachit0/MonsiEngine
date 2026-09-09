@@ -16,12 +16,11 @@ m_ViewportFocused(false), m_ViewportHovered(false), m_SpherePosition({ -5.0f, 3.
 void Sandbox3D::OnLayerAttach()
 {
 	m_Scene = Monsi::CreateReference<Monsi::Scene>();
-	
+
 	Monsi::FrameBufferSpec spec;
 	spec.Width = 1600;
 	spec.Height = 900;
 	m_FrameBuffer = Monsi::FrameBuffer::Create(spec);
-	m_MonsiTest = Monsi::Texture2D::Create(TEXTURE_PATH "background.png");
 
 	m_Backpack = Monsi::CreateReference<Monsi::Model>(MODEL_PATH "backpack/backpack.obj");
 
@@ -40,12 +39,9 @@ void Sandbox3D::OnLayerAttach()
 
 	m_SkyBoxTest = Monsi::CubeMapTexture::Create(skyBoxTexturesPaths);
 
-	m_SkyBoxPass = Monsi::CreateReference<Monsi::SkyBoxPass>(skyBoxTexturesPaths);
-	m_SkyBoxPass->Init();
-
 	m_SkyBoxEntity = m_Scene->CreateEntity("SkyBox", false);
-	m_SkyBoxEntity.AddComponent<Monsi::SkyBoxComponent>(m_SkyBoxPass, m_SkyBoxTest);
-	
+	m_SkyBoxEntity.AddComponent<Monsi::SkyBoxComponent>(m_SkyBoxTest, skyBoxTexturesPaths);
+
 	m_ShadowMap = Monsi::ShadowMap::Create(8192, 8192);
 
 	m_ShpereMaterial = Monsi::CreateReference<Monsi::Material>();
@@ -77,7 +73,7 @@ void Sandbox3D::OnLayerAttach()
 	auto& coc = m_CameraOrthogonalEntity.AddComponent<Monsi::CameraComponent>();
 	coc.Primary = false;
 
-	m_MainLightEntity = m_Scene->CreateEntity("Directional Light");
+	m_MainLightEntity = m_Scene->CreateEntity("Directional Light", false);
 	auto& mainLight = m_MainLightEntity.AddComponent<Monsi::DirectionalLightComponent>();
 	mainLight.Direction = glm::vec3(0.0f, -1.0f, 0.0f);
 	mainLight.Color = MonsiColors::White;
@@ -163,10 +159,6 @@ void Sandbox3D::OnLayerUpdate(Monsi::TimeStep timestep)
 
 void Sandbox3D::OnLayerDetach()
 {
-	if (m_SkyBoxPass)
-	{
-		m_SkyBoxPass->Shutdown();
-	}
 }
 
 void Sandbox3D::OnImGuiDraw() {
@@ -241,11 +233,11 @@ void Sandbox3D::OnImGuiDraw() {
 		ImGuiID dock_id_left_bottom;
 		ImGui::DockBuilderSplitNode(dock_id_left, ImGuiDir_Up, 0.5f, &dock_id_left_top, &dock_id_left_bottom);
 
-		ImGui::DockBuilderDockWindow("Viewport",	dock_id_main);
-		ImGui::DockBuilderDockWindow("Hierarchy",	dock_id_left_top);
-		ImGui::DockBuilderDockWindow("Properties",	dock_id_left_bottom);
-		ImGui::DockBuilderDockWindow("Info",		dock_id_left_bottom);
-		ImGui::DockBuilderDockWindow("Settings",	dock_id_left_bottom);
+		ImGui::DockBuilderDockWindow("Viewport", dock_id_main);
+		ImGui::DockBuilderDockWindow("Hierarchy", dock_id_left_top);
+		ImGui::DockBuilderDockWindow("Properties", dock_id_left_bottom);
+		ImGui::DockBuilderDockWindow("Info", dock_id_left_bottom);
+		ImGui::DockBuilderDockWindow("Settings", dock_id_left_bottom);
 
 		if (ImGuiDockNode* node = ImGui::DockBuilderGetNode(dock_id_main)) {
 			node->LocalFlags |= ImGuiDockNodeFlags_NoTabBar;
@@ -262,11 +254,21 @@ void Sandbox3D::OnImGuiDraw() {
 	ImGui::Text("FPS: %.1f", m_FPS);
 	ImGui::Text("Frame Time: %.3f ms", (1.0f / m_FPS) * 1000.0f);
 
+	ImGui::Separator();
+
+	Monsi::Renderer3DStats stats = Monsi::Renderer3D::GetStats();
+	ImGui::Text("Draw Calls: %u", stats.GetTotalDrawCalls());
+	ImGui::Text("  Model: %u", stats.ModelDrawCalls);
+	ImGui::Text("  Shadow Map: %u", stats.ShadowDrawCalls);
+	ImGui::Text("  Skybox: %u", stats.SkyboxDrawCalls);
+	ImGui::Text("Model Instances: %u", stats.ModelInstances);
+	ImGui::Text("Triangles: %u", stats.GetTotalTriangles());
+
 	ImGui::End();
 
 	ImGui::Begin("Settings");
 	static bool vsync = Monsi::Application::Get().GetWindow().IsVSync();
-	
+
 	if (ImGui::Checkbox("VSync", &vsync)) {
 		Monsi::Application::Get().GetWindow().SetVSync(vsync);
 	}

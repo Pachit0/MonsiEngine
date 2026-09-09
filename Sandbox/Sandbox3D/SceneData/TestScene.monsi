@@ -130,7 +130,7 @@ Entities:
     ShadowMapComponent:
       Width: 4096
       Height: 4096
-      LightDistance: 50
+      LightDistance: 512
       Near: -10
       Far: 1000
       OrthoSize: 256
@@ -148,20 +148,16 @@ Entities:
   - Entity_ID: 1337420
     TagComponent:
       Tag: Directional Light
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [1, 0, 0, 0]
-      Scale: [1, 1, 1]
     DirectionalLightComponent:
       Color: [1, 1, 1]
-      Direction: [0, -1, 0]
+      Direction: [1, -1, 0]
       Intensity: 1
   - Entity_ID: 1337420
     TagComponent:
       Tag: Orthogonal Camera
     TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0.70710677, 0, -0.70710677, 0]
+      Translation: [-45.486553, 24.278278, -3.7384133]
+      Rotation: [0.6591558, -0.16740426, -0.7105787, -0.18046401]
       Scale: [1, 1, 1]
     CameraComponent:
       Primary: false
@@ -178,8 +174,8 @@ Entities:
     TagComponent:
       Tag: Perspective Camera
     TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0.70710677, 0, -0.70710677, 0]
+      Translation: [-45.486553, 24.278278, -3.7384133]
+      Rotation: [0.6591558, -0.16740426, -0.7105787, -0.18046401]
       Scale: [1, 1, 1]
     CameraComponent:
       Primary: true

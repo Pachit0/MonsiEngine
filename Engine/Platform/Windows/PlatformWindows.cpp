@@ -166,11 +166,11 @@ namespace Monsi {
 
 		if (enabled) {
 			glfwSwapInterval(1);
-			ENGINE_LOG_TRACE("VSync {}", enabled);
+			ENGINE_LOG_INFO("VSync {}", enabled);
 		}
 		else {
 			glfwSwapInterval(0);
-			ENGINE_LOG_TRACE("VSync {}", enabled);
+			ENGINE_LOG_INFO("VSync {}", enabled);
 		}
 
 		m_Data.VSync = enabled;

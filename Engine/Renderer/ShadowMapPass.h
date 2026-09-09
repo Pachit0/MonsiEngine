@@ -23,6 +23,14 @@ namespace Monsi {
 
 		void Clear();
 
+		struct Stats
+		{
+			uint32_t DrawCalls = 0;
+			uint32_t Triangles = 0;
+		};
+		const Stats& GetStats() const { return m_Stats; }
+		void ResetStats() { m_Stats = {}; }
+
 	private:
 		void DrawMeshDepthOnly(const Mesh* meshPtr, const glm::mat4& transform);
 
@@ -34,6 +42,8 @@ namespace Monsi {
 
 		std::vector<ShadowCasterCommand> m_Commands;
 		Reference<Shader> m_ShadowMapShader;
+
+		Stats m_Stats;
 	};
 
 }

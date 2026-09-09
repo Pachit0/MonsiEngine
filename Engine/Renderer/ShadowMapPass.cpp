@@ -55,10 +55,15 @@ namespace Monsi {
 		vao->Bind();
 
 		RenderCommand::DrawIndexedInstanced(vao, meshPtr->GetIndexCount(), 1);
+
+		m_Stats.DrawCalls++;
+		m_Stats.Triangles += meshPtr->GetIndexCount() / 3;
 	}
 
 	void ShadowMapPass::DrawShadowMap(const glm::mat4& lightSpaceMatrix, const Reference<ShadowMap>& shadowMap)
 	{
+		m_Stats = {};
+
 		if (!shadowMap || m_Commands.empty()) return;
 
 		shadowMap->Bind();

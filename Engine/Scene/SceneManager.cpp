@@ -336,7 +336,7 @@ namespace Monsi {
 
 		if (entity.HasComponent<SkyBoxComponent>()) {
 			auto& sbc = entity.GetComponent<SkyBoxComponent>();
-			auto& filePath = sbc.SkyBox->GetFilePath();
+			auto& filePath = sbc.FilePath;
 			out << YAML::Key << "SkyBoxComponent";
 			out << YAML::BeginMap;
 			out << YAML::Key << "AssetPath";
@@ -572,12 +572,9 @@ namespace Monsi {
 							assetPaths[i] = assetPathsNode[i].as<std::string>();
 						}
 
-						auto skyBoxPass = CreateReference<Monsi::SkyBoxPass>(assetPaths);
-						skyBoxPass->Init();
-
 						auto skyBoxTexture = Monsi::CubeMapTexture::Create(assetPaths);
 
-						deserializedEntity.AddComponent<Monsi::SkyBoxComponent>(skyBoxPass, skyBoxTexture);
+						deserializedEntity.AddComponent<Monsi::SkyBoxComponent>(skyBoxTexture, assetPaths);
 					}
 				}
 			}

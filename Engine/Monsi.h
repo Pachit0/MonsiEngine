@@ -33,7 +33,6 @@
 #include "Renderer/Texture.h"
 #include "Renderer/SubTexture2D.h"
 #include "Renderer/OrthographicCamera.h"
-#include "Renderer/PerspectiveCamera.h"
 #include "Renderer/Renderer2D.h"
 #include "Renderer/Renderer3D.h"
 #include "Renderer/FrameBuffer.h"
@@ -41,7 +40,6 @@
 
 //	CameraControls
 #include "Renderer/OrthographicControl.h"
-#include "Renderer/PerspectiveControl.h"
 
 //  Scripts
 #include "Scripts/CameraControllerScript.h"

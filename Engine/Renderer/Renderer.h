@@ -12,8 +12,6 @@ namespace Monsi {
 		static void Init(RenderTypeEnum type);
 		static void onWindowResize(uint32_t width, uint32_t height);
 
-		static void Begin(OrthographicCamera& camera);
-		static void End();
 		static void Sumbit(const Reference<VertexArray>& vertexArray, const Reference<Shader>& shader, const glm::mat4& transform = glm::mat4(1.0f));
 
 		inline static RendererAPI::API GetRendererAPI() { return RendererAPI::GetAPI(); }

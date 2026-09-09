@@ -32,12 +32,14 @@ namespace Monsi {
 	};
 
 	struct SkyBoxComponent {
-		Reference<SkyBoxPass> SkyBox;
 		Reference<CubeMapTexture> SkyboxTexture;
+		std::array<std::string, 6> FilePath; //This should probably be removed in the future and
+		std::string SingleFilePath;			 //only accepting single file path sky box
 
 		SkyBoxComponent() = default;
 		SkyBoxComponent(const SkyBoxComponent& other) = default;
-		SkyBoxComponent(const Reference<SkyBoxPass>& skybox, const Reference<CubeMapTexture>& texture = nullptr) : SkyBox(skybox), SkyboxTexture(texture) {}
+		SkyBoxComponent(const Reference<CubeMapTexture>& texture, const std::string& path) :  SkyboxTexture(texture), SingleFilePath(path) {}
+		SkyBoxComponent(const Reference<CubeMapTexture>& texture, const std::array<std::string, 6>& paths) :  SkyboxTexture(texture), FilePath(paths) {}
 	};
 
 

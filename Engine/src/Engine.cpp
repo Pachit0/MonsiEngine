@@ -33,8 +33,6 @@ namespace Monsi {
 
     Application::~Application() {
         ENGINE_PROFILER_FUNCTION();
-
-        Renderer::End();
     }
 
     void Application::OnEvent(Event& event) {

@@ -22,6 +22,10 @@ namespace Monsi {
 	void Model::LoadModel(const std::string& filepath, const ModelImportSettings& settings)
 	{
 		m_ModelSettings = settings;
+		
+		m_Meshes.clear();
+		m_TextureCache.clear();
+
 		Assimp::Importer importer;
 		unsigned int flags = aiProcess_Triangulate;
 

@@ -37,4 +37,14 @@ namespace Monsi {
 		return nullptr;
 	}
 
+	Reference<CubeMapTexture> CubeMapTexture::Create(const std::string& ResourcePath) {
+		switch (Renderer::GetRendererAPI()) {
+			case RendererAPI::API::None: ENGINE_ASSERT(false, "RendererAPI::None!"); return nullptr;
+			case RendererAPI::API::OpenGL: return CreateReference<OpenGLCubeMapTexture>(ResourcePath);
+		}
+
+		ENGINE_ASSERT(false, "Unknown RendererAPI!");
+		return nullptr;
+	}
+
 }
