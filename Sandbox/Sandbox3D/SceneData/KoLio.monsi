@@ -1,0 +1,122 @@
+Scene: Name
+Entities:
+  - Entity_ID: 1337420
+    TagComponent:
+      Tag: Camera
+    TransformComponent:
+      Translation: [30.054756, 20.910599, -2.688581]
+      Rotation: [-0.6722389, 0.098668225, -0.7259519, -0.10655198]
+      Scale: [0.05, 0.05, 0.05]
+    CameraComponent:
+      Primary: true
+      FixedAspectRatio: false
+      Camera:
+        ProjectionType: 1
+        PerspectiveFOV: 45
+        PerspectiveNear: 1
+        PerspectiveFar: 10000
+        OrthographicSize: 250
+        OrthographicNear: -1000
+        OrthographicFar: 1000
+  - Entity_ID: 1337420
+    TagComponent:
+      Tag: Castle
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [1, 0, 0, 0]
+      Scale: [0.05, 0.05, 0.05]
+    ModelComponent:
+      AssetPath: D:\Monsi Engine\Sandbox\assets\Models\crytek_sponza\sponza.obj
+      CalcTangentSpace: true
+      FlipUVs: false
+      GenSmoothNormals: true
+  - Entity_ID: 1337420
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [1, 0, 0, 0]
+      Scale: [1, 1, 1]
+    SkyBoxComponent:
+      SingleFilePath: D:\Monsi Engine\Sandbox\assets\Textures\single file skybox\Cubemap_Sky_13-512x512.png
+  - Entity_ID: 1337420
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [0, 6.8, 0]
+      Rotation: [1, 0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshComponent:
+      PrimitiveType: 1
+      AmbientColor: [0.93670887, 0, 0]
+      DiffuseColor: [0.67088604, 0.49254927, 0.49254927]
+      SpecularColor: [0.96202534, 0.14207126, 0.14207126]
+      Shininess: 48
+      PrimitiveParams:
+        Radius: 0.5
+        Rings: 32
+        Sectors: 32
+  - Entity_ID: 1337420
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [-6.3, 0, 0]
+      Rotation: [1, 0, 0, 0]
+      Scale: [1, 1, 1]
+    PointLightComponent:
+      Color: [1, 1, 1]
+      Intensity: 1
+      Radius: 4
+  - Entity_ID: 1337420
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [1, 0, 0, 0]
+      Scale: [1, 1, 1]
+    DirectionalLightComponent:
+      Color: [1, 1, 1]
+      Direction: [0, -1, 0]
+      Intensity: 1
+  - Entity_ID: 1337420
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [1, 0, 0, 0]
+      Scale: [1, 1, 1]
+    ShadowMapComponent:
+      Width: 8192
+      Height: 8192
+      LightDistance: 557
+      Near: -10
+      Far: 1000
+      OrthoSize: 159
+  - Entity_ID: 1337420
+    TagComponent:
+      Tag: Entity
+    TransformComponent:
+      Translation: [-22.4, 14.3, 0]
+      Rotation: [1, 0, 0, 0]
+      Scale: [1, 1, 1]
+    ModelComponent:
+      AssetPath: D:\Monsi Engine\Sandbox\assets\Models\microwave\microwave.obj
+      CalcTangentSpace: true
+      FlipUVs: false
+      GenSmoothNormals: true
+  - Entity_ID: 1337420
+    TagComponent:
+      Tag: Entity
+    TransformComponent:
+      Translation: [-12, 6.4, 0]
+      Rotation: [0.97484064, 0.06560336, 0.21254963, -0.014303845]
+      Scale: [1.8, 1.1, 4.2]
+    PointLightComponent:
+      Color: [0, 1, 0.050632715]
+      Intensity: 1
+      Radius: 10
+    ModelComponent:
+      AssetPath: D:\Monsi Engine\Sandbox\assets\Models\Universal Base Characters[Standard]\Base Characters\Godot - UE\Superhero_Male_FullBody.gltf
+      CalcTangentSpace: true
+      FlipUVs: false
+      GenSmoothNormals: true

@@ -336,15 +336,22 @@ namespace Monsi {
 
 		if (entity.HasComponent<SkyBoxComponent>()) {
 			auto& sbc = entity.GetComponent<SkyBoxComponent>();
-			auto& filePath = sbc.FilePath;
+
 			out << YAML::Key << "SkyBoxComponent";
 			out << YAML::BeginMap;
-			out << YAML::Key << "AssetPath";
-			out << YAML::BeginSeq;
-			for (int i = 0; i < 6; i++) {
-				out << YAML::Value << filePath[i];
+
+			if (!sbc.SingleFilePath.empty()) {
+				out << YAML::Key << "SingleFilePath" << YAML::Value << sbc.SingleFilePath;
 			}
-			out << YAML::EndSeq;
+			else {
+				out << YAML::Key << "AssetPath";
+				out << YAML::BeginSeq;
+				for (const auto& path : sbc.FilePath) {
+					out << YAML::Value << path;
+				}
+				out << YAML::EndSeq;
+			}
+
 			out << YAML::EndMap;
 		}
 
@@ -565,8 +572,16 @@ namespace Monsi {
 
 				auto skyBoxComponentNode = entityNode["SkyBoxComponent"];
 				if (skyBoxComponentNode) {
+					auto singleFilePathNode = skyBoxComponentNode["SingleFilePath"];
 					auto assetPathsNode = skyBoxComponentNode["AssetPath"];
-					if (assetPathsNode && assetPathsNode.IsSequence()) {
+
+					if (singleFilePathNode) {
+						std::string singlePath = singleFilePathNode.as<std::string>();
+						auto skyBoxTexture = Monsi::CubeMapTexture::Create(singlePath);
+
+						deserializedEntity.AddComponent<Monsi::SkyBoxComponent>(skyBoxTexture, singlePath);
+					}
+					else if (assetPathsNode && assetPathsNode.IsSequence()) {
 						std::array<std::string, 6> assetPaths;
 						for (size_t i = 0; i < 6 && i < assetPathsNode.size(); i++) {
 							assetPaths[i] = assetPathsNode[i].as<std::string>();
