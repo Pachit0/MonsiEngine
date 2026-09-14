@@ -1,16 +1,13 @@
 #pragma once
 
 #include <vector>
-#include <string>
 #include <memory>
+#include <string>
 #include <cstdint>
 
 #include "VertexArray.h"
-#include "Shader.h"
 #include "Material.h"
 #include "PrimitiveParams.h"
-
-#include <glm/glm.hpp>
 
 namespace Monsi {
 
@@ -18,21 +15,46 @@ namespace Monsi {
 		None = 0, Sphere, Grid, Cube, Cylinder, Cone, Torus, Quad
 	};
 
-	struct Vertex_t
+	#define MAX_BONE_INFLUENCE 4
+
+	struct StaticVertex
 	{
 		glm::vec3 Position;
 		glm::vec3 Normal;
 		glm::vec2 TexCoords;
 	};
 
-	class Mesh
+	struct AnimatedVertex
+	{
+		glm::vec3 Position;
+		glm::vec3 Normal;
+		glm::vec2 TexCoords;
+
+		int BoneIDs[MAX_BONE_INFLUENCE] = { -1, -1, -1, -1 };
+		float Weights[MAX_BONE_INFLUENCE] = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+		void AddBoneData(int boneID, float weight)
+		{
+			for (int i = 0; i < MAX_BONE_INFLUENCE; ++i)
+			{
+				if (BoneIDs[i] < 0)
+				{
+					BoneIDs[i] = boneID;
+					Weights[i] = weight;
+					return;
+				}
+			}
+		}
+	};
+
+	class StaticMesh
 	{
 	public:
-		Mesh() = default;
-		Mesh(const std::vector<Vertex_t>& vertices, const std::vector<unsigned int>& indices, const Reference<Material>& material);
+		StaticMesh() = default;
+		StaticMesh(const std::vector<StaticVertex>& vertices, const std::vector<unsigned int>& indices, const Reference<Material>& material);
 
 		const Reference<VertexArray>& GetVertexArray() const { return m_VertexArray; }
-		uint32_t GetIndexCount() const { return m_Indices.size(); }
+		uint32_t GetIndexCount() const { return static_cast<uint32_t>(m_Indices.size()); }
 
 		void SetMaterial(const Reference<Material>& material) { m_Material = material; }
 		void SetAmbientColor(const glm::vec3& color) { m_Material->AmbientColor = color; }
@@ -42,6 +64,7 @@ namespace Monsi {
 		void SetDiffuseMap(const Reference<Texture2D>& tex) { m_Material->DiffuseMap = tex; }
 		void SetSpecularMap(const Reference<Texture2D>& tex) { m_Material->SpecularMap = tex; }
 		void SetNormalMap(const Reference<Texture2D>& tex) { m_Material->NormalMap = tex; }
+
 		void SetPrimitiveType(const PrimitiveType& type) { m_Type = type; }
 		void SetPrimitiveParams(const PrimitiveParams& params) { m_Params = params; }
 
@@ -63,7 +86,7 @@ namespace Monsi {
 		void setupMesh();
 
 	private:
-		std::vector<Vertex_t> m_Vertices;
+		std::vector<StaticVertex> m_Vertices;
 		std::vector<unsigned int> m_Indices;
 		Reference<Material> m_Material;
 
@@ -71,15 +94,44 @@ namespace Monsi {
 		Reference<VertexBuffer> m_VertexBuffer;
 		Reference<IndexBuffer> m_IndexBuffer;
 
-	private:
 		PrimitiveType m_Type = PrimitiveType::None;
 		PrimitiveParams m_Params;
 
-		static uint64_t s_NextId; // should move to std::atomic in the future, when introducing multithreading.
+		static uint64_t s_NextId;
 		uint64_t m_Id = s_NextId++;
-		std::shared_ptr<char> m_LifetimeToken = std::make_shared<char>(); // this variable exists only to track the live time of the mesh.
+		std::shared_ptr<char> m_LifetimeToken = std::make_shared<char>();
 
 		friend class MeshBuilder;
+	};
+
+	class AnimatedMesh
+	{
+	public:
+		AnimatedMesh() = default;
+		AnimatedMesh(const std::vector<AnimatedVertex>& vertices, const std::vector<unsigned int>& indices, const Reference<Material>& material);
+
+		const Reference<VertexArray>& GetVertexArray() const { return m_VertexArray; }
+		uint32_t GetIndexCount() const { return static_cast<uint32_t>(m_Indices.size()); }
+		const Reference<Material>& GetMaterial() const { return m_Material; }
+
+		uint64_t GetId() const { return m_Id; }
+		std::weak_ptr<void> GetLifetimeToken() const { return m_LifetimeToken; }
+
+	private:
+		void setupMesh();
+
+	private:
+		std::vector<AnimatedVertex> m_Vertices;
+		std::vector<unsigned int> m_Indices;
+		Reference<Material> m_Material;
+
+		Reference<VertexArray> m_VertexArray;
+		Reference<VertexBuffer> m_VertexBuffer;
+		Reference<IndexBuffer> m_IndexBuffer;
+
+		static uint64_t s_NextId;
+		uint64_t m_Id = s_NextId++;
+		std::shared_ptr<char> m_LifetimeToken = std::make_shared<char>();
 	};
 
 }

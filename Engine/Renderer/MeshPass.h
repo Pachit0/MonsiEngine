@@ -1,18 +1,18 @@
 #pragma once
 
-#include "ModelLoader.h"
+#include "StaticModel.h"
 #include "Lighting.h"
 #include "ShadowMap.h"
 #include "VertexArray.h"
 #include "Shader.h"
 #include "Texture.h"
 #include <memory>
-#include <unordered_set>
+#include <vector>
 #include <unordered_map>
 
 namespace Monsi {
 
-	class ModelPass {
+	class MeshPass {
 	public:
 		void Init();
 		void Shutdown();
@@ -20,13 +20,13 @@ namespace Monsi {
 		void BeginScene(const glm::mat4& viewProj, const glm::vec3& viewPos, const Reference<LightingBuffer>& lighting);
 		void EndScene();
 
-		void SetShadowMapData(const glm::mat4& lightSpaceMatrix, const Reference<ShadowMap>& shadowMap);
+		void SetShadowMapData(const glm::mat4& lightSpaceMatrix, const Reference<ShadowMap>& shadowMap, float shadowIntensity);
 
-		void SubmitModel(const Reference<Model>& model, const glm::mat4& transform, const glm::vec4& color);
-		void SubmitModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color);
-		void SubmitModel(const Reference<Model>& model, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation);
-		void SubmitMesh(const Mesh* meshPtr, const glm::mat4& transform, const glm::vec4& color);
-		void SubmitMesh(const Mesh* meshPtr, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, const glm::vec3& rotation);
+		void SubmitModel(const Reference<StaticModel>& model, const glm::mat4& transform, const glm::vec4& color = glm::vec4(1.0f));
+		void SubmitModel(const Reference<StaticModel>& model, const glm::vec3& position, const glm::vec3& size = glm::vec3(1.0f), const glm::vec4& color = glm::vec4(1.0f), const glm::vec3& rotation = glm::vec3(0.0f));
+
+		void SubmitMesh(const StaticMesh* meshPtr, const glm::mat4& transform, const glm::vec4& color = glm::vec4(1.0f));
+		void SubmitMesh(const StaticMesh* meshPtr, const glm::vec3& position, const glm::vec3& size = glm::vec3(1.0f), const glm::vec4& color = glm::vec4(1.0f), const glm::vec3& rotation = glm::vec3(0.0f));
 
 		void ClearBatches();
 
@@ -41,12 +41,11 @@ namespace Monsi {
 
 	private:
 		void Flush();
-		void RegisterMesh(const Mesh* mesh);
-
+		void RegisterMesh(const StaticMesh* mesh);
 		void PruneStaleBatches();
 
 	private:
-		struct ModelInstanceData
+		struct MeshInstanceData
 		{
 			glm::mat4 Transform;
 			glm::vec4 Color;
@@ -54,9 +53,9 @@ namespace Monsi {
 
 		struct MeshBatch
 		{
-			const Mesh* MeshPtr = nullptr;
+			const StaticMesh* MeshPtr = nullptr;
 			std::weak_ptr<void> LifetimeToken;
-			std::vector<ModelInstanceData> InstanceData;
+			std::vector<MeshInstanceData> InstanceData;
 			bool WarnedOverflow = false;
 		};
 
@@ -72,7 +71,6 @@ namespace Monsi {
 		Reference<Texture2D> m_WhiteTexture;
 
 		glm::mat4 m_ViewProjection;
-
 		Stats m_Stats;
 	};
 

@@ -15,10 +15,11 @@
 namespace Monsi {
 
 	struct Vec3ControlParams {
-		const std::string& label;
+		const std::string& label = "null";
 		glm::vec3& values;
 		float resetValue = 0.0f;
 		float columnWidth = 100.0f;
+		float dragSpeed = 0.1f;
 		float minVal = 0.0f;
 		float maxVal = 0.0f;
 	};
@@ -61,7 +62,7 @@ namespace Monsi {
 		ImGui::PopFont();
 
 		ImGui::SameLine();
-		ImGui::DragFloat("##X", &params.values.x, 0.1f, params.minVal, params.maxVal, "%.4f");
+		ImGui::DragFloat("##X", &params.values.x, params.dragSpeed, params.minVal, params.maxVal, "%.4f");
 
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(1);
@@ -75,7 +76,7 @@ namespace Monsi {
 		ImGui::PopFont();
 
 		ImGui::SameLine();
-		ImGui::DragFloat("##Y", &params.values.y, 0.1f, params.minVal, params.maxVal, "%.4f");
+		ImGui::DragFloat("##Y", &params.values.y, params.dragSpeed, params.minVal, params.maxVal, "%.4f");
 
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(1);
@@ -89,7 +90,7 @@ namespace Monsi {
 		ImGui::PopFont();
 
 		ImGui::SameLine();
-		ImGui::DragFloat("##Z", &params.values.z, 0.1f, params.minVal, params.maxVal, "%.4f");
+		ImGui::DragFloat("##Z", &params.values.z, params.dragSpeed, params.minVal, params.maxVal, "%.4f");
 
 		ImGui::PopStyleVar(4);
 
@@ -173,13 +174,16 @@ namespace Monsi {
 		}
 
 		if (ImGui::BeginPopupContextWindow(0, ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems)) {
-			if (ImGui::MenuItem("Create Empty Entity")) {
-				m_Scene->CreateEntityEmpty();
+			if (ImGui::BeginMenu("Create Entity")) {
+				if (ImGui::MenuItem("Empty")) {
+					m_Scene->CreateEntityEmpty();
+				}
+				if (ImGui::MenuItem("Transform")) {
+					m_Scene->CreateEntity();
+				}
+				ImGui::EndPopup();
 			}
-			if (ImGui::MenuItem("Create Transform Entity")) {
-				m_Scene->CreateEntity();
-			}
-			ImGui::EndPopup();
+			ImGui::EndMenu();
 		}
 
 		if (ImGui::IsMouseDown(ImGuiMouseButton_Left) && ImGui::IsWindowHovered()) {
@@ -191,6 +195,7 @@ namespace Monsi {
 		ImGui::Begin("Properties");
 
 		static bool openModelSettingsModal = false;
+		static bool openAnimatedModelSettingsModal = false;
 		static Monsi::ModelImportSettings pendingSettings;
 
 		if (m_Selected) {
@@ -213,26 +218,26 @@ namespace Monsi {
 						}
 					}
 					else {
-						if (!m_Selected.HasComponent<MeshComponent>()) {
+						if (!m_Selected.HasComponent<StaticMeshComponent>()) {
 							if (ImGui::BeginMenu("Mesh")) {
 								if (ImGui::MenuItem("Sphere")) {
-									m_Selected.AddComponent<MeshComponent>(MeshBuilder::Create(SphereParams{}, Monsi::CreateReference<Monsi::Material>()));
+									m_Selected.AddComponent<StaticMeshComponent>(MeshBuilder::Create(SphereParams{}, Monsi::CreateReference<Monsi::Material>()));
 									ImGui::CloseCurrentPopup();
 								}
 								if (ImGui::MenuItem("Torus")) {
-									m_Selected.AddComponent<MeshComponent>(MeshBuilder::Create(TorusParams{}, Monsi::CreateReference<Monsi::Material>()));
+									m_Selected.AddComponent<StaticMeshComponent>(MeshBuilder::Create(TorusParams{}, Monsi::CreateReference<Monsi::Material>()));
 									ImGui::CloseCurrentPopup();
 								}
 								if (ImGui::MenuItem("Cube")) {
-									m_Selected.AddComponent<MeshComponent>(MeshBuilder::Create(CubeParams{}, Monsi::CreateReference<Monsi::Material>()));
+									m_Selected.AddComponent<StaticMeshComponent>(MeshBuilder::Create(CubeParams{}, Monsi::CreateReference<Monsi::Material>()));
 									ImGui::CloseCurrentPopup();
 								}
 								if (ImGui::MenuItem("Cylinder")) {
-									m_Selected.AddComponent<MeshComponent>(MeshBuilder::Create(CylinderParams{}, Monsi::CreateReference<Monsi::Material>()));
+									m_Selected.AddComponent<StaticMeshComponent>(MeshBuilder::Create(CylinderParams{}, Monsi::CreateReference<Monsi::Material>()));
 									ImGui::CloseCurrentPopup();
 								}
 								if (ImGui::MenuItem("Cone")) {
-									m_Selected.AddComponent<MeshComponent>(MeshBuilder::Create(ConeParams{}, Monsi::CreateReference<Monsi::Material>()));
+									m_Selected.AddComponent<StaticMeshComponent>(MeshBuilder::Create(ConeParams{}, Monsi::CreateReference<Monsi::Material>()));
 									ImGui::CloseCurrentPopup();
 								}
 								ImGui::EndMenu();
@@ -296,9 +301,16 @@ namespace Monsi {
 							}
 						}
 
-						if (!m_Selected.HasComponent<ModelComponent>()) {
+						if (!m_Selected.HasComponent<StaticModelComponent>()) {
 							if (ImGui::MenuItem("Model")) {
 								openModelSettingsModal = true;
+								ImGui::CloseCurrentPopup();
+							}
+						}
+
+						if (!m_Selected.HasComponent<AnimatedModelComponent>()) {
+							if (ImGui::MenuItem("Animated Model")) {
+								openAnimatedModelSettingsModal = true;
 								ImGui::CloseCurrentPopup();
 							}
 						}
@@ -329,6 +341,11 @@ namespace Monsi {
 				openModelSettingsModal = false;
 			}
 
+			if (openAnimatedModelSettingsModal) {
+				ImGui::OpenPopup("Animated Model Import Settings");
+				openAnimatedModelSettingsModal = false;
+			}
+
 			if (ImGui::BeginPopupModal("Model Import Settings", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
 				ImGui::Text("Configure Model Import Flags:");
 				ImGui::Separator();
@@ -342,8 +359,36 @@ namespace Monsi {
 				if (ImGui::Button("Browse & Import", ImVec2(130, 0))) {
 					std::string path = FileDialogs::OpenFile("3D Model (*.obj;*.fbx;*.gltf)\0*.obj;*.fbx;*.gltf\0");
 					if (!path.empty()) {
-						auto model = CreateReference<Monsi::Model>(path, pendingSettings);
-						m_Selected.AddComponent<ModelComponent>(model);
+						auto model = CreateReference<Monsi::StaticModel>(path, pendingSettings);
+						m_Selected.AddComponent<StaticModelComponent>(model);
+					}
+					ImGui::CloseCurrentPopup();
+				}
+
+				ImGui::SameLine();
+
+				if (ImGui::Button("Cancel", ImVec2(100, 0))) {
+					ImGui::CloseCurrentPopup();
+				}
+
+				ImGui::EndPopup();
+			}
+
+			if (ImGui::BeginPopupModal("Animated Model Import Settings", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) { // temporary copied the code from static model :3
+				ImGui::Text("Configure Model Import Flags:");
+				ImGui::Separator();
+
+				ImGui::Checkbox("Flip UVs", &pendingSettings.FlipUVs);
+				ImGui::Checkbox("Generate Smooth Normals", &pendingSettings.GenSmoothNormals);
+				ImGui::Checkbox("Calculate Tangent Space", &pendingSettings.CalcTangentSpace);
+
+				ImGui::Separator();
+
+				if (ImGui::Button("Browse & Import", ImVec2(130, 0))) {
+					std::string path = FileDialogs::OpenFile("3D Model (*.obj;*.fbx;*.gltf)\0*.obj;*.fbx;*.gltf\0");
+					if (!path.empty()) {
+						auto model = CreateReference<Monsi::AnimatedModel>(path, pendingSettings);
+						m_Selected.AddComponent<AnimatedModelComponent>(model);
 					}
 					ImGui::CloseCurrentPopup();
 				}
@@ -393,7 +438,7 @@ namespace Monsi {
 
 		if (entityDeleted)
 		{
-			if (entity.HasComponent<MeshComponent>())
+			if (entity.HasComponent<StaticMeshComponent>())
 			{
 				MeshInvalidationTracker::MarkDirty();
 			}
@@ -455,6 +500,7 @@ namespace Monsi {
 
 		DrawComponent<ShadowMapComponent>("ShadowMap", entity, [](auto& component) {
 			ImGui::DragFloat("Size", &component.Settings.OrthoSize);
+			ImGui::DragFloat("Intensity", &component.Settings.ShadowIntensity, 0.01f, 0.0f, 1.0f);
 			ImGui::DragFloat("Distance", &component.Settings.LightDistance);
 			ImGui::DragFloat("Near", &component.Settings.NearPlane);
 			ImGui::DragFloat("Far", &component.Settings.FarPlane);
@@ -493,7 +539,7 @@ namespace Monsi {
 			});
 
 		DrawComponent<DirectionalLightComponent>("Directional Light", entity, [](auto& component) {
-			DrawVec3Control({ .label = "Direction", .values = component.Direction, .minVal = -1.0f, .maxVal = 1.0f });
+			DrawVec3Control({ .label = "Direction", .values = component.Direction, .dragSpeed = 0.01f, .minVal = -1.0f, .maxVal = 1.0f });
 			ImGui::ColorEdit3("Color", glm::value_ptr(component.Color));
 			ImGui::DragFloat("Intensity", &component.Intensity);
 			});
@@ -504,7 +550,7 @@ namespace Monsi {
 			ImGui::DragFloat("Intensity", &component.Intensity);
 			});
 
-		DrawComponent<MeshComponent>("Mesh", entity, [](auto& component) {
+		DrawComponent<StaticMeshComponent>("Mesh", entity, [](auto& component) {
 			auto& material = component.MeshAsset->GetMaterial();
 			ImGui::ColorEdit3("Ambient Color", glm::value_ptr(material->AmbientColor));
 			ImGui::ColorEdit3("Diffuse Color", glm::value_ptr(material->DiffuseColor));
@@ -512,7 +558,7 @@ namespace Monsi {
 			ImGui::DragFloat("Shininess", &material->Shininess);
 			});
 
-		DrawComponent<ModelComponent>("Model", entity, [](auto& component) {
+		DrawComponent<StaticModelComponent>("Model", entity, [](auto& component) {
 			auto& materialVector = component.ModelAsset->GetMeshes();
 			int count = materialVector.size();
 			ImGui::Text("Number of meshes used: %d", count);
@@ -528,6 +574,28 @@ namespace Monsi {
 				std::string path = component.ModelAsset->GetFilePath();
 				if (!path.empty()) {
 					component.ModelAsset->LoadModel(path, settings);
+					MeshInvalidationTracker::MarkDirty();
+				}
+			}
+			});
+
+		DrawComponent<AnimatedModelComponent>("Animated Model", entity, [](auto& component) {
+			auto& materialVector = component.ModelAsset->GetMeshes();
+			int count = materialVector.size();
+			ImGui::Text("Number of meshes used: %d", count);
+
+			ModelImportSettings settings = component.ModelAsset->GetModelSettings();
+			bool settingsChanged = false;
+
+			settingsChanged |= ImGui::Checkbox("Flip UVs", &settings.FlipUVs);
+			settingsChanged |= ImGui::Checkbox("Gen Smooth Normals", &settings.GenSmoothNormals);
+			settingsChanged |= ImGui::Checkbox("Calc Tangent Space", &settings.CalcTangentSpace);
+
+			if (settingsChanged || ImGui::Button("Reload Model")) {
+				std::string path = component.ModelAsset->GetFilePath();
+				if (!path.empty()) {
+					component.ModelAsset->LoadModel(path, settings);
+					MeshInvalidationTracker::MarkDirty();
 				}
 			}
 			});

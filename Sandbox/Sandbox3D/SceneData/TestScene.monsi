@@ -102,6 +102,18 @@ Entities:
         Sectors: 32
   - Entity_ID: 1337420
     TagComponent:
+      Tag: CesiumMan
+    TransformComponent:
+      Translation: [0, 0, 5]
+      Rotation: [0.35355335, -0.35355335, 0.61237246, 0.61237246]
+      Scale: [1, 1, 1]
+    AnimatedModelComponent:
+      AssetPath: D:/Monsi Engine/Sandbox/Sandbox3D/../assets/Models/CesiumMan/CesiumMan.gltf
+      CalcTangentSpace: true
+      FlipUVs: false
+      GenSmoothNormals: true
+  - Entity_ID: 1337420
+    TagComponent:
       Tag: Sponza
     TransformComponent:
       Translation: [0, 0, 0]
@@ -134,6 +146,7 @@ Entities:
       Near: -10
       Far: 1000
       OrthoSize: 256
+      ShadowIntensity: 1
   - Entity_ID: 1337420
     TagComponent:
       Tag: Point Light
@@ -150,14 +163,14 @@ Entities:
       Tag: Directional Light
     DirectionalLightComponent:
       Color: [1, 1, 1]
-      Direction: [1, -1, 0]
+      Direction: [0, -1, 0]
       Intensity: 1
   - Entity_ID: 1337420
     TagComponent:
       Tag: Orthogonal Camera
     TransformComponent:
-      Translation: [-45.486553, 24.278278, -3.7384133]
-      Rotation: [0.6591558, -0.16740426, -0.7105787, -0.18046401]
+      Translation: [-12.548489, 0.15787138, 0.56837815]
+      Rotation: [0.7301597, 0.0019115568, -0.6832715, 0.0017888036]
       Scale: [1, 1, 1]
     CameraComponent:
       Primary: false
@@ -174,8 +187,8 @@ Entities:
     TagComponent:
       Tag: Perspective Camera
     TransformComponent:
-      Translation: [-45.486553, 24.278278, -3.7384133]
-      Rotation: [0.6591558, -0.16740426, -0.7105787, -0.18046401]
+      Translation: [-12.548489, 0.15787138, 0.56837815]
+      Rotation: [0.7301597, 0.0019115568, -0.6832715, 0.0017888036]
       Scale: [1, 1, 1]
     CameraComponent:
       Primary: true

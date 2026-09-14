@@ -1,6 +1,7 @@
 #pragma once
 
-#include "ModelLoader.h"
+#include "StaticModel.h"
+#include "AnimatedModel.h"
 #include "ShadowMap.h"
 #include "Renderer/VertexArray.h"
 #include "Renderer/Shader.h"
@@ -14,8 +15,9 @@ namespace Monsi {
 		void Init();
 		void Shutdown();
 
-		void SubmitModel(const Reference<Model>& model, const glm::mat4& transform);
-		void SubmitMesh(const Mesh* meshPtr, const glm::mat4& transform);
+		void SubmitModel(const Reference<StaticModel>& model, const glm::mat4& transform);
+		void SubmitMesh(const StaticMesh* meshPtr, const glm::mat4& transform);
+		void SubmitAnimatedModel(const Reference<AnimatedModel>& model, const glm::mat4& transform);
 
 		void ResizeShadowMap(uint32_t width, uint32_t height, const Reference<ShadowMap>& shadowMap);
 
@@ -32,16 +34,25 @@ namespace Monsi {
 		void ResetStats() { m_Stats = {}; }
 
 	private:
-		void DrawMeshDepthOnly(const Mesh* meshPtr, const glm::mat4& transform);
+		void DrawMeshDepthOnly(const StaticMesh* meshPtr, const glm::mat4& transform);
+		void DrawAnimatedMeshDepthOnly(const AnimatedMesh* meshPtr, const AnimatedModel* modelPtr, const glm::mat4& transform);
 
-		struct ShadowCasterCommand {
-			const Mesh* MeshPtr = nullptr;
-			Reference<Model> ModelRef = nullptr;
+		struct StaticShadowCasterCommand {
+			const StaticMesh* MeshPtr = nullptr;
+			Reference<StaticModel> ModelRef = nullptr;
 			glm::mat4 Transform{ 1.0f };
 		};
 
-		std::vector<ShadowCasterCommand> m_Commands;
+		struct AnimatedShadowCasterCommand {
+			Reference<AnimatedModel> ModelRef = nullptr;
+			glm::mat4 Transform{ 1.0f };
+		};
+
+		std::vector<StaticShadowCasterCommand> m_StaticCommands;
+		std::vector<AnimatedShadowCasterCommand> m_AnimatedCommands;
+
 		Reference<Shader> m_ShadowMapShader;
+		Reference<Shader> m_AnimatedShadowMapShader;
 
 		Stats m_Stats;
 	};

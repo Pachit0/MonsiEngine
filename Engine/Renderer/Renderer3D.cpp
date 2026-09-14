@@ -1,6 +1,7 @@
 #include "MonsiPch.h"
 #include "Renderer3D.h"
-#include "ModelPass.h"
+#include "MeshPass.h"
+#include "AnimatedModelPass.h"
 #include "SkyBoxPass.h"
 #include "ShadowMap.h"
 #include "ShadowMapPass.h"
@@ -9,8 +10,8 @@
 namespace Monsi {
 
 	struct Renderer3DData {
-
-		Reference<ModelPass> Model;
+		Reference<MeshPass> Mesh;
+		Reference<AnimatedModelPass> AnimatedModel;
 		Reference<LightingBuffer> Lighting;
 		Reference<SkyBoxPass> SkyBox;
 		Reference<ShadowMapPass> shadowMapPass;
@@ -24,13 +25,19 @@ namespace Monsi {
 	void Renderer3D::Init()
 	{
 		ENGINE_PROFILER_FUNCTION();
-		s_Data.Model = CreateReference<ModelPass>();
-		s_Data.Model->Init();
+		s_Data.Mesh = CreateReference<MeshPass>();
+		s_Data.Mesh->Init();
+
+		s_Data.AnimatedModel = CreateReference<AnimatedModelPass>();
+		s_Data.AnimatedModel->Init();
+
 		s_Data.Lighting = CreateReference<LightingBuffer>();
 		s_Data.SkyBox = CreateReference<SkyBoxPass>();
 		s_Data.SkyBox->Init();
+
 		s_Data.shadowMapPass = CreateReference<ShadowMapPass>();
 		s_Data.shadowMapPass->Init();
+
 		s_Data.Lighting->SetLighting(s_Data.SceneLight);
 		s_Data.shadow = ShadowMap::Create(1, 1);
 	}
@@ -38,42 +45,56 @@ namespace Monsi {
 	void Renderer3D::Shutdown()
 	{
 		ENGINE_PROFILER_FUNCTION();
-		s_Data.Model->Shutdown();
-		s_Data.Model.reset();
+		s_Data.Mesh->Shutdown();
+		s_Data.Mesh.reset();
+
+		s_Data.AnimatedModel->Shutdown();
+		s_Data.AnimatedModel.reset();
 
 		s_Data.SkyBox->Shutdown();
 		s_Data.SkyBox.reset();
 
 		s_Data.shadowMapPass->Shutdown();
 		s_Data.shadowMapPass.reset();
+
+		s_Data.Lighting.reset();
 	}
 
 	void Renderer3D::Begin3D(const glm::mat4& viewProjection, const glm::vec3& cameraPosition)
 	{
 		ENGINE_PROFILER_FUNCTION();
-		s_Data.Model->BeginScene(viewProjection, cameraPosition, s_Data.Lighting);
+		s_Data.Mesh->BeginScene(viewProjection, cameraPosition, s_Data.Lighting);
+		s_Data.AnimatedModel->BeginScene(viewProjection, cameraPosition, s_Data.Lighting);
 	}
 
 	void Renderer3D::End3D()
 	{
 		ENGINE_PROFILER_FUNCTION();
-		s_Data.Model->EndScene();
+		s_Data.Mesh->EndScene();
+		s_Data.AnimatedModel->EndScene();
 		s_Data.Lighting->Clear();
 		s_Data.shadowMapPass->Clear();
 	}
 
-	void Renderer3D::DrawModel(const Reference<Model>& model, const glm::mat4& transform, const glm::vec4& color)
+	void Renderer3D::DrawModel(const Reference<StaticModel>& model, const glm::mat4& transform, const glm::vec4& color)
 	{
 		ENGINE_PROFILER_FUNCTION();
-		s_Data.Model->SubmitModel(model, transform, color);
+		s_Data.Mesh->SubmitModel(model, transform, color);
 		s_Data.shadowMapPass->SubmitModel(model, transform);
 	}
 
-	void Renderer3D::DrawMesh(const Mesh* meshPtr, const glm::mat4& transform, const glm::vec4& color)
+	void Renderer3D::DrawMesh(const StaticMesh* meshPtr, const glm::mat4& transform, const glm::vec4& color)
 	{
 		ENGINE_PROFILER_FUNCTION();
-		s_Data.Model->SubmitMesh(meshPtr, transform, color);
+		s_Data.Mesh->SubmitMesh(meshPtr, transform, color);
 		s_Data.shadowMapPass->SubmitMesh(meshPtr, transform);
+	}
+
+	void Renderer3D::DrawAnimatedModel(const Reference<AnimatedModel>& model, const glm::mat4& transform, const glm::vec4& color)
+	{
+		ENGINE_PROFILER_FUNCTION();
+		s_Data.AnimatedModel->SubmitModel(model, transform, color);
+		s_Data.shadowMapPass->SubmitAnimatedModel(model, transform);
 	}
 
 	void Renderer3D::DrawSkyBox(const glm::mat4& view, const glm::mat4& projection, const Reference<CubeMapTexture>& skyboxTexture)
@@ -86,18 +107,21 @@ namespace Monsi {
 	{
 		ENGINE_PROFILER_FUNCTION();
 		if (shadowMap == nullptr) { return; }
-		s_Data.shadowMapPass->DrawShadowMap(projection * view, shadowMap);
+		glm::mat4 lightSpaceMatrix = projection * view;
+		s_Data.shadowMapPass->DrawShadowMap(lightSpaceMatrix, shadowMap);
 	}
 
-	void Renderer3D::SetShadowMapData(const glm::mat4& lightSpaceMatrix, const Reference<ShadowMap>& shadowMap)
+	void Renderer3D::SetShadowMapData(const glm::mat4& lightSpaceMatrix, const Reference<ShadowMap>& shadowMap, float shadowIntensity)
 	{
 		ENGINE_PROFILER_FUNCTION();
 		if (shadowMap == nullptr) {
-			s_Data.Model->SetShadowMapData(glm::mat4(1.0f), s_Data.shadow);
+			s_Data.Mesh->SetShadowMapData(glm::mat4(1.0f), s_Data.shadow, shadowIntensity);
+			s_Data.AnimatedModel->SetShadowMapData(glm::mat4(1.0f), s_Data.shadow, shadowIntensity);
 			return;
 		}
 
-		s_Data.Model->SetShadowMapData(lightSpaceMatrix, shadowMap);
+		s_Data.Mesh->SetShadowMapData(lightSpaceMatrix, shadowMap, shadowIntensity);
+		s_Data.AnimatedModel->SetShadowMapData(lightSpaceMatrix, shadowMap, shadowIntensity);
 	}
 
 	void Renderer3D::ResizeShadowMap(uint32_t width, uint32_t height, const Reference<ShadowMap>& shadowMap)
@@ -117,12 +141,20 @@ namespace Monsi {
 	{
 		Renderer3DStats stats;
 
-		if (s_Data.Model)
+		if (s_Data.Mesh)
 		{
-			const auto& modelStats = s_Data.Model->GetStats();
-			stats.ModelDrawCalls = modelStats.DrawCalls;
-			stats.ModelInstances = modelStats.Instances;
-			stats.ModelTriangles = modelStats.Triangles;
+			const auto& meshStats = s_Data.Mesh->GetStats();
+			stats.ModelDrawCalls = meshStats.DrawCalls;
+			stats.ModelInstances = meshStats.Instances;
+			stats.ModelTriangles = meshStats.Triangles;
+		}
+
+		if (s_Data.AnimatedModel)
+		{
+			const auto& animStats = s_Data.AnimatedModel->GetStats();
+			stats.AnimatedModelDrawCalls = animStats.DrawCalls;
+			stats.AnimatedModelInstances = animStats.Instances;
+			stats.AnimatedModelTriangles = animStats.Triangles;
 		}
 
 		if (s_Data.shadowMapPass)
@@ -144,8 +176,11 @@ namespace Monsi {
 
 	void Renderer3D::ResetStats()
 	{
-		if (s_Data.Model)
-			s_Data.Model->ResetStats();
+		if (s_Data.Mesh)
+			s_Data.Mesh->ResetStats();
+
+		if (s_Data.AnimatedModel)
+			s_Data.AnimatedModel->ResetStats();
 
 		if (s_Data.shadowMapPass)
 			s_Data.shadowMapPass->ResetStats();

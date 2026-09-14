@@ -1,4 +1,10 @@
+cmake_minimum_required(VERSION 4.4)
+
 project(Editor)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(USE_STATIC_C_RUNTIME OFF CACHE BOOL "" FORCE)
 
 file(GLOB SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
@@ -19,7 +25,6 @@ target_include_directories( Editor PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/Panel
 )
-
 
 if(WIN32)
     target_compile_definitions(Editor PRIVATE MONSI_BUILD_DEBUG)

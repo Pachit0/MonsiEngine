@@ -260,6 +260,7 @@ namespace Monsi {
 			out << YAML::Key << "Near" << YAML::Value << smc.Settings.NearPlane;
 			out << YAML::Key << "Far" << YAML::Value << smc.Settings.FarPlane;
 			out << YAML::Key << "OrthoSize" << YAML::Value << smc.Settings.OrthoSize;
+			out << YAML::Key << "ShadowIntensity" << YAML::Value << smc.Settings.ShadowIntensity;
 			out << YAML::EndMap;
 		}
 
@@ -296,8 +297,8 @@ namespace Monsi {
 			out << YAML::EndMap;
 		}
 
-		if (entity.HasComponent<MeshComponent>()) {
-			auto& mc = entity.GetComponent<MeshComponent>();
+		if (entity.HasComponent<StaticMeshComponent>()) {
+			auto& mc = entity.GetComponent<StaticMeshComponent>();
 			out << YAML::Key << "MeshComponent";
 			out << YAML::BeginMap;
 
@@ -323,9 +324,20 @@ namespace Monsi {
 			out << YAML::EndMap;
 		}
 
-		if (entity.HasComponent<ModelComponent>()) {
-			auto& mc = entity.GetComponent<ModelComponent>();
+		if (entity.HasComponent<StaticModelComponent>()) {
+			auto& mc = entity.GetComponent<StaticModelComponent>();
 			out << YAML::Key << "ModelComponent";
+			out << YAML::BeginMap;
+			out << YAML::Key << "AssetPath" << YAML::Value << mc.ModelAsset->GetFilePath();
+			out << YAML::Key << "CalcTangentSpace" << YAML::Value << mc.ModelAsset->GetModelSettings().CalcTangentSpace;
+			out << YAML::Key << "FlipUVs" << YAML::Value << mc.ModelAsset->GetModelSettings().FlipUVs;
+			out << YAML::Key << "GenSmoothNormals" << YAML::Value << mc.ModelAsset->GetModelSettings().GenSmoothNormals;
+			out << YAML::EndMap;
+		}
+
+		if (entity.HasComponent<AnimatedModelComponent>()) {
+			auto& mc = entity.GetComponent<AnimatedModelComponent>();
+			out << YAML::Key << "AnimatedModelComponent";
 			out << YAML::BeginMap;
 			out << YAML::Key << "AssetPath" << YAML::Value << mc.ModelAsset->GetFilePath();
 			out << YAML::Key << "CalcTangentSpace" << YAML::Value << mc.ModelAsset->GetModelSettings().CalcTangentSpace;
@@ -467,7 +479,7 @@ namespace Monsi {
 					auto width = shadowMapComponent["Width"].as<uint32_t>();
 					auto height = shadowMapComponent["Height"].as<uint32_t>();
 
-					auto& smr = ShadowMap::Create(width, height);
+					auto smr = ShadowMap::Create(width, height);
 					auto& smc = deserializedEntity.AddComponent<ShadowMapComponent>(smr);
 
 					smc.Settings.Width = width;
@@ -476,6 +488,7 @@ namespace Monsi {
 					smc.Settings.NearPlane = shadowMapComponent["Near"].as<float>();
 					smc.Settings.FarPlane = shadowMapComponent["Far"].as<float>();
 					smc.Settings.OrthoSize = shadowMapComponent["OrthoSize"].as<float>();
+					smc.Settings.ShadowIntensity = shadowMapComponent["ShadowIntensity"].as<float>();
 				}
 
 				auto meshComponentNode = entityNode["MeshComponent"];
@@ -553,8 +566,8 @@ namespace Monsi {
 					default: ENGINE_LOG_ERROR("PrimitiveParams Error!"); break;
 					}
 
-					auto& mc = deserializedEntity.AddComponent<MeshComponent>();
-					mc = MeshBuilder::CreateFromParams(params, material);
+					auto& mc = deserializedEntity.AddComponent<StaticMeshComponent>();
+					mc.MeshAsset = MeshBuilder::CreateFromParams(params, material);
 				}
 
 				auto modelComponentNode = entityNode["ModelComponent"];
@@ -565,9 +578,22 @@ namespace Monsi {
 					settings.FlipUVs = modelComponentNode["FlipUVs"].as<bool>();
 					settings.GenSmoothNormals = modelComponentNode["GenSmoothNormals"].as<bool>();
 
-					Reference<Monsi::Model> model = CreateReference<Monsi::Model>(assetPath, settings);
+					Reference<Monsi::StaticModel> model = CreateReference<Monsi::StaticModel>(assetPath, settings);
 
-					auto& mc = deserializedEntity.AddComponent<ModelComponent>(model);
+					auto& mc = deserializedEntity.AddComponent<StaticModelComponent>(model);
+				}
+
+				auto animatedModelComponentNode = entityNode["AnimatedModelComponent"];
+				if (animatedModelComponentNode) {
+					ModelImportSettings settings;
+					std::string assetPath = animatedModelComponentNode["AssetPath"].as<std::string>();
+					settings.CalcTangentSpace = animatedModelComponentNode["CalcTangentSpace"].as<bool>();
+					settings.FlipUVs = animatedModelComponentNode["FlipUVs"].as<bool>();
+					settings.GenSmoothNormals = animatedModelComponentNode["GenSmoothNormals"].as<bool>();
+
+					Reference<Monsi::AnimatedModel> model = CreateReference<Monsi::AnimatedModel>(assetPath, settings);
+
+					auto& amc = deserializedEntity.AddComponent<AnimatedModelComponent>(model);
 				}
 
 				auto skyBoxComponentNode = entityNode["SkyBoxComponent"];

@@ -3,14 +3,14 @@
 
 namespace Monsi {
 
-	static	void AddQuadFace(std::vector<Vertex_t>& vertices, std::vector<uint32_t>& indices,
+	static	void AddQuadFace(std::vector<StaticVertex>& vertices, std::vector<uint32_t>& indices,
 		const glm::vec3& center, const glm::vec3& normal,
 		const glm::vec3& right, const glm::vec3& up,
 		float halfWidth, float halfHeight)
 	{
 		uint32_t base = (uint32_t)vertices.size();
 
-		Vertex_t vertex;
+		StaticVertex vertex;
 		vertex.Normal = normal;
 
 		vertex.Position = center - right * halfWidth + up * halfHeight;
@@ -38,14 +38,14 @@ namespace Monsi {
 		indices.push_back(base + 3);
 	}
 
-	static void AddDiskCap(std::vector<Vertex_t>& vertices, std::vector<uint32_t>& indices,
+	static void AddDiskCap(std::vector<StaticVertex>& vertices, std::vector<uint32_t>& indices,
 		float y, float radius, uint32_t sectors, const glm::vec3& normal, float windingSign)
 	{
 		const float pi = 3.1415926535f;
 
 		uint32_t centerIndex = (uint32_t)vertices.size();
 
-		Vertex_t centerVertex;
+		StaticVertex centerVertex;
 		centerVertex.Position = glm::vec3(0.0f, y, 0.0f);
 		centerVertex.Normal = normal;
 		centerVertex.TexCoords = { 0.5f, 0.5f };
@@ -59,7 +59,7 @@ namespace Monsi {
 			float x = std::cos(phi);
 			float z = std::sin(phi);
 
-			Vertex_t vertex;
+			StaticVertex vertex;
 			vertex.Position = glm::vec3(x * radius, y, z * radius);
 			vertex.Normal = normal;
 			vertex.TexCoords = { x * 0.5f + 0.5f, z * 0.5f + 0.5f };
@@ -86,9 +86,9 @@ namespace Monsi {
 		}
 	}
 
-	Reference<Mesh> MeshBuilder::CreateFromParams(const PrimitiveParams& params, const Reference<Material>& material)
+	Reference<StaticMesh> MeshBuilder::CreateFromParams(const PrimitiveParams& params, const Reference<Material>& material)
 	{
-		return std::visit([&material](auto&& p) -> Reference<Mesh>
+		return std::visit([&material](auto&& p) -> Reference<StaticMesh>
 			{
 				using T = std::decay_t<decltype(p)>;
 				if constexpr (std::is_same_v<T, std::monostate>)
@@ -102,10 +102,10 @@ namespace Monsi {
 			}, params);
 	}
 
-	Reference<Mesh> MeshBuilder::CreateSphere(float radius, uint32_t rings, uint32_t sectors, const Reference<Material>& material)
+	Reference<StaticMesh> MeshBuilder::CreateSphere(float radius, uint32_t rings, uint32_t sectors, const Reference<Material>& material)
 	{
-		Reference<Mesh> meshBuild;
-		std::vector<Vertex_t> vertices;
+		Reference<StaticMesh> meshBuild;
+		std::vector<StaticVertex> vertices;
 		std::vector<uint32_t> indices;
 
 		vertices.reserve((rings + 1) * (sectors + 1));
@@ -125,7 +125,7 @@ namespace Monsi {
 				float sinPhi = std::sin(phi);
 				float cosPhi = std::cos(phi);
 
-				Vertex_t vertex;
+				StaticVertex vertex;
 
 				vertex.Normal.x = cosPhi * sinTheta;
 				vertex.Normal.y = cosTheta;
@@ -159,16 +159,16 @@ namespace Monsi {
 			}
 		}
 
-		meshBuild = CreateReference<Mesh>(vertices, indices, material);
+		meshBuild = CreateReference<StaticMesh>(vertices, indices, material);
 		meshBuild->m_Type = PrimitiveType::Sphere;
 
 		return meshBuild;
 	}
 
-	Reference<Mesh> MeshBuilder::CreateGrid(float width, float depth, uint32_t columns, uint32_t rows, const Reference<Material>& material)
+	Reference<StaticMesh> MeshBuilder::CreateGrid(float width, float depth, uint32_t columns, uint32_t rows, const Reference<Material>& material)
 	{
-		Reference<Mesh> meshBuild;
-		std::vector<Vertex_t> vertices;
+		Reference<StaticMesh> meshBuild;
+		std::vector<StaticVertex> vertices;
 		std::vector<uint32_t> indices;
 
 		vertices.reserve((rows + 1) * (columns + 1));
@@ -188,7 +188,7 @@ namespace Monsi {
 			{
 				float x = -halfWidth + (float)c * dx;
 
-				Vertex_t vertex;
+				StaticVertex vertex;
 				vertex.Position = glm::vec3(x, 0.0f, z);
 				vertex.Normal = glm::vec3(0.0f, 1.0f, 0.0f);
 				vertex.TexCoords.x = (float)c / (float)columns;
@@ -219,16 +219,16 @@ namespace Monsi {
 			}
 		}
 
-		meshBuild = CreateReference<Mesh>(vertices, indices, material);
+		meshBuild = CreateReference<StaticMesh>(vertices, indices, material);
 		meshBuild->m_Type = PrimitiveType::Grid;
 
 		return meshBuild;
 	}
 
-	Reference<Mesh> MeshBuilder::CreateCube(float size, const Reference<Material>& material)
+	Reference<StaticMesh> MeshBuilder::CreateCube(float size, const Reference<Material>& material)
 	{
-		Reference<Mesh> meshBuild;
-		std::vector<Vertex_t> vertices;
+		Reference<StaticMesh> meshBuild;
+		std::vector<StaticVertex> vertices;
 		std::vector<uint32_t> indices;
 
 		vertices.reserve(24);
@@ -243,16 +243,16 @@ namespace Monsi {
 		AddQuadFace(vertices, indices, glm::vec3(0.0f, 0.0f, half), glm::vec3(0, 0, 1), glm::vec3(1, 0, 0), glm::vec3(0, 1, 0), half, half);
 		AddQuadFace(vertices, indices, glm::vec3(0.0f, 0.0f, -half), glm::vec3(0, 0, -1), glm::vec3(-1, 0, 0), glm::vec3(0, 1, 0), half, half);
 
-		meshBuild = CreateReference<Mesh>(vertices, indices, material);
+		meshBuild = CreateReference<StaticMesh>(vertices, indices, material);
 		meshBuild->m_Type = PrimitiveType::Cube;
 
 		return meshBuild;
 	}
 
-	Reference<Mesh> MeshBuilder::CreateCylinder(float radius, float height, uint32_t sectors, const Reference<Material>& material)
+	Reference<StaticMesh> MeshBuilder::CreateCylinder(float radius, float height, uint32_t sectors, const Reference<Material>& material)
 	{
-		Reference<Mesh> meshBuild;
-		std::vector<Vertex_t> vertices;
+		Reference<StaticMesh> meshBuild;
+		std::vector<StaticVertex> vertices;
 		std::vector<uint32_t> indices;
 
 		vertices.reserve((sectors + 1) * 2 + (sectors + 1) * 2 + 2);
@@ -268,13 +268,13 @@ namespace Monsi {
 			float z = std::sin(phi);
 			float u = (float)s / (float)sectors;
 
-			Vertex_t top;
+			StaticVertex top;
 			top.Position = glm::vec3(x * radius, halfHeight, z * radius);
 			top.Normal = glm::vec3(x, 0.0f, z);
 			top.TexCoords = { u, 0.0f };
 			vertices.push_back(top);
 
-			Vertex_t bottom;
+			StaticVertex bottom;
 			bottom.Position = glm::vec3(x * radius, -halfHeight, z * radius);
 			bottom.Normal = glm::vec3(x, 0.0f, z);
 			bottom.TexCoords = { u, 1.0f };
@@ -300,16 +300,16 @@ namespace Monsi {
 		AddDiskCap(vertices, indices, halfHeight, radius, sectors, glm::vec3(0, 1, 0), 1.0f);
 		AddDiskCap(vertices, indices, -halfHeight, radius, sectors, glm::vec3(0, -1, 0), -1.0f);
 
-		meshBuild = CreateReference<Mesh>(vertices, indices, material);
+		meshBuild = CreateReference<StaticMesh>(vertices, indices, material);
 		meshBuild->m_Type = PrimitiveType::Cylinder;
 
 		return meshBuild;
 	}
 
-	Reference<Mesh> MeshBuilder::CreateCone(float radius, float height, uint32_t sectors, const Reference<Material>& material)
+	Reference<StaticMesh> MeshBuilder::CreateCone(float radius, float height, uint32_t sectors, const Reference<Material>& material)
 	{
-		Reference<Mesh> meshBuild;
-		std::vector<Vertex_t> vertices;
+		Reference<StaticMesh> meshBuild;
+		std::vector<StaticVertex> vertices;
 		std::vector<uint32_t> indices;
 
 		vertices.reserve((sectors + 1) * 2 + (sectors + 1) + 1);
@@ -327,13 +327,13 @@ namespace Monsi {
 
 			glm::vec3 normal = glm::normalize(glm::vec3(height * cosPhi, radius, height * sinPhi));
 
-			Vertex_t apex;
+			StaticVertex apex;
 			apex.Position = glm::vec3(0.0f, halfHeight, 0.0f);
 			apex.Normal = normal;
 			apex.TexCoords = { u, 0.0f };
 			vertices.push_back(apex);
 
-			Vertex_t base;
+			StaticVertex base;
 			base.Position = glm::vec3(cosPhi * radius, -halfHeight, sinPhi * radius);
 			base.Normal = normal;
 			base.TexCoords = { u, 1.0f };
@@ -353,16 +353,16 @@ namespace Monsi {
 
 		AddDiskCap(vertices, indices, -halfHeight, radius, sectors, glm::vec3(0, -1, 0), -1.0f);
 
-		meshBuild = CreateReference<Mesh>(vertices, indices, material);
+		meshBuild = CreateReference<StaticMesh>(vertices, indices, material);
 		meshBuild->m_Type = PrimitiveType::Cone;
 
 		return meshBuild;
 	}
 
-	Reference<Mesh> MeshBuilder::CreateTorus(float majorRadius, float minorRadius, uint32_t majorSegments, uint32_t minorSegments, const Reference<Material>& material)
+	Reference<StaticMesh> MeshBuilder::CreateTorus(float majorRadius, float minorRadius, uint32_t majorSegments, uint32_t minorSegments, const Reference<Material>& material)
 	{
-		Reference<Mesh> meshBuild;
-		std::vector<Vertex_t> vertices;
+		Reference<StaticMesh> meshBuild;
+		std::vector<StaticVertex> vertices;
 		std::vector<uint32_t> indices;
 
 		vertices.reserve((majorSegments + 1) * (minorSegments + 1));
@@ -384,7 +384,7 @@ namespace Monsi {
 
 				float tubeCenterOffset = majorRadius + minorRadius * cosPhi;
 
-				Vertex_t vertex;
+				StaticVertex vertex;
 				vertex.Position.x = tubeCenterOffset * cosTheta;
 				vertex.Position.y = minorRadius * sinPhi;
 				vertex.Position.z = tubeCenterOffset * sinTheta;
@@ -419,16 +419,16 @@ namespace Monsi {
 			}
 		}
 
-		meshBuild = CreateReference<Mesh>(vertices, indices, material);
+		meshBuild = CreateReference<StaticMesh>(vertices, indices, material);
 		meshBuild->m_Type = PrimitiveType::Torus;
 
 		return meshBuild;
 	}
 
-	Reference<Mesh> MeshBuilder::CreateQuad(float width, float height, const Reference<Material>& material)
+	Reference<StaticMesh> MeshBuilder::CreateQuad(float width, float height, const Reference<Material>& material)
 	{
-		Reference<Mesh> meshBuild;
-		std::vector<Vertex_t> vertices;
+		Reference<StaticMesh> meshBuild;
+		std::vector<StaticVertex> vertices;
 		std::vector<uint32_t> indices;
 
 		vertices.reserve(4);
@@ -436,7 +436,7 @@ namespace Monsi {
 
 		AddQuadFace(vertices, indices, glm::vec3(0.0f), glm::vec3(0, 0, 1), glm::vec3(1, 0, 0), glm::vec3(0, 1, 0), width * 0.5f, height * 0.5f);
 
-		meshBuild = CreateReference<Mesh>(vertices, indices, material);
+		meshBuild = CreateReference<StaticMesh>(vertices, indices, material);
 		meshBuild->m_Type = PrimitiveType::Quad;
 
 		return meshBuild;
@@ -458,49 +458,49 @@ namespace Monsi {
 		}
 	}
 
-	Monsi::Reference<Monsi::Mesh> MeshBuilder::Create(const SphereParams& p, const Reference<Material>& mat)
+	Monsi::Reference<StaticMesh> MeshBuilder::Create(const SphereParams& p, const Reference<Material>& mat)
 	{
 		auto mesh = CreateSphere(p.radius, p.rings, p.sectors, mat);
 		mesh->SetPrimitiveParams(p);
 		return mesh;
 	}
 
-	Monsi::Reference<Monsi::Mesh> MeshBuilder::Create(const CubeParams& p, const Reference<Material>& mat)
+	Monsi::Reference<StaticMesh> MeshBuilder::Create(const CubeParams& p, const Reference<Material>& mat)
 	{
 		auto mesh = CreateCube(p.size, mat);
 		mesh->SetPrimitiveParams(p);
 		return mesh;
 	}
 
-	Monsi::Reference<Monsi::Mesh> MeshBuilder::Create(const GridParams& p, const Reference<Material>& mat)
+	Monsi::Reference<StaticMesh> MeshBuilder::Create(const GridParams& p, const Reference<Material>& mat)
 	{
 		auto mesh = CreateGrid(p.width, p.depth, p.columns, p.rows, mat);
 		mesh->SetPrimitiveParams(p);
 		return mesh;
 	}
 
-	Monsi::Reference<Monsi::Mesh> MeshBuilder::Create(const CylinderParams& p, const Reference<Material>& mat)
+	Monsi::Reference<StaticMesh> MeshBuilder::Create(const CylinderParams& p, const Reference<Material>& mat)
 	{
 		auto mesh = CreateCylinder(p.radius, p.height, p.sectors, mat);
 		mesh->SetPrimitiveParams(p);
 		return mesh;
 	}
 
-	Monsi::Reference<Monsi::Mesh> MeshBuilder::Create(const ConeParams& p, const Reference<Material>& mat)
+	Monsi::Reference<StaticMesh> MeshBuilder::Create(const ConeParams& p, const Reference<Material>& mat)
 	{
 		auto mesh = CreateCone(p.radius, p.height, p.sectors, mat);
 		mesh->SetPrimitiveParams(p);
 		return mesh;
 	}
 
-	Monsi::Reference<Monsi::Mesh> MeshBuilder::Create(const TorusParams& p, const Reference<Material>& mat)
+	Monsi::Reference<StaticMesh> MeshBuilder::Create(const TorusParams& p, const Reference<Material>& mat)
 	{
 		auto mesh = CreateTorus(p.majorRadius, p.minorRadius, p.majorSegments, p.minorSegments, mat);
 		mesh->SetPrimitiveParams(p);
 		return mesh;
 	}
 
-	Monsi::Reference<Monsi::Mesh> MeshBuilder::Create(const QuadParams& p, const Reference<Material>& mat)
+	Monsi::Reference<StaticMesh> MeshBuilder::Create(const QuadParams& p, const Reference<Material>& mat)
 	{
 		auto mesh = CreateQuad(p.width, p.height, mat);
 		mesh->SetPrimitiveParams(p);

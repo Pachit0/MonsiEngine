@@ -10,6 +10,7 @@ namespace Monsi {
 		float LightDistance = 512.0f;
 		float NearPlane = -10.0f;
 		float FarPlane = 1000.0f;
+		float ShadowIntensity = 1.0f;
 	};
 
 	class ShadowMap {

@@ -7,41 +7,50 @@
 #include "SkyBoxPass.h"
 #include "ShadowMap.h"
 #include "Mesh.h"
-#include "ModelLoader.h"
+#include "StaticModel.h"
+#include "AnimatedModel.h"
 #include "ScriptableEntity.h"
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
 namespace Monsi {
 
-	struct MeshComponent {
-		Reference<Mesh>  MeshAsset;
+	struct StaticMeshComponent {
+		Reference<StaticMesh> MeshAsset;
 
-		MeshComponent() = default;
-		MeshComponent(const MeshComponent& other) = default;
-		MeshComponent(const Reference<Mesh>& mesh) : MeshAsset(mesh) {}
+		StaticMeshComponent() = default;
+		StaticMeshComponent(const StaticMeshComponent& other) = default;
+		StaticMeshComponent(const Reference<StaticMesh>& mesh) : MeshAsset(mesh) {}
 	};
 
-	struct ModelComponent {
-		Reference<Model> ModelAsset;
+	struct StaticModelComponent {
+		Reference<StaticModel> ModelAsset;
 		ModelImportSettings Settings;
 
-		ModelComponent() = default;
-		ModelComponent(const ModelComponent& other) = default;
-		ModelComponent(const Reference<Model>& model) : ModelAsset(model) {}
+		StaticModelComponent() = default;
+		StaticModelComponent(const StaticModelComponent& other) = default;
+		StaticModelComponent(const Reference<StaticModel>& model) : ModelAsset(model) {}
+	};
+
+	struct AnimatedModelComponent {
+		Reference<AnimatedModel> ModelAsset;
+		ModelImportSettings Settings;
+
+		AnimatedModelComponent() = default;
+		AnimatedModelComponent(const AnimatedModelComponent& other) = default;
+		AnimatedModelComponent(const Reference<AnimatedModel>& model) : ModelAsset(model) {}
 	};
 
 	struct SkyBoxComponent {
 		Reference<CubeMapTexture> SkyboxTexture;
-		std::array<std::string, 6> FilePath; //This should probably be removed in the future and
-		std::string SingleFilePath;			 //only accepting single file path sky box
+		std::array<std::string, 6> FilePath;
+		std::string SingleFilePath;
 
 		SkyBoxComponent() = default;
 		SkyBoxComponent(const SkyBoxComponent& other) = default;
-		SkyBoxComponent(const Reference<CubeMapTexture>& texture, const std::string& path) :  SkyboxTexture(texture), SingleFilePath(path) {}
-		SkyBoxComponent(const Reference<CubeMapTexture>& texture, const std::array<std::string, 6>& paths) :  SkyboxTexture(texture), FilePath(paths) {}
+		SkyBoxComponent(const Reference<CubeMapTexture>& texture, const std::string& path) : SkyboxTexture(texture), SingleFilePath(path) {}
+		SkyBoxComponent(const Reference<CubeMapTexture>& texture, const std::array<std::string, 6>& paths) : SkyboxTexture(texture), FilePath(paths) {}
 	};
-
 
 	struct ShadowMapComponent {
 		Reference<ShadowMap> Shadow;
@@ -92,7 +101,6 @@ namespace Monsi {
 		SpriteRendererComponent() = default;
 		SpriteRendererComponent(const SpriteRendererComponent& other) = default;
 		SpriteRendererComponent(const glm::vec4& color) : Color(color) {}
-
 	};
 
 	struct TagComponent {
@@ -116,7 +124,7 @@ namespace Monsi {
 	{
 		ScriptableEntity* Instance = nullptr;
 
-		ScriptableEntity*(*InstantiateFuncPtr)();
+		ScriptableEntity* (*InstantiateFuncPtr)();
 		void (*DestroyInstanceFuncPtr)(NativeScriptComponent*);
 
 		template<typename T>

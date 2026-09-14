@@ -4,8 +4,14 @@
 layout(location = 0) in vec3 a_Position;
 layout(location = 1) in vec3 a_Normal;
 layout(location = 2) in vec2 a_TexCoord;
-layout(location = 3) in mat4 a_InstanceTransform;
-layout(location = 7) in vec4 a_InstanceColor;
+layout(location = 3) in ivec4 a_BoneIDs;
+layout(location = 4) in vec4 a_Weights;
+
+layout(location = 5) in mat4 a_InstanceTransform;
+layout(location = 9) in vec4 a_InstanceColor;
+
+const int MAX_BONES = 100;
+uniform mat4 u_FinalBoneMatrices[MAX_BONES];
 
 uniform mat4 u_ViewProjection;
 uniform mat4 u_LightSpaceMatrix;
@@ -20,11 +26,29 @@ void main()
 {
     TexCoords = a_TexCoord;
     InstanceColor = a_InstanceColor;
-    
-    vec4 worldPos = a_InstanceTransform * vec4(a_Position, 1.0);
+
+    mat4 boneTransform = mat4(0.0);
+    bool isSkinned = false;
+
+    for (int i = 0; i < 4; i++)
+    {
+        if (a_BoneIDs[i] >= 0 && a_BoneIDs[i] < MAX_BONES)
+        {
+            boneTransform += u_FinalBoneMatrices[a_BoneIDs[i]] * a_Weights[i];
+            isSkinned = true;
+        }
+    }
+
+    if (!isSkinned)
+    {
+        boneTransform = mat4(1.0);
+    }
+
+    vec4 localPos = boneTransform * vec4(a_Position, 1.0);
+    vec4 worldPos = a_InstanceTransform * localPos;
     v_FragPos = vec3(worldPos);
 
-    v_Normal = mat3(a_InstanceTransform) * a_Normal;
+    v_Normal = mat3(a_InstanceTransform) * mat3(boneTransform) * a_Normal;
     v_FragPosLightSpace = u_LightSpaceMatrix * worldPos;
 
     gl_Position = u_ViewProjection * worldPos;
@@ -36,7 +60,7 @@ void main()
 struct Material {
     vec3 ambient;
     vec3 diffuse;
-    vec3 specular;    
+    vec3 specular;
     float shininess;
 
     sampler2D specularMap;
@@ -45,7 +69,7 @@ struct Material {
     float hasDiffuseMap;
     float hasSpecularMap;
     float hasNormalMap;
-}; 
+};
 
 struct DirectionalLight {
     vec3 Direction;
@@ -66,8 +90,8 @@ uniform Material material;
 uniform PointLight u_PointLights[32];
 uniform vec3 u_ViewPos;
 uniform sampler2D texture_diffuse1;
-
 uniform sampler2DShadow u_ShadowMap;
+uniform float u_ShadowIntensity;
 
 in vec2 TexCoords;
 in vec4 InstanceColor;
@@ -81,7 +105,7 @@ vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir
     if (dot(light.Direction, light.Direction) < 0.0001) return vec3(0.0);
 
     vec3 lightDir = normalize(-light.Direction);
-    
+
     float diff = max(dot(normal, lightDir), 0.0);
     vec3 diffuse = light.Color * light.Intensity * diff * material.diffuse;
 
@@ -124,6 +148,7 @@ float CalculateShadow(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir)
 
     vec2 texelSize = 1.0 / textureSize(u_ShadowMap, 0);
     float lit = 0.0;
+
     for (int x = -1; x <= 1; ++x)
     {
         for (int y = -1; y <= 1; ++y)
@@ -132,6 +157,7 @@ float CalculateShadow(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir)
             lit += texture(u_ShadowMap, vec3(projCoords.xy + offset, projCoords.z - bias));
         }
     }
+
     lit /= 9.0;
 
     return 1.0 - lit;
@@ -154,6 +180,8 @@ void main()
     vec3 lightResult = material.ambient;
 
     float shadow = CalculateShadow(v_FragPosLightSpace, norm, normalize(-u_MainLight.Direction));
+    
+    shadow *= clamp(u_ShadowIntensity, 0.0, 1.0);
 
     lightResult += (1.0 - shadow) * CalculateDirectionalLight(u_MainLight, norm, viewDir);
 

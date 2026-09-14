@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 4.4)
 
 # GLFW
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
@@ -27,7 +27,6 @@ add_library(imgui STATIC ${IMGUI_SRC})
 target_include_directories(imgui PUBLIC imgui-docking imgui-docking/backends)
 target_link_libraries(imgui PUBLIC glfw glad)
 
-
 # GLM as interface
 add_library(glm INTERFACE)
 target_include_directories(glm INTERFACE glm)
@@ -37,14 +36,12 @@ add_subdirectory(spdlog)
 
 # stb_image - single header
 add_library(stb_image INTERFACE)
-
 target_include_directories(stb_image INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/stb_image
 )
 
 # entt - single header
 add_library(entt INTERFACE)
-
 target_include_directories(entt INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/entt
 )
@@ -67,6 +64,24 @@ target_include_directories(implot PUBLIC implot)
 target_link_libraries(implot PUBLIC imgui)
 
 # yaml-cpp
+set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(YAML_MSVC_SHARED_RT ON CACHE BOOL "" FORCE)
 add_subdirectory(yaml-cpp)
-target_link_libraries(Engine PUBLIC yaml-cpp::yaml-cpp)
+
+# Jolt Physics
+set(TARGET_UNIT_TESTS OFF CACHE BOOL "" FORCE)
+set(TARGET_SAMPLES OFF CACHE BOOL "" FORCE)
+set(TARGET_VIEWER OFF CACHE BOOL "" FORCE)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(USE_STATIC_C_RUNTIME OFF CACHE BOOL "" FORCE)
+
+set(USE_AVX2 ON CACHE BOOL "" FORCE)
+set(USE_SSE4_2 ON CACHE BOOL "" FORCE)
+
+add_subdirectory(JoltPhysics/Build)
+
+if(MSVC)
+    set_target_properties(Jolt PROPERTIES
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+    )
+endif()

@@ -6,8 +6,7 @@
 
 namespace Monsi {
 
-	class Material {
-	public:
+	struct Material {
 		Material() = default;
 		Material(const Material& other) = default;
 		Material(Material&& other) noexcept = default;

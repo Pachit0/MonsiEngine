@@ -4,11 +4,10 @@
 
 ## Features In Development
 
-- ECS (currently developing)
-- Better UI (currently developing)
-- File dialogs
+- Skeletal Animations
 - Gizmos
 - Play Button
+- Jolt Physics
 - Indirect instancing
 - Bindless rendering
 
@@ -22,9 +21,9 @@
 
 ### Prerequisites
 
-- C++17 compatible compiler (GCC, Clang, MSVC)
-- CMake 3.16+
-- OpenGL (so far)
+- C++20 compatible compiler (GCC, Clang, MSVC)
+- CMake 4.4
+- OpenGL 4.6
 
 ### Build Instructions
 ```bash
@@ -33,4 +32,5 @@ cd MonsiEngine
 mkdir build && cd build
 cmake ..
 make OR cmake build . --config <debug/release>
+If you are using visual studio go to: tools->options->CMake->CMake Executable directory: C:\Program Files\CMake\bin (make sure you have CMake 4.4)
 ```

@@ -1,28 +1,27 @@
 #include "MonsiPch.h"
-#include "ModelLoader.h"
-#include "Material.h"
+#include "StaticModel.h"
 
 namespace Monsi {
 
-	Model::Model(const std::string& filepath)
+	StaticModel::StaticModel(const std::string& filepath)
 	{
 		LoadModel(filepath);
 	}
 
-	Model::Model(const std::string& filepath, const ModelImportSettings& settings)
+	StaticModel::StaticModel(const std::string& filepath, const ModelImportSettings& settings)
 	{
 		LoadModel(filepath, settings);
 	}
 
-	void Model::LoadModel(const std::string& filepath)
+	void StaticModel::LoadModel(const std::string& filepath)
 	{
 		LoadModel(filepath, ModelImportSettings{});
 	}
 
-	void Model::LoadModel(const std::string& filepath, const ModelImportSettings& settings)
+	void StaticModel::LoadModel(const std::string& filepath, const ModelImportSettings& settings)
 	{
 		m_ModelSettings = settings;
-		
+
 		m_Meshes.clear();
 		m_TextureCache.clear();
 
@@ -38,7 +37,7 @@ namespace Monsi {
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		{
 			ENGINE_LOG_ERROR("ASSIMP ERROR: {0}", importer.GetErrorString());
-			ENGINE_ASSERT(false, "Model load failed!");
+			ENGINE_ASSERT(false, "StaticModel load failed!");
 			return;
 		}
 
@@ -49,7 +48,7 @@ namespace Monsi {
 		processNode(scene->mRootNode, scene);
 	}
 
-	void Model::processNode(aiNode* node, const aiScene* scene)
+	void StaticModel::processNode(aiNode* node, const aiScene* scene)
 	{
 		for (uint32_t i = 0; i < node->mNumMeshes; i++)
 		{
@@ -63,43 +62,29 @@ namespace Monsi {
 		}
 	}
 
-	Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
+	StaticMesh StaticModel::processMesh(aiMesh* mesh, const aiScene* scene)
 	{
-		std::vector<Vertex_t> vertices;
+		std::vector<StaticVertex> vertices;
 		vertices.reserve(mesh->mNumVertices);
-
-		size_t totalIndices = 0;
-		for (uint32_t i = 0; i < mesh->mNumFaces; i++)
-			totalIndices += mesh->mFaces[i].mNumIndices;
-
-		std::vector<unsigned int> indices;
-		indices.reserve(totalIndices);
 
 		for (uint32_t i = 0; i < mesh->mNumVertices; i++)
 		{
-			Vertex_t vertex;
+			StaticVertex vertex;
 			vertex.Position = { mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z };
 			vertex.Normal = { mesh->mNormals[i].x,  mesh->mNormals[i].y,  mesh->mNormals[i].z };
-
-			if (mesh->mTextureCoords[0])
-				vertex.TexCoords = { mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y };
-			else
-				vertex.TexCoords = { 0.0f, 0.0f };
-
+			vertex.TexCoords = mesh->mTextureCoords[0] ? glm::vec2{ mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y } : glm::vec2{ 0.0f, 0.0f };
 			vertices.push_back(vertex);
 		}
 
+		std::vector<unsigned int> indices;
 		for (uint32_t i = 0; i < mesh->mNumFaces; i++)
 		{
 			aiFace face = mesh->mFaces[i];
 			for (uint32_t j = 0; j < face.mNumIndices; j++)
-			{
 				indices.push_back(face.mIndices[j]);
-			}
 		}
 
 		auto meshMaterial = CreateReference<Material>();
-
 		if (mesh->mMaterialIndex >= 0)
 		{
 			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
@@ -120,18 +105,17 @@ namespace Monsi {
 			if (material->Get(AI_MATKEY_TWOSIDED, twoSided) == AI_SUCCESS)
 				meshMaterial->DoubleSided = (twoSided != 0);
 
-			meshMaterial->DiffuseMap = LoadMaterialTexture(material, aiTextureType_DIFFUSE);
-			meshMaterial->SpecularMap = LoadMaterialTexture(material, aiTextureType_SPECULAR);
-			meshMaterial->NormalMap = LoadMaterialTexture(material, aiTextureType_HEIGHT);
+			meshMaterial->DiffuseMap = loadMaterialTexture(material, aiTextureType_DIFFUSE);
+			meshMaterial->SpecularMap = loadMaterialTexture(material, aiTextureType_SPECULAR);
+			meshMaterial->NormalMap = loadMaterialTexture(material, aiTextureType_HEIGHT);
 		}
 
-		return Mesh(vertices, indices, meshMaterial);
+		return StaticMesh(vertices, indices, meshMaterial);
 	}
 
-	Reference<Texture2D> Model::LoadMaterialTexture(aiMaterial* mat, aiTextureType type)
+	Reference<Texture2D> StaticModel::loadMaterialTexture(aiMaterial* mat, aiTextureType type)
 	{
-		if (mat->GetTextureCount(type) == 0)
-			return nullptr;
+		if (mat->GetTextureCount(type) == 0) return nullptr;
 
 		aiString str;
 		mat->GetTexture(type, 0, &str);
@@ -139,13 +123,10 @@ namespace Monsi {
 
 		auto it = m_TextureCache.find(path);
 		if (it != m_TextureCache.end())
-		{
 			return it->second;
-		}
 
 		std::string filename = m_Directory + "/" + path;
 		Reference<Texture2D> texture = Texture2D::Create(filename);
-
 		m_TextureCache[path] = texture;
 		return texture;
 	}

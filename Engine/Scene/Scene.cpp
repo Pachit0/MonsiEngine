@@ -1,6 +1,7 @@
 #include "MonsiPch.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glad/glad.h>
 
 #include "Renderer2D.h"
 #include "Renderer3D.h"
@@ -9,7 +10,6 @@
 #include "Entity.h"
 #include "RenderInitializator.h"
 #include "ShadowMap.h"
-#include "glad/glad.h"
 
 namespace Monsi {
 
@@ -43,7 +43,6 @@ namespace Monsi {
 
 		return e;
 	}
-
 
 	void Scene::RemoveEntity(Entity entity)
 	{
@@ -139,18 +138,26 @@ namespace Monsi {
 
 			Renderer3D::Begin3D(viewProj, cameraPos);
 
-			auto meshGroup = m_Registry.view<TransformComponent, MeshComponent>();
-			for (auto entity : meshGroup)
+			auto staticMeshGroup = m_Registry.view<TransformComponent, StaticMeshComponent>();
+			for (auto entity : staticMeshGroup)
 			{
-				auto [transform, mesh] = meshGroup.get<TransformComponent, MeshComponent>(entity);
+				auto [transform, mesh] = staticMeshGroup.get<TransformComponent, StaticMeshComponent>(entity);
 				Renderer3D::DrawMesh(mesh.MeshAsset.get(), transform.GetTransform(), glm::vec4(1.0f));
 			}
 
-			auto modelGroup = m_Registry.view<TransformComponent, ModelComponent>();
-			for (auto entity : modelGroup)
+			auto staticModelGroup = m_Registry.view<TransformComponent, StaticModelComponent>();
+			for (auto entity : staticModelGroup)
 			{
-				auto [transform, model] = modelGroup.get<TransformComponent, ModelComponent>(entity);
+				auto [transform, model] = staticModelGroup.get<TransformComponent, StaticModelComponent>(entity);
 				Renderer3D::DrawModel(model.ModelAsset, transform.GetTransform(), glm::vec4(1.0f));
+			}
+
+			auto animatedModelGroup = m_Registry.view<TransformComponent, AnimatedModelComponent>();
+			for (auto entity : animatedModelGroup)
+			{
+				auto [transform, model] = animatedModelGroup.get<TransformComponent, AnimatedModelComponent>(entity);
+				model.ModelAsset->UpdateAnimation(timeStep);
+				Renderer3D::DrawAnimatedModel(model.ModelAsset, transform.GetTransform(), glm::vec4(1.0f));
 			}
 
 			bool hasShadowMap = false;
@@ -184,12 +191,12 @@ namespace Monsi {
 					glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 
 					Renderer3D::DrawShadowMap(lightView, lightProjection, shadowMapComp.Shadow);
-					Renderer3D::SetShadowMapData(lightSpaceMatrix, shadowMapComp.Shadow);
+					Renderer3D::SetShadowMapData(lightSpaceMatrix, shadowMapComp.Shadow,shadowMapComp.Settings.ShadowIntensity);
 				}
 			}
 
 			if (!hasShadowMap) {
-				Renderer3D::SetShadowMapData(glm::mat4(1.0f), nullptr);
+				Renderer3D::SetShadowMapData(glm::mat4(1.0f), nullptr, 0.0f);
 			}
 
 			Renderer3D::End3D();
@@ -252,10 +259,13 @@ namespace Monsi {
 	void Scene::OnAddComponent<PointLightComponent>(Entity entity, PointLightComponent& component) {}
 
 	template<>
-	void Scene::OnAddComponent<MeshComponent>(Entity entity, MeshComponent& component) {}
+	void Scene::OnAddComponent<StaticMeshComponent>(Entity entity, StaticMeshComponent& component) {}
 
 	template<>
-	void Scene::OnAddComponent<ModelComponent>(Entity entity, ModelComponent& component) {}
+	void Scene::OnAddComponent<StaticModelComponent>(Entity entity, StaticModelComponent& component) {}
+
+	template<>
+	void Scene::OnAddComponent<AnimatedModelComponent>(Entity entity, AnimatedModelComponent& component) {}
 
 	template<>
 	void Scene::OnAddComponent<SkyBoxComponent>(Entity entity, SkyBoxComponent& component) {}

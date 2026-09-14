@@ -3,6 +3,7 @@
 #include <Monsi.h>
 #include "SceneHierarchyUnit.h"
 
+
 class Sandbox3D : public Monsi::Layer {
 public:
 	Sandbox3D();
@@ -27,22 +28,26 @@ private:
 	bool m_ViewportHovered;
 
 	Monsi::Reference<Monsi::FrameBuffer> m_FrameBuffer;
-	Monsi::Reference<Monsi::Model> m_Backpack;
-	Monsi::Reference<Monsi::Model> m_Sponza;
+	
+	Monsi::Reference<Monsi::StaticModel> m_Backpack;
+	Monsi::Reference<Monsi::StaticModel> m_Sponza;
+
+	Monsi::Reference<Monsi::AnimatedModel> m_CesiumMan;
 
 	Monsi::Reference<Monsi::CubeMapTexture> m_SkyBoxTest;
 	Monsi::Reference<Monsi::SkyBoxPass> m_SkyBoxPass;
 	Monsi::Reference<Monsi::ShadowMap> m_ShadowMap;
 
-	Monsi::Reference<Monsi::Mesh> m_SphereTest;
-	Monsi::Reference<Monsi::Mesh> m_CubeTest;
-	Monsi::Reference<Monsi::Mesh> m_TorusTest;
-	Monsi::Reference<Monsi::Mesh> m_CylinderTest;
-	Monsi::Reference<Monsi::Mesh> m_ConeTest;
-	Monsi::Reference<Monsi::Mesh> m_QuadTest;
+	Monsi::Reference<Monsi::StaticMesh> m_SphereTest;
+	Monsi::Reference<Monsi::StaticMesh> m_CubeTest;
+	Monsi::Reference<Monsi::StaticMesh> m_TorusTest;
+	Monsi::Reference<Monsi::StaticMesh> m_CylinderTest;
+	Monsi::Reference<Monsi::StaticMesh> m_ConeTest;
+	Monsi::Reference<Monsi::StaticMesh> m_QuadTest;
 	Monsi::Reference<Monsi::Material> m_ShpereMaterial;
 
 	Monsi::Reference<Monsi::Scene> m_Scene;
+	Monsi::Entity m_CesiumManEntity;
 	Monsi::Entity m_CameraPerspectiveEntity;
 	Monsi::Entity m_CameraOrthogonalEntity;
 	Monsi::Entity m_SkyBoxEntity;

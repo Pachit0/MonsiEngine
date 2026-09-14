@@ -22,11 +22,13 @@ void Sandbox3D::OnLayerAttach()
 	spec.Height = 900;
 	m_FrameBuffer = Monsi::FrameBuffer::Create(spec);
 
-	m_Backpack = Monsi::CreateReference<Monsi::Model>(MODEL_PATH "backpack/backpack.obj");
+	m_Backpack = Monsi::CreateReference<Monsi::StaticModel>(MODEL_PATH "backpack/backpack.obj");
 
 	Monsi::ModelImportSettings gamer;
 	gamer.FlipUVs = false;
-	m_Sponza = Monsi::CreateReference<Monsi::Model>(MODEL_PATH "crytek_sponza/sponza.obj", gamer);
+	m_Sponza = Monsi::CreateReference<Monsi::StaticModel>(MODEL_PATH "crytek_sponza/sponza.obj", gamer);
+
+	m_CesiumMan = Monsi::CreateReference<Monsi::AnimatedModel>(MODEL_PATH "CesiumMan/CesiumMan.gltf", gamer);
 
 	std::array<std::string, 6> skyBoxTexturesPaths = {
 		TEXTURE_PATH "right.png",
@@ -89,42 +91,46 @@ void Sandbox3D::OnLayerAttach()
 	m_ShadowMapEntity.AddComponent<Monsi::ShadowMapComponent>(m_ShadowMap);
 
 	m_BackpackEntity = m_Scene->CreateEntity("Backpack");
-	m_BackpackEntity.AddComponent<Monsi::ModelComponent>(m_Backpack);
+	m_BackpackEntity.AddComponent<Monsi::StaticModelComponent>(m_Backpack);
 	m_BackpackEntity.GetComponent<Monsi::TransformComponent>().Translation = glm::vec3(-50.0f, 3.0f, 0.0f);
 
 	m_SponzaEntity = m_Scene->CreateEntity("Sponza");
-	m_SponzaEntity.AddComponent<Monsi::ModelComponent>(m_Sponza);
+	m_SponzaEntity.AddComponent<Monsi::StaticModelComponent>(m_Sponza);
 	m_SponzaEntity.GetComponent<Monsi::TransformComponent>().Scale = glm::vec3(0.05f);
 
+	m_CesiumManEntity = m_Scene->CreateEntity("CesiumMan");
+	m_CesiumManEntity.AddComponent<Monsi::AnimatedModelComponent>(m_CesiumMan);
+	m_CesiumManEntity.GetComponent<Monsi::TransformComponent>().Translation = glm::vec3(0.0f, 0.0f, 5.0f);
+	m_CesiumManEntity.GetComponent<Monsi::TransformComponent>().Rotation = glm::quat(glm::radians(glm::vec3(-90.0f, 120.0f, 0.0f)));
+
 	m_SphereEntity = m_Scene->CreateEntity("Sphere");
-	m_SphereEntity.AddComponent<Monsi::MeshComponent>(m_SphereTest);
+	m_SphereEntity.AddComponent<Monsi::StaticMeshComponent>(m_SphereTest);
 	m_SphereEntity.GetComponent<Monsi::TransformComponent>().Translation = m_SpherePosition;
 
 	m_CubeEntity = m_Scene->CreateEntity("Cube");
-	m_CubeEntity.AddComponent<Monsi::MeshComponent>(m_CubeTest);
+	m_CubeEntity.AddComponent<Monsi::StaticMeshComponent>(m_CubeTest);
 	m_CubeEntity.GetComponent<Monsi::TransformComponent>().Translation = glm::vec3(0.0f, 5.0f, 0.0f);
 
 	m_TorusEntity = m_Scene->CreateEntity("Torus");
-	m_TorusEntity.AddComponent<Monsi::MeshComponent>(m_TorusTest);
+	m_TorusEntity.AddComponent<Monsi::StaticMeshComponent>(m_TorusTest);
 	m_TorusEntity.GetComponent<Monsi::TransformComponent>().Translation = glm::vec3(0.0f, 1.0f, 0.0f);
 
 	m_CylinderEntity = m_Scene->CreateEntity("Cylinder");
-	m_CylinderEntity.AddComponent<Monsi::MeshComponent>(m_CylinderTest);
+	m_CylinderEntity.AddComponent<Monsi::StaticMeshComponent>(m_CylinderTest);
 	m_CylinderEntity.GetComponent<Monsi::TransformComponent>().Translation = glm::vec3(10.0f, 5.0f, 0.0f);
 
 	m_ConeEntity = m_Scene->CreateEntity("Cone");
-	m_ConeEntity.AddComponent<Monsi::MeshComponent>(m_ConeTest);
+	m_ConeEntity.AddComponent<Monsi::StaticMeshComponent>(m_ConeTest);
 	m_ConeEntity.GetComponent<Monsi::TransformComponent>().Translation = glm::vec3(20.0f, 5.0f, 0.0f);
 
 	m_QuadEntity = m_Scene->CreateEntity("Quad");
-	m_QuadEntity.AddComponent<Monsi::MeshComponent>(m_QuadTest);
+	m_QuadEntity.AddComponent<Monsi::StaticMeshComponent>(m_QuadTest);
 	m_QuadEntity.GetComponent<Monsi::TransformComponent>().Translation = glm::vec3(30.0f, 1.0f, 0.0f);
 
 	m_Unit.SetContext(m_Scene);
 
 	m_CameraPerspectiveEntity.AddComponent<Monsi::NativeScriptComponent>().Bind<Monsi::PerspectiveCameraControllerScript>();
 	m_CameraOrthogonalEntity.AddComponent<Monsi::NativeScriptComponent>().Bind<Monsi::PerspectiveCameraControllerScript>();
-
 }
 
 void Sandbox3D::OnLayerUpdate(Monsi::TimeStep timestep)
@@ -259,9 +265,10 @@ void Sandbox3D::OnImGuiDraw() {
 	Monsi::Renderer3DStats stats = Monsi::Renderer3D::GetStats();
 	ImGui::Text("Draw Calls: %u", stats.GetTotalDrawCalls());
 	ImGui::Text("  Model: %u", stats.ModelDrawCalls);
+	ImGui::Text("  Animated Model: %u", stats.AnimatedModelDrawCalls);
 	ImGui::Text("  Shadow Map: %u", stats.ShadowDrawCalls);
 	ImGui::Text("  Skybox: %u", stats.SkyboxDrawCalls);
-	ImGui::Text("Model Instances: %u", stats.ModelInstances);
+	ImGui::Text("Model Instances: %u", stats.ModelInstances + stats.AnimatedModelInstances);
 	ImGui::Text("Triangles: %u", stats.GetTotalTriangles());
 
 	ImGui::End();
@@ -283,7 +290,6 @@ void Sandbox3D::OnImGuiDraw() {
 
 	ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
 	m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
-
 
 	uint32_t textureID = m_FrameBuffer->GetColorAttachmentID();
 	ImGui::Image((void*)textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });

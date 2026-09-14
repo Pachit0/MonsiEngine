@@ -21,7 +21,9 @@
 #include "Scene/Components.h"
 
 //  Model & Mesh
-#include "ModelLoader/ModelLoader.h"
+#include "Mesh.h"
+#include "StaticModel.h"
+#include "AnimatedModel.h"
 #include "ModelLoader/MeshBuilder.h"
 
 //	Renderer
