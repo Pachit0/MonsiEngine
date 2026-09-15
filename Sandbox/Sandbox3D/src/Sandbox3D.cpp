@@ -200,17 +200,6 @@ void Sandbox3D::OnImGuiDraw() {
 
 		ImGui::EndMenu();
 	}
-	if (ImGui::BeginMenu("Theme"))
-	{
-		if (ImGui::MenuItem("Dark"))    Monsi::Application::Get().GetImGuiLayer()->SetTheme(Monsi::ImGuiTheme::Dark);
-		if (ImGui::MenuItem("Light"))   Monsi::Application::Get().GetImGuiLayer()->SetTheme(Monsi::ImGuiTheme::Light);
-		if (ImGui::MenuItem("Classic")) Monsi::Application::Get().GetImGuiLayer()->SetTheme(Monsi::ImGuiTheme::Classic);
-		if (ImGui::MenuItem("Blue"))	Monsi::Application::Get().GetImGuiLayer()->SetTheme(Monsi::ImGuiTheme::Blue);
-		if (ImGui::MenuItem("Red"))		Monsi::Application::Get().GetImGuiLayer()->SetTheme(Monsi::ImGuiTheme::Red);
-		if (ImGui::MenuItem("Cyan"))	Monsi::Application::Get().GetImGuiLayer()->SetTheme(Monsi::ImGuiTheme::Cyan);
-		if (ImGui::MenuItem("Magenta")) Monsi::Application::Get().GetImGuiLayer()->SetTheme(Monsi::ImGuiTheme::Magenta);
-		ImGui::EndMenu();
-	}
 	ImGui::EndMainMenuBar();
 
 	float windowMinSizeWidth = style.WindowMinSize.x;
@@ -233,7 +222,7 @@ void Sandbox3D::OnImGuiDraw() {
 
 		ImGuiID dock_id_main = dockspace_id;
 		ImGuiID dock_id_left;
-		ImGui::DockBuilderSplitNode(dock_id_main, ImGuiDir_Left, 0.20f, &dock_id_left, &dock_id_main);
+		ImGui::DockBuilderSplitNode(dock_id_main, ImGuiDir_Left, 0.25f, &dock_id_left, &dock_id_main);
 
 		ImGuiID dock_id_left_top;
 		ImGuiID dock_id_left_bottom;
@@ -241,9 +230,8 @@ void Sandbox3D::OnImGuiDraw() {
 
 		ImGui::DockBuilderDockWindow("Viewport", dock_id_main);
 		ImGui::DockBuilderDockWindow("Hierarchy", dock_id_left_top);
+		ImGui::DockBuilderDockWindow("Animation Settings", dock_id_left_bottom);
 		ImGui::DockBuilderDockWindow("Properties", dock_id_left_bottom);
-		ImGui::DockBuilderDockWindow("Info", dock_id_left_bottom);
-		ImGui::DockBuilderDockWindow("Settings", dock_id_left_bottom);
 
 		if (ImGuiDockNode* node = ImGui::DockBuilderGetNode(dock_id_main)) {
 			node->LocalFlags |= ImGuiDockNodeFlags_NoTabBar;
@@ -252,35 +240,8 @@ void Sandbox3D::OnImGuiDraw() {
 		ImGui::DockBuilderFinish(dockspace_id);
 	}
 
+	m_Unit.SetFPS(m_FPS);
 	m_Unit.OnImGuiRender();
-
-	ImGui::Begin("Info");
-
-	ImGui::Text("Renderer3D stats:");
-	ImGui::Text("FPS: %.1f", m_FPS);
-	ImGui::Text("Frame Time: %.3f ms", (1.0f / m_FPS) * 1000.0f);
-
-	ImGui::Separator();
-
-	Monsi::Renderer3DStats stats = Monsi::Renderer3D::GetStats();
-	ImGui::Text("Draw Calls: %u", stats.GetTotalDrawCalls());
-	ImGui::Text("  Model: %u", stats.ModelDrawCalls);
-	ImGui::Text("  Animated Model: %u", stats.AnimatedModelDrawCalls);
-	ImGui::Text("  Shadow Map: %u", stats.ShadowDrawCalls);
-	ImGui::Text("  Skybox: %u", stats.SkyboxDrawCalls);
-	ImGui::Text("Model Instances: %u", stats.ModelInstances + stats.AnimatedModelInstances);
-	ImGui::Text("Triangles: %u", stats.GetTotalTriangles());
-
-	ImGui::End();
-
-	ImGui::Begin("Settings");
-	static bool vsync = Monsi::Application::Get().GetWindow().IsVSync();
-
-	if (ImGui::Checkbox("VSync", &vsync)) {
-		Monsi::Application::Get().GetWindow().SetVSync(vsync);
-	}
-
-	ImGui::End();
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0.0f,0.0f });
 	ImGui::Begin("Viewport", nullptr, ImGuiWindowFlags_NoDecoration);

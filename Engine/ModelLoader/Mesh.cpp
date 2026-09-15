@@ -12,6 +12,31 @@ namespace Monsi {
 		setupMesh();
 	}
 
+	StaticMesh::StaticMesh(const StaticMesh& other)
+		: m_Vertices(other.m_Vertices), m_Indices(other.m_Indices), m_Material(other.m_Material),
+		  m_VertexArray(other.m_VertexArray), m_VertexBuffer(other.m_VertexBuffer), m_IndexBuffer(other.m_IndexBuffer),
+		  m_Type(other.m_Type), m_Params(other.m_Params), m_Id(s_NextId++), m_LifetimeToken(std::make_shared<char>())
+	{
+	}
+
+	StaticMesh& StaticMesh::operator=(const StaticMesh& other)
+	{
+		if (this == &other)
+			return *this;
+
+		m_Vertices = other.m_Vertices;
+		m_Indices = other.m_Indices;
+		m_Material = other.m_Material;
+		m_VertexArray = other.m_VertexArray;
+		m_VertexBuffer = other.m_VertexBuffer;
+		m_IndexBuffer = other.m_IndexBuffer;
+		m_Type = other.m_Type;
+		m_Params = other.m_Params;
+		m_Id = s_NextId++;
+		m_LifetimeToken = std::make_shared<char>();
+		return *this;
+	}
+
 	void StaticMesh::setupMesh()
 	{
 		m_VertexArray = VertexArray::Create();
@@ -32,6 +57,29 @@ namespace Monsi {
 		: m_Vertices(vertices), m_Indices(indices), m_Material(material)
 	{
 		setupMesh();
+	}
+
+	AnimatedMesh::AnimatedMesh(const AnimatedMesh& other)
+		: m_Vertices(other.m_Vertices), m_Indices(other.m_Indices), m_Material(other.m_Material),
+		  m_VertexArray(other.m_VertexArray), m_VertexBuffer(other.m_VertexBuffer), m_IndexBuffer(other.m_IndexBuffer),
+		  m_Id(s_NextId++), m_LifetimeToken(std::make_shared<char>())
+	{
+	}
+
+	AnimatedMesh& AnimatedMesh::operator=(const AnimatedMesh& other)
+	{
+		if (this == &other)
+			return *this;
+
+		m_Vertices = other.m_Vertices;
+		m_Indices = other.m_Indices;
+		m_Material = other.m_Material;
+		m_VertexArray = other.m_VertexArray;
+		m_VertexBuffer = other.m_VertexBuffer;
+		m_IndexBuffer = other.m_IndexBuffer;
+		m_Id = s_NextId++;
+		m_LifetimeToken = std::make_shared<char>();
+		return *this;
 	}
 
 	void AnimatedMesh::setupMesh()

@@ -8,11 +8,24 @@
 #include "MeshBuilder.h"
 #include "Components.h"
 #include "glm/gtc/type_ptr.hpp"
-#include "MeshInvalidationTracker.h"
 #include "SceneCamera.h"
 #include "PlatformUtilities.h"
+#include "Engine.h"
+#include "Renderer3D.h"
 
 namespace Monsi {
+
+	static std::string ToLowerCopy(const std::string& text)
+	{
+		std::string result = text;
+
+		for (char& character : result)
+		{
+			character = static_cast<char>(std::tolower(static_cast<unsigned char>(character)));
+		}
+
+		return result;
+	}
 
 	struct Vec3ControlParams {
 		const std::string& label = "null";
@@ -160,6 +173,10 @@ namespace Monsi {
 
 	void SceneHierarchyUnit::OnImGuiRender()
 	{
+		ImGui::BeginMainMenuBar();
+		DrawOptionsMenu();
+		ImGui::EndMainMenuBar();
+
 		ImGui::Begin("Hierarchy");
 
 		if (m_Scene)
@@ -186,11 +203,16 @@ namespace Monsi {
 			ImGui::EndMenu();
 		}
 
-		if (ImGui::IsMouseDown(ImGuiMouseButton_Left) && ImGui::IsWindowHovered()) {
+		if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::IsAnyItemHovered())
+		{
 			m_Selected = {};
 		}
 
 		ImGui::End();
+
+		DrawAnimatedModelWindow();
+		DrawInfoWindow();
+		DrawSettingsWindow();
 
 		ImGui::Begin("Properties");
 
@@ -374,7 +396,7 @@ namespace Monsi {
 				ImGui::EndPopup();
 			}
 
-			if (ImGui::BeginPopupModal("Animated Model Import Settings", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) { // temporary copied the code from static model :3
+			if (ImGui::BeginPopupModal("Animated Model Import Settings", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
 				ImGui::Text("Configure Model Import Flags:");
 				ImGui::Separator();
 
@@ -438,11 +460,6 @@ namespace Monsi {
 
 		if (entityDeleted)
 		{
-			if (entity.HasComponent<StaticMeshComponent>())
-			{
-				MeshInvalidationTracker::MarkDirty();
-			}
-
 			m_Scene->RemoveEntity(entity);
 
 			if (m_Selected == entity)
@@ -491,7 +508,7 @@ namespace Monsi {
 				}
 			}
 
-			DrawVec3Control({ "Scale", component.Scale, 1.0f });
+			DrawVec3Control({ .label = "Scale", .values = component.Scale, .resetValue = 1.0f, .minVal = 0.001f, .maxVal = 1000.0f });
 			}, false);
 
 		DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [](auto& component) {
@@ -499,11 +516,11 @@ namespace Monsi {
 			});
 
 		DrawComponent<ShadowMapComponent>("ShadowMap", entity, [](auto& component) {
-			ImGui::DragFloat("Size", &component.Settings.OrthoSize);
+			ImGui::DragFloat("Size", &component.Settings.OrthoSize, 1.0f, 0.1f, 1000.0f);
 			ImGui::DragFloat("Intensity", &component.Settings.ShadowIntensity, 0.01f, 0.0f, 1.0f);
-			ImGui::DragFloat("Distance", &component.Settings.LightDistance);
-			ImGui::DragFloat("Near", &component.Settings.NearPlane);
-			ImGui::DragFloat("Far", &component.Settings.FarPlane);
+			ImGui::DragFloat("Distance", &component.Settings.LightDistance, 1.0f, 0.1f, 10000.0f);
+			ImGui::DragFloat("Near", &component.Settings.NearPlane, 0.01f, -100000.0f, component.Settings.FarPlane - 0.01f);
+			ImGui::DragFloat("Far", &component.Settings.FarPlane, 1.0f, component.Settings.NearPlane + 0.01f, 100000.0f);
 
 			const int resolutions[] = { 512, 1024, 2048, 4096, 8192 };
 			const char* resolutionLabels[] = { "512x512", "1024x1024", "2048x2048", "4096x4096", "8192x8192" };
@@ -541,13 +558,13 @@ namespace Monsi {
 		DrawComponent<DirectionalLightComponent>("Directional Light", entity, [](auto& component) {
 			DrawVec3Control({ .label = "Direction", .values = component.Direction, .dragSpeed = 0.01f, .minVal = -1.0f, .maxVal = 1.0f });
 			ImGui::ColorEdit3("Color", glm::value_ptr(component.Color));
-			ImGui::DragFloat("Intensity", &component.Intensity);
+			ImGui::DragFloat("Intensity", &component.Intensity, 0.01f, 0.0f, 50.0f);
 			});
 
 		DrawComponent<PointLightComponent>("Point Light", entity, [](auto& component) {
 			ImGui::ColorEdit3("Color", glm::value_ptr(component.Color));
-			ImGui::DragFloat("Radius", &component.Radius);
-			ImGui::DragFloat("Intensity", &component.Intensity);
+			ImGui::DragFloat("Radius", &component.Radius, 0.1f, 0.01f, 1000.0f);
+			ImGui::DragFloat("Intensity", &component.Intensity, 0.01f, 0.0f, 50.0f);
 			});
 
 		DrawComponent<StaticMeshComponent>("Mesh", entity, [](auto& component) {
@@ -555,7 +572,7 @@ namespace Monsi {
 			ImGui::ColorEdit3("Ambient Color", glm::value_ptr(material->AmbientColor));
 			ImGui::ColorEdit3("Diffuse Color", glm::value_ptr(material->DiffuseColor));
 			ImGui::ColorEdit3("Specular Color", glm::value_ptr(material->SpecularColor));
-			ImGui::DragFloat("Shininess", &material->Shininess);
+			ImGui::DragFloat("Shininess", &material->Shininess, 1.0f, 1.0f, 256.0f);
 			});
 
 		DrawComponent<StaticModelComponent>("Model", entity, [](auto& component) {
@@ -574,7 +591,6 @@ namespace Monsi {
 				std::string path = component.ModelAsset->GetFilePath();
 				if (!path.empty()) {
 					component.ModelAsset->LoadModel(path, settings);
-					MeshInvalidationTracker::MarkDirty();
 				}
 			}
 			});
@@ -595,7 +611,6 @@ namespace Monsi {
 				std::string path = component.ModelAsset->GetFilePath();
 				if (!path.empty()) {
 					component.ModelAsset->LoadModel(path, settings);
-					MeshInvalidationTracker::MarkDirty();
 				}
 			}
 			});
@@ -648,30 +663,30 @@ namespace Monsi {
 
 			if (component.Camera.GetProjectionType() == SceneCamera::ProjectionType::Orthographic) {
 				float orthographicSize = component.Camera.GetOrthographicSize();
-				if (ImGui::DragFloat("Size", &orthographicSize)) {
+				if (ImGui::DragFloat("Size", &orthographicSize, 0.1f, 0.01f, 10000.0f)) {
 					component.Camera.SetOrthographicSize(orthographicSize);
 				}
 				float orthographicFar = component.Camera.GetOrthographicFarClip();
-				if (ImGui::DragFloat("Far", &orthographicFar)) {
+				if (ImGui::DragFloat("Far", &orthographicFar, 1.0f, component.Camera.GetOrthographicNearClip() + 0.01f, 100000.0f)) {
 					component.Camera.SetOrthographicFarClip(orthographicFar);
 				}
 				float orthographicNear = component.Camera.GetOrthographicNearClip();
-				if (ImGui::DragFloat("Near", &orthographicNear)) {
+				if (ImGui::DragFloat("Near", &orthographicNear, 0.01f, -100000.0f, orthographicFar - 0.01f)) {
 					component.Camera.SetOrthographicNearClip(orthographicNear);
 				}
 			}
 
 			if (component.Camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective) {
-				float perspectiveFOV = component.Camera.GetPerspectiveFOV();
-				if (ImGui::DragFloat("FOV", &perspectiveFOV)) {
-					component.Camera.SetPerspectiveFOV(perspectiveFOV);
+				float perspectiveFOVDegrees = glm::degrees(component.Camera.GetPerspectiveFOV());
+				if (ImGui::DragFloat("FOV", &perspectiveFOVDegrees, 0.5f, 1.0f, 179.0f)) {
+					component.Camera.SetPerspectiveFOV(glm::radians(perspectiveFOVDegrees));
 				}
 				float perspectiveFar = component.Camera.GetPerspectiveFar();
-				if (ImGui::DragFloat("Far", &perspectiveFar)) {
+				if (ImGui::DragFloat("Far", &perspectiveFar, 1.0f, component.Camera.GetPerspectiveNear() + 0.01f, 100000.0f)) {
 					component.Camera.SetPerspectiveFar(perspectiveFar);
 				}
 				float perspectiveNear = component.Camera.GetPerspectiveNear();
-				if (ImGui::DragFloat("Near", &perspectiveNear)) {
+				if (ImGui::DragFloat("Near", &perspectiveNear, 0.01f, 0.01f, perspectiveFar - 0.01f)) {
 					component.Camera.SetPerspectiveNear(perspectiveNear);
 				}
 			}
@@ -689,6 +704,204 @@ namespace Monsi {
 				}
 			}
 			});
+	}
+
+	void SceneHierarchyUnit::DrawAnimatedModelWindow()
+	{
+		if (!m_Selected || !m_Selected.HasComponent<AnimatedModelComponent>())
+		{
+			return;
+		}
+
+		auto& component = m_Selected.GetComponent<AnimatedModelComponent>();
+		auto model = component.ModelAsset;
+
+		if (!model)
+		{
+			return;
+		}
+
+		ImGui::Begin("Animation Settings", nullptr, ImGuiWindowFlags_NoFocusOnAppearing);
+
+		uint32_t animationCount = model->GetAnimationCount();
+		ImGui::Text("Animations: %u", animationCount);
+		ImGui::Separator();
+
+		static char searchBuffer[128] = "";
+		ImGui::InputTextWithHint("##AnimatedModelSearch", "Search by name or index...", searchBuffer, sizeof(searchBuffer));
+
+		std::string searchText(searchBuffer);
+		std::string searchTextLower = ToLowerCopy(searchText);
+
+		bool searchIsNumeric = !searchText.empty();
+		for (char character : searchText)
+		{
+			if (!std::isdigit(static_cast<unsigned char>(character)))
+			{
+				searchIsNumeric = false;
+				break;
+			}
+		}
+
+		uint32_t searchIndex = 0;
+		if (searchIsNumeric)
+		{
+			searchIndex = static_cast<uint32_t>(std::stoul(searchText));
+		}
+
+		ImGui::BeginChild("##AnimatedModelList", ImVec2(0.0f, 220.0f), true);
+
+		for (uint32_t i = 0; i < animationCount; ++i)
+		{
+			std::string animationName = model->GetAnimationName(i);
+			std::string animationNameLower = ToLowerCopy(animationName);
+
+			bool matchesSearch = searchText.empty();
+
+			if (!matchesSearch && searchIsNumeric)
+			{
+				matchesSearch = (i == searchIndex);
+			}
+
+			if (!matchesSearch)
+			{
+				matchesSearch = animationNameLower.find(searchTextLower) != std::string::npos;
+			}
+
+			if (!matchesSearch)
+			{
+				continue;
+			}
+
+			bool isCurrent = (i == model->GetCurrentAnimationIndex());
+			std::string displayLabel = "[" + std::to_string(i) + "] " + (animationName.empty() ? "(unnamed)" : animationName);
+
+			if (ImGui::Selectable(displayLabel.c_str(), isCurrent))
+			{
+				model->SetAnimation(i);
+			}
+		}
+
+		ImGui::EndChild();
+
+		ImGui::Separator();
+
+		float speed = model->GetAnimationSpeed();
+		if (ImGui::DragFloat("Speed", &speed, 0.01f, 0.0f, 10.0f))
+		{
+			model->SetAnimationSpeed(speed);
+		}
+
+		if (ImGui::Button(model->IsPaused() ? "Resume" : "Pause"))
+		{
+			model->TogglePause();
+		}
+
+		ImGui::End();
+	}
+
+	void SceneHierarchyUnit::DrawOptionsMenu()
+	{
+		if (ImGui::BeginMenu("Options"))
+		{
+			if (ImGui::MenuItem("Settings", nullptr, m_ShowSettingsWindow))
+			{
+				m_ShowSettingsWindow = !m_ShowSettingsWindow;
+			}
+
+			if (ImGui::MenuItem("Info", nullptr, m_ShowInfoWindow))
+			{
+				m_ShowInfoWindow = !m_ShowInfoWindow;
+			}
+
+			if (ImGui::BeginMenu("Theme"))
+			{
+				if (ImGui::MenuItem("Dark"))
+				{
+					Monsi::Application::Get().GetImGuiLayer()->SetTheme(Monsi::ImGuiTheme::Dark);
+				}
+
+				if (ImGui::MenuItem("Light"))
+				{
+					Monsi::Application::Get().GetImGuiLayer()->SetTheme(Monsi::ImGuiTheme::Light);
+				}
+
+				if (ImGui::MenuItem("Classic"))
+				{
+					Monsi::Application::Get().GetImGuiLayer()->SetTheme(Monsi::ImGuiTheme::Classic);
+				}
+
+				if (ImGui::MenuItem("Blue"))
+				{
+					Monsi::Application::Get().GetImGuiLayer()->SetTheme(Monsi::ImGuiTheme::Blue);
+				}
+
+				if (ImGui::MenuItem("Red"))
+				{
+					Monsi::Application::Get().GetImGuiLayer()->SetTheme(Monsi::ImGuiTheme::Red);
+				}
+
+				if (ImGui::MenuItem("Cyan"))
+				{
+					Monsi::Application::Get().GetImGuiLayer()->SetTheme(Monsi::ImGuiTheme::Cyan);
+				}
+
+				if (ImGui::MenuItem("Magenta"))
+				{
+					Monsi::Application::Get().GetImGuiLayer()->SetTheme(Monsi::ImGuiTheme::Magenta);
+				}
+
+				ImGui::EndMenu();
+			}
+
+			ImGui::EndMenu();
+		}
+	}
+
+	void SceneHierarchyUnit::DrawInfoWindow()
+	{
+		if (!m_ShowInfoWindow)
+		{
+			return;
+		}
+
+		ImGui::Begin("Info", &m_ShowInfoWindow);
+
+		ImGui::Text("Renderer3D stats:");
+		ImGui::Text("FPS: %.1f", m_FPS);
+		ImGui::Text("Frame Time: %.3f ms", (1.0f / m_FPS) * 1000.0f);
+
+		ImGui::Separator();
+
+		Monsi::Renderer3DStats stats = Monsi::Renderer3D::GetStats();
+		ImGui::Text("Draw Calls: %u", stats.GetTotalDrawCalls());
+		ImGui::Text("  Model: %u", stats.ModelDrawCalls);
+		ImGui::Text("  Animated Model: %u", stats.AnimatedModelDrawCalls);
+		ImGui::Text("  Shadow Map: %u", stats.ShadowDrawCalls);
+		ImGui::Text("  Skybox: %u", stats.SkyboxDrawCalls);
+		ImGui::Text("Model Instances: %u", stats.ModelInstances + stats.AnimatedModelInstances);
+		ImGui::Text("Triangles: %u", stats.GetTotalTriangles());
+
+		ImGui::End();
+	}
+
+	void SceneHierarchyUnit::DrawSettingsWindow()
+	{
+		if (!m_ShowSettingsWindow)
+		{
+			return;
+		}
+
+		ImGui::Begin("Settings", &m_ShowSettingsWindow);
+
+		static bool vsync = Monsi::Application::Get().GetWindow().IsVSync();
+
+		if (ImGui::Checkbox("VSync", &vsync))
+		{
+			Monsi::Application::Get().GetWindow().SetVSync(vsync);
+		}
+
+		ImGui::End();
 	}
 
 }

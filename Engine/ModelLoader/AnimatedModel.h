@@ -34,10 +34,20 @@ namespace Monsi {
 		std::string GetFilePath() const { return m_FilePath; }
 		const std::vector<AnimatedMesh>& GetMeshes() const { return m_Meshes; }
 		const std::vector<glm::mat4>& GetFinalBoneTransforms() const { return m_FinalBoneTransforms; }
+		uint32_t GetAnimationCount() const { return m_Scene ? m_Scene->mNumAnimations : 0; }
+		uint32_t GetCurrentAnimationIndex() const { return m_CurrentAnimIndex; }
+		std::string GetAnimationName(uint32_t index) const;
+		float GetAnimationSpeed() const { return m_AnimationSpeed; }
 
+		void SetAnimationSpeed(float speed);
+		void SetAnimation(uint32_t index);
 		void SetModelSettings(const ModelImportSettings& settings) { m_ModelSettings = settings; }
 		const ModelImportSettings& GetModelSettings() const { return m_ModelSettings; }
 
+		void Pause() { m_IsPaused = true; }
+		void Resume() { m_IsPaused = false; }
+		void TogglePause() { m_IsPaused = !m_IsPaused; }
+		bool IsPaused() const { return m_IsPaused; }
 	private:
 		void processNode(aiNode* node, const aiScene* scene);
 		AnimatedMesh processMesh(aiMesh* mesh, const aiScene* scene);
@@ -53,10 +63,13 @@ namespace Monsi {
 		std::unordered_map<std::string, BoneInfo> m_BoneInfoMap;
 		std::vector<glm::mat4> m_FinalBoneTransforms;
 
+		uint32_t m_CurrentAnimIndex = 0;
+		float m_CurrentAnimTime = 0.0f;
+		float m_AnimationSpeed = 1.0f;
+		bool m_IsPaused = false;
+		glm::mat4 m_GlobalInverseTransform = glm::mat4(1.0f);
 		Assimp::Importer m_Importer;
 		const aiScene* m_Scene = nullptr;
-		glm::mat4 m_GlobalInverseTransform = glm::mat4(1.0f);
-		float m_CurrentAnimTime = 0.0f;
 		std::string m_Directory;
 		std::string m_FilePath;
 	};

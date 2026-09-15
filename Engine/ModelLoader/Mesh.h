@@ -52,6 +52,10 @@ namespace Monsi {
 	public:
 		StaticMesh() = default;
 		StaticMesh(const std::vector<StaticVertex>& vertices, const std::vector<unsigned int>& indices, const Reference<Material>& material);
+		StaticMesh(const StaticMesh& other);
+		StaticMesh& operator=(const StaticMesh& other);
+		StaticMesh(StaticMesh&&) noexcept = default;
+		StaticMesh& operator=(StaticMesh&&) noexcept = default;
 
 		const Reference<VertexArray>& GetVertexArray() const { return m_VertexArray; }
 		uint32_t GetIndexCount() const { return static_cast<uint32_t>(m_Indices.size()); }
@@ -109,6 +113,10 @@ namespace Monsi {
 	public:
 		AnimatedMesh() = default;
 		AnimatedMesh(const std::vector<AnimatedVertex>& vertices, const std::vector<unsigned int>& indices, const Reference<Material>& material);
+		AnimatedMesh(const AnimatedMesh& other);
+		AnimatedMesh& operator=(const AnimatedMesh& other);
+		AnimatedMesh(AnimatedMesh&&) noexcept = default;
+		AnimatedMesh& operator=(AnimatedMesh&&) noexcept = default;
 
 		const Reference<VertexArray>& GetVertexArray() const { return m_VertexArray; }
 		uint32_t GetIndexCount() const { return static_cast<uint32_t>(m_Indices.size()); }

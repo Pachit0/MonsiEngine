@@ -3,7 +3,6 @@
 #include "RenderCommand.h"
 #include "Lighting.h"
 #include "Material.h"
-#include "MeshInvalidationTracker.h"
 #include <algorithm>
 #include <glm/ext/matrix_transform.hpp>
 
@@ -42,19 +41,6 @@ namespace Monsi {
 		m_FlushList.clear();
 	}
 
-	void MeshPass::PruneStaleBatches()
-	{
-		for (auto it = m_MeshBatches.begin(); it != m_MeshBatches.end(); )
-		{
-			if (it->second.LifetimeToken.expired()) {
-				it = m_MeshBatches.erase(it);
-			}
-			else {
-				++it;
-			}
-		}
-	}
-
 	void MeshPass::RegisterMesh(const StaticMesh* mesh)
 	{
 		auto& vao = mesh->GetVertexArray();
@@ -76,14 +62,17 @@ namespace Monsi {
 			lighting->Bind(m_Shader);
 		}
 
-		if (MeshInvalidationTracker::GetState() == true) {
-			PruneStaleBatches();
-			MeshInvalidationTracker::ReleaseDirty();
-		}
-
-		for (auto& [meshId, batch] : m_MeshBatches)
+		for (auto it = m_MeshBatches.begin(); it != m_MeshBatches.end(); )
 		{
-			batch.InstanceData.clear();
+			if (it->second.LifetimeToken.expired())
+			{
+				it = m_MeshBatches.erase(it);
+			}
+			else
+			{
+				it->second.InstanceData.clear();
+				++it;
+			}
 		}
 	}
 

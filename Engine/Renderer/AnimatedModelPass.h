@@ -39,7 +39,6 @@ namespace Monsi {
     private:
         void Flush();
         void RegisterMesh(const AnimatedMesh* mesh);
-        void PruneStaleBatches();
 
     private:
         struct InstanceData

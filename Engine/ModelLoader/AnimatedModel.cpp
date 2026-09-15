@@ -121,6 +121,12 @@ namespace Monsi {
 		m_BoneInfoMap.clear();
 		m_FinalBoneTransforms.clear();
 
+		m_CurrentAnimIndex = 0;
+		m_CurrentAnimTime = 0.0f;
+		m_AnimationSpeed = 1.0f;
+		m_IsPaused = false;
+
+
 		unsigned int flags = aiProcess_Triangulate | aiProcess_LimitBoneWeights | aiProcess_PopulateArmatureData;
 
 		if (settings.GenSmoothNormals) flags |= aiProcess_GenSmoothNormals;
@@ -257,21 +263,51 @@ namespace Monsi {
 
 	void AnimatedModel::UpdateAnimation(float deltaTime)
 	{
-		if (!m_Scene || !m_Scene->HasAnimations())
+		if (!m_Scene || !m_Scene->HasAnimations() || m_CurrentAnimIndex >= m_Scene->mNumAnimations)
 			return;
 
-		aiAnimation* anim = m_Scene->mAnimations[0];
+		if (m_IsPaused)
+			return;
+
+		aiAnimation* anim = m_Scene->mAnimations[m_CurrentAnimIndex];
 
 		if (anim->mDuration <= 0.0)
 			return;
 
-		float ticksPerSecond = static_cast<float>(
-			anim->mTicksPerSecond != 0 ? anim->mTicksPerSecond : 25.0f);
+		float ticksPerSecond = static_cast<float>(anim->mTicksPerSecond != 0 ? anim->mTicksPerSecond : 25.0f);
 
-		m_CurrentAnimTime += deltaTime * ticksPerSecond;
+		m_CurrentAnimTime += deltaTime * ticksPerSecond * m_AnimationSpeed;
 		m_CurrentAnimTime = fmod(m_CurrentAnimTime, static_cast<float>(anim->mDuration));
+		if (m_CurrentAnimTime < 0.0f)
+			m_CurrentAnimTime += static_cast<float>(anim->mDuration);
 
 		updateNodeHierarchy(m_CurrentAnimTime, m_Scene->mRootNode, glm::mat4(1.0f));
+	}
+
+	std::string AnimatedModel::GetAnimationName(uint32_t index) const
+	{
+		if (!m_Scene || index >= m_Scene->mNumAnimations) return "";
+		return m_Scene->mAnimations[index]->mName.C_Str();
+	}
+
+	void AnimatedModel::SetAnimationSpeed(float speed)
+	{
+		m_AnimationSpeed = glm::clamp(speed, 0.0f, 10.0f);
+	}
+
+	void AnimatedModel::SetAnimation(uint32_t index)
+	{
+		if (!m_Scene || index >= m_Scene->mNumAnimations)
+		{
+			ENGINE_LOG_ERROR("Invalid animation index: {0}", index);
+			return;
+		}
+
+		if (index != m_CurrentAnimIndex)
+		{
+			m_CurrentAnimIndex = index;
+			m_CurrentAnimTime = 0.0f;
+		}
 	}
 
 	void AnimatedModel::updateNodeHierarchy(float animationTime, const aiNode* pNode, const glm::mat4& parentTransform)
@@ -279,34 +315,31 @@ namespace Monsi {
 		std::string nodeName(pNode->mName.data);
 		glm::mat4 nodeTransform = ConvertAssimpMatrix(pNode->mTransformation);
 
-		if (m_Scene && m_Scene->HasAnimations())
+		if (m_Scene && m_Scene->HasAnimations() && m_CurrentAnimIndex < m_Scene->mNumAnimations)
 		{
-			const aiNodeAnim* nodeAnim = findNodeAnim(m_Scene->mAnimations[0], nodeName);
+			const aiNodeAnim* nodeAnim = findNodeAnim(m_Scene->mAnimations[m_CurrentAnimIndex], nodeName);
+
 			if (nodeAnim)
 			{
 				aiVector3D scale, position;
 				aiQuaternion rotation;
 				pNode->mTransformation.Decompose(scale, rotation, position);
 
-				if (nodeAnim->mNumScalingKeys > 0)
+				if (nodeAnim->mNumScalingKeys > 0) {
 					scale = CalcInterpolatedScaling(animationTime, nodeAnim);
+				}
 
-				if (nodeAnim->mNumRotationKeys > 0)
+				if (nodeAnim->mNumRotationKeys > 0) {
 					rotation = CalcInterpolatedRotation(animationTime, nodeAnim);
+				}
 
-				if (nodeAnim->mNumPositionKeys > 0)
+				if (nodeAnim->mNumPositionKeys > 0) {
 					position = CalcInterpolatedPosition(animationTime, nodeAnim);
+				}
 
-				glm::mat4 T = glm::translate(
-					glm::mat4(1.0f),
-					glm::vec3(position.x, position.y, position.z));
-
-				glm::mat4 R = glm::toMat4(
-					glm::quat(rotation.w, rotation.x, rotation.y, rotation.z));
-
-				glm::mat4 S = glm::scale(
-					glm::mat4(1.0f),
-					glm::vec3(scale.x, scale.y, scale.z));
+				glm::mat4 T = glm::translate(glm::mat4(1.0f),glm::vec3(position.x, position.y, position.z));
+				glm::mat4 R = glm::toMat4(glm::quat(rotation.w, rotation.x, rotation.y, rotation.z));
+				glm::mat4 S = glm::scale(glm::mat4(1.0f),glm::vec3(scale.x, scale.y, scale.z));
 
 				nodeTransform = T * R * S;
 			}
@@ -332,16 +365,14 @@ namespace Monsi {
 		for (uint32_t i = 0; i < animation->mNumChannels; ++i)
 		{
 			const aiNodeAnim* nodeAnim = animation->mChannels[i];
-			if (std::string(nodeAnim->mNodeName.data) == nodeName)
-				return nodeAnim;
+			if (std::string(nodeAnim->mNodeName.data) == nodeName) return nodeAnim;
 		}
 		return nullptr;
 	}
 
 	Reference<Texture2D> AnimatedModel::loadMaterialTexture(aiMaterial* mat, aiTextureType type)
 	{
-		if (mat->GetTextureCount(type) == 0)
-			return nullptr;
+		if (mat->GetTextureCount(type) == 0) return nullptr;
 
 		aiString str;
 		mat->GetTexture(type, 0, &str);

@@ -42,7 +42,6 @@ namespace Monsi {
 	private:
 		void Flush();
 		void RegisterMesh(const StaticMesh* mesh);
-		void PruneStaleBatches();
 
 	private:
 		struct MeshInstanceData
