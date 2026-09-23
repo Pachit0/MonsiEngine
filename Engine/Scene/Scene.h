@@ -3,6 +3,7 @@
 #include "entt.hpp"
 #include "TimeStep.h"
 #include "ShadowMap.h"
+#include "FrameBuffer.h"
 
 namespace Monsi {
 	class Entity;
@@ -22,12 +23,17 @@ namespace Monsi {
 		template<typename T>
 		void OnAddComponent(Entity entity, T& component);
 
+		void EnsureGBuffer(uint32_t width, uint32_t height);
+
 	private:
 		uint32_t m_ViewportWidth = 0;
 		uint32_t m_ViewportHeight = 0;
 
 		uint32_t m_ShadowMapFramebufferWidth = 0;
 		uint32_t m_ShadowMapFramebufferHeight = 0;
+
+		Reference<FrameBuffer> m_GBuffer;
+
 		entt::registry m_Registry;
 
 		friend class Entity;

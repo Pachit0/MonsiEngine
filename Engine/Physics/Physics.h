@@ -2,6 +2,8 @@
 
 namespace Monsi {
 
+	class Physics {
 
+	};
 
 }

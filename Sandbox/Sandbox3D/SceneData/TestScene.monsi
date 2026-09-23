@@ -143,7 +143,7 @@ Entities:
       Width: 4096
       Height: 4096
       LightDistance: 512
-      Near: -10
+      Near: 0
       Far: 1000
       OrthoSize: 256
       ShadowIntensity: 1
@@ -169,8 +169,8 @@ Entities:
     TagComponent:
       Tag: Orthogonal Camera
     TransformComponent:
-      Translation: [-12.548489, 0.15787138, 0.56837815]
-      Rotation: [0.7301597, 0.0019115568, -0.6832715, 0.0017888036]
+      Translation: [-46.503845, 2.4322762, 4.046407]
+      Rotation: [-0.9370836, -0.06141981, -0.34292388, 0.022476457]
       Scale: [1, 1, 1]
     CameraComponent:
       Primary: false
@@ -187,8 +187,8 @@ Entities:
     TagComponent:
       Tag: Perspective Camera
     TransformComponent:
-      Translation: [-12.548489, 0.15787138, 0.56837815]
-      Rotation: [0.7301597, 0.0019115568, -0.6832715, 0.0017888036]
+      Translation: [-46.503845, 2.4322762, 4.046407]
+      Rotation: [-0.9370836, -0.06141981, -0.34292388, 0.022476457]
       Scale: [1, 1, 1]
     CameraComponent:
       Primary: true

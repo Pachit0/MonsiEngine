@@ -4,6 +4,7 @@
 #include <fstream>
 #include <glad/glad.h>
 #include "glm/gtc/type_ptr.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
 namespace Monsi {
 
@@ -174,6 +175,16 @@ namespace Monsi {
 		UploadIntArray(name, value, count);
 	}
 
+	const void OpenGLShader::setVec3Array(const std::string& name, glm::vec3* value, uint32_t count)
+	{
+		UploadVec3Array(name, value, count);
+	}
+
+	const void OpenGLShader::setVec2(const std::string& name, const glm::vec2& value)
+	{
+		UploadVec2(name, value);
+	}
+
 	const void OpenGLShader::setFloat(const std::string& name, float value) {
 		UploadFloat(name, value);
 	}
@@ -209,6 +220,11 @@ namespace Monsi {
 	void OpenGLShader::UploadIntArray(const std::string& name, int* value, uint32_t count)
 	{
 		glUniform1iv(GetUniformLocation(name), count, value);
+	}
+
+	void OpenGLShader::UploadVec3Array(const std::string& name, glm::vec3* value, uint32_t count)
+	{
+		glUniform3fv(GetUniformLocation(name), count, glm::value_ptr(value[0]));
 	}
 
 	void OpenGLShader::UploadFloat(const std::string& name, float value) {

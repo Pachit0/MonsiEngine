@@ -5,6 +5,8 @@
 #include "AnimatedModel.h"
 #include "Lighting.h"
 #include "ShadowMap.h"
+#include "SSAO.h"
+#include "FrameBuffer.h"
 #include <glm/glm.hpp>
 
 namespace Monsi {
@@ -24,6 +26,9 @@ namespace Monsi {
 
 		uint32_t SkyboxDrawCalls = 0;
 		uint32_t SkyboxTriangles = 0;
+
+		uint32_t SSAODrawCalls = 0;
+		uint32_t SSAOTriangles = 0;
 
 		uint32_t GetTotalDrawCalls() const { return ModelDrawCalls + AnimatedModelDrawCalls + ShadowDrawCalls + SkyboxDrawCalls; }
 		uint32_t GetTotalTriangles() const { return ModelTriangles + AnimatedModelTriangles + ShadowTriangles + SkyboxTriangles; }
@@ -46,10 +51,17 @@ namespace Monsi {
 
 		static void DrawSkyBox(const glm::mat4& view, const glm::mat4& projection, const Reference<CubeMapTexture>& skyboxTexture);
 		static void DrawShadowMap(const glm::mat4& view, const glm::mat4& projection, const Reference<ShadowMap>& shadowMap);
+		static void DrawSSAO(const Reference<SSAO>& ssaoInstance, const Reference<FrameBuffer>& gBuffer, const glm::mat4& projection);
+
+		static void BeginGBuffer(const glm::mat4& view, const glm::mat4& projection, const Reference<FrameBuffer>& gBuffer);
+		static void DrawModelToGBuffer(const Reference<StaticModel>& model, const glm::mat4& transform);
+		static void DrawMeshToGBuffer(const StaticMesh* meshPtr, const glm::mat4& transform);
+		static void EndGBuffer();
 
 		static void SetSceneLighting(const SceneLighting& lighting);
 		static void SetShadowMapData(const glm::mat4& lightSpaceMatrix, const Reference<ShadowMap>& shadowMap, float shadowIntensity);
 		static void ResizeShadowMap(uint32_t width, uint32_t height, const Reference<ShadowMap>& shadowMap);
+		static void ResizeSSAO(uint32_t width, uint32_t height, const Reference<SSAO>& ssaoInstance);
 
 		static Renderer3DStats GetStats();
 		static void ResetStats();

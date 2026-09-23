@@ -10,6 +10,7 @@
 #include "StaticModel.h"
 #include "AnimatedModel.h"
 #include "ScriptableEntity.h"
+#include "SSAO.h"
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
@@ -118,6 +119,21 @@ namespace Monsi {
 
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent& other) = default;
+	};
+
+	struct SSAOComponent
+	{
+		SSAOSettings Settings;
+		Reference<SSAO> SSAOInstance;
+
+		SSAOComponent() = default;
+		SSAOComponent(const SSAOComponent&) = default;
+		SSAOComponent(const Reference<SSAO>& ssao) : SSAOInstance(ssao)
+		{
+			if (SSAOInstance) {
+				Settings = SSAOInstance->GetSettings();
+			}
+		}
 	};
 
 	struct NativeScriptComponent

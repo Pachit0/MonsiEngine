@@ -289,10 +289,18 @@ namespace Monsi {
 
 						bool sceneHasShadowMap = !m_Scene->m_Registry.view<ShadowMapComponent>().empty();
 						bool sceneHasSkyBox = !m_Scene->m_Registry.view<SkyBoxComponent>().empty();
+						bool sceneHasSSAO = !m_Scene->m_Registry.view<SSAOComponent>().empty();
 
 						if (!sceneHasShadowMap && !m_Selected.HasComponent<ShadowMapComponent>()) {
 							if (ImGui::MenuItem("ShadowMap")) {
 								m_Selected.AddComponent<ShadowMapComponent>(ShadowMap::Create(4096, 4096));
+								ImGui::CloseCurrentPopup();
+							}
+						}
+
+						if (!sceneHasSSAO && !m_Selected.HasComponent<SSAOComponent>()) {
+							if (ImGui::MenuItem("SSAO")) {
+								m_Selected.AddComponent<SSAOComponent>(SSAO::Create());
 								ImGui::CloseCurrentPopup();
 							}
 						}
@@ -513,6 +521,12 @@ namespace Monsi {
 
 		DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [](auto& component) {
 			ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
+			});
+
+		DrawComponent<SSAOComponent>("SSAO", entity, [](auto& component) {
+			ImGui::DragInt("Kernel Size", &component.Settings.KernelSize, 1, 1, 128);
+			ImGui::DragFloat("Radius", &component.Settings.Radius, 0.01f, 0.01f, 10.0f, "%.3f");
+			ImGui::DragFloat("Bias", &component.Settings.Bias, 0.001f, 0.0f, 1.0f, "%.4f");
 			});
 
 		DrawComponent<ShadowMapComponent>("ShadowMap", entity, [](auto& component) {

@@ -5,7 +5,8 @@
 #include "SkyBoxPass.h"
 #include "ShadowMap.h"
 #include "ShadowMapPass.h"
-#include "ColorPalette.h"
+#include "SSAOPass.h"
+#include "GBufferPass.h"
 
 namespace Monsi {
 
@@ -15,6 +16,8 @@ namespace Monsi {
 		Reference<LightingBuffer> Lighting;
 		Reference<SkyBoxPass> SkyBox;
 		Reference<ShadowMapPass> shadowMapPass;
+		Reference<SSAOPass> ssaoPass;
+		Reference<GBufferPass> gBufferPass;
 
 		SceneLighting SceneLight;
 		Reference<ShadowMap> shadow;
@@ -38,6 +41,12 @@ namespace Monsi {
 		s_Data.shadowMapPass = CreateReference<ShadowMapPass>();
 		s_Data.shadowMapPass->Init();
 
+		s_Data.ssaoPass = CreateReference<SSAOPass>();
+		s_Data.ssaoPass->Init();
+
+		s_Data.gBufferPass = CreateReference<GBufferPass>();
+		s_Data.gBufferPass->Init();
+
 		s_Data.Lighting->SetLighting(s_Data.SceneLight);
 		s_Data.shadow = ShadowMap::Create(1, 1);
 	}
@@ -56,6 +65,12 @@ namespace Monsi {
 
 		s_Data.shadowMapPass->Shutdown();
 		s_Data.shadowMapPass.reset();
+
+		s_Data.ssaoPass->Shutdown();
+		s_Data.ssaoPass.reset();
+
+		s_Data.gBufferPass->Shutdown();
+		s_Data.gBufferPass.reset();
 
 		s_Data.Lighting.reset();
 	}
@@ -111,6 +126,51 @@ namespace Monsi {
 		s_Data.shadowMapPass->DrawShadowMap(lightSpaceMatrix, shadowMap);
 	}
 
+	void Renderer3D::DrawSSAO(const Reference<SSAO>& ssaoInstance, const Reference<FrameBuffer>& gBuffer, const glm::mat4& projection)
+	{
+		ENGINE_PROFILER_FUNCTION();
+		if (s_Data.ssaoPass && ssaoInstance && gBuffer)
+		{
+			s_Data.ssaoPass->DrawSSAO(ssaoInstance, gBuffer, projection);
+		}
+	}
+
+	void Renderer3D::BeginGBuffer(const glm::mat4& view, const glm::mat4& projection, const Reference<FrameBuffer>& gBuffer)
+	{
+		ENGINE_PROFILER_FUNCTION();
+		if (s_Data.gBufferPass && gBuffer)
+		{
+			s_Data.gBufferPass->Begin(view, projection, gBuffer);
+		}
+	}
+
+	void Renderer3D::DrawModelToGBuffer(const Reference<StaticModel>& model, const glm::mat4& transform)
+	{
+		ENGINE_PROFILER_FUNCTION();
+		if (s_Data.gBufferPass)
+		{
+			s_Data.gBufferPass->SubmitModel(model, transform);
+		}
+	}
+
+	void Renderer3D::DrawMeshToGBuffer(const StaticMesh* meshPtr, const glm::mat4& transform)
+	{
+		ENGINE_PROFILER_FUNCTION();
+		if (s_Data.gBufferPass)
+		{
+			s_Data.gBufferPass->SubmitMesh(meshPtr, transform);
+		}
+	}
+
+	void Renderer3D::EndGBuffer()
+	{
+		ENGINE_PROFILER_FUNCTION();
+		if (s_Data.gBufferPass)
+		{
+			s_Data.gBufferPass->End();
+		}
+	}
+
 	void Renderer3D::SetShadowMapData(const glm::mat4& lightSpaceMatrix, const Reference<ShadowMap>& shadowMap, float shadowIntensity)
 	{
 		ENGINE_PROFILER_FUNCTION();
@@ -128,6 +188,15 @@ namespace Monsi {
 	{
 		ENGINE_PROFILER_FUNCTION();
 		s_Data.shadowMapPass->ResizeShadowMap(width, height, shadowMap);
+	}
+
+	void Renderer3D::ResizeSSAO(uint32_t width, uint32_t height, const Reference<SSAO>& ssaoInstance)
+	{
+		ENGINE_PROFILER_FUNCTION();
+		if (s_Data.ssaoPass && ssaoInstance)
+		{
+			s_Data.ssaoPass->Resize(width, height, ssaoInstance);
+		}
 	}
 
 	void Renderer3D::SetSceneLighting(const SceneLighting& lighting)
@@ -171,6 +240,13 @@ namespace Monsi {
 			stats.SkyboxTriangles = skyboxStats.Triangles;
 		}
 
+		if (s_Data.ssaoPass)
+		{
+			const auto& ssaoStats = s_Data.ssaoPass->GetStats();
+			stats.SSAODrawCalls = ssaoStats.DrawCalls;
+			stats.SSAOTriangles = ssaoStats.Triangles;
+		}
+
 		return stats;
 	}
 
@@ -187,6 +263,12 @@ namespace Monsi {
 
 		if (s_Data.SkyBox)
 			s_Data.SkyBox->ResetStats();
+
+		if (s_Data.ssaoPass)
+			s_Data.ssaoPass->ResetStats();
+
+		if (s_Data.gBufferPass)
+			s_Data.gBufferPass->ResetStats();
 	}
 
 }

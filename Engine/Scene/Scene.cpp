@@ -49,6 +49,25 @@ namespace Monsi {
 		m_Registry.destroy(entity);
 	}
 
+	void Scene::EnsureGBuffer(uint32_t width, uint32_t height)
+	{
+		if (width == 0 || height == 0) return;
+
+		if (!m_GBuffer)
+		{
+			FrameBufferSpec spec;
+			spec.Width = width;
+			spec.Height = height;
+			spec.Attachments = { FrameBufferTextureFormat::RGBA16F, FrameBufferTextureFormat::RGBA16F };
+
+			m_GBuffer = FrameBuffer::Create(spec);
+		}
+		else
+		{
+			m_GBuffer->Resize(width, height);
+		}
+	}
+
 	void Scene::OnUpdate(TimeStep timeStep)
 	{
 		SceneCamera* mainCamera = nullptr;
@@ -91,7 +110,8 @@ namespace Monsi {
 			Renderer3D::ResetStats();
 
 			glm::vec3 cameraPos = cameraPosition;
-			glm::mat4 viewProj = mainCamera->GetProjectionMatrix() * glm::inverse(cameraTransform);
+			glm::mat4 viewMatrix = glm::inverse(cameraTransform);
+			glm::mat4 viewProj = mainCamera->GetProjectionMatrix() * viewMatrix;
 
 			SceneLighting sceneLighting;
 			auto DirectionalLightView = m_Registry.view<DirectionalLightComponent>();
@@ -119,7 +139,7 @@ namespace Monsi {
 				auto& skybox = skyboxView.get<SkyBoxComponent>(entity);
 				if (skybox.SkyboxTexture)
 				{
-					glm::mat4 skyboxViewMatrix = glm::mat4(glm::mat3(glm::inverse(cameraTransform)));
+					glm::mat4 skyboxViewMatrix = glm::mat4(glm::mat3(viewMatrix));
 
 					glm::mat4 projMatrix;
 					if (mainCamera->GetProjectionType() == SceneCamera::ProjectionType::Orthographic)
@@ -133,6 +153,49 @@ namespace Monsi {
 					}
 
 					Renderer3D::DrawSkyBox(skyboxViewMatrix, projMatrix, skybox.SkyboxTexture);
+				}
+			}
+
+			auto ssaoView = m_Registry.view<SSAOComponent>();
+			if (!ssaoView.empty())
+			{
+				EnsureGBuffer(m_ViewportWidth, m_ViewportHeight);
+
+				if (m_GBuffer)
+				{
+					Renderer3D::BeginGBuffer(viewMatrix, mainCamera->GetProjectionMatrix(), m_GBuffer);
+
+					auto gbufferMeshGroup = m_Registry.view<TransformComponent, StaticMeshComponent>();
+					for (auto entity : gbufferMeshGroup)
+					{
+						auto [transform, mesh] = gbufferMeshGroup.get<TransformComponent, StaticMeshComponent>(entity);
+						Renderer3D::DrawMeshToGBuffer(mesh.MeshAsset.get(), transform.GetTransform());
+					}
+
+					auto gbufferModelGroup = m_Registry.view<TransformComponent, StaticModelComponent>();
+					for (auto entity : gbufferModelGroup)
+					{
+						auto [transform, model] = gbufferModelGroup.get<TransformComponent, StaticModelComponent>(entity);
+						Renderer3D::DrawModelToGBuffer(model.ModelAsset, transform.GetTransform());
+					}
+
+					Renderer3D::EndGBuffer();
+				}
+
+				for (auto entity : ssaoView)
+				{
+					auto& ssaoComp = ssaoView.get<SSAOComponent>(entity);
+					if (ssaoComp.SSAOInstance && m_GBuffer)
+					{
+						if (m_ViewportWidth != ssaoComp.Settings.Width || m_ViewportHeight != ssaoComp.Settings.Height)
+						{
+							ssaoComp.Settings.Width = m_ViewportWidth;
+							ssaoComp.Settings.Height = m_ViewportHeight;
+							Renderer3D::ResizeSSAO(m_ViewportWidth, m_ViewportHeight, ssaoComp.SSAOInstance);
+						}
+
+						Renderer3D::DrawSSAO(ssaoComp.SSAOInstance, m_GBuffer, mainCamera->GetProjectionMatrix());
+					}
 				}
 			}
 
@@ -191,7 +254,7 @@ namespace Monsi {
 					glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 
 					Renderer3D::DrawShadowMap(lightView, lightProjection, shadowMapComp.Shadow);
-					Renderer3D::SetShadowMapData(lightSpaceMatrix, shadowMapComp.Shadow,shadowMapComp.Settings.ShadowIntensity);
+					Renderer3D::SetShadowMapData(lightSpaceMatrix, shadowMapComp.Shadow, shadowMapComp.Settings.ShadowIntensity);
 				}
 			}
 
@@ -220,6 +283,9 @@ namespace Monsi {
 	{
 		m_ViewportWidth = width;
 		m_ViewportHeight = height;
+
+		if (m_GBuffer)
+			m_GBuffer->Resize(width, height);
 
 		auto view = m_Registry.view<TransformComponent, CameraComponent>();
 		for (auto entity : view) {
@@ -279,4 +345,13 @@ namespace Monsi {
 	template<>
 	void Scene::OnAddComponent<NativeScriptComponent>(Entity entity, NativeScriptComponent& component) {}
 
+	template<>
+	void Scene::OnAddComponent<SSAOComponent>(Entity entity, SSAOComponent& component)
+	{
+		component.SSAOInstance = SSAO::Create(component.Settings);
+
+		uint32_t width = (m_ViewportWidth > 0) ? m_ViewportWidth : component.Settings.Width;
+		uint32_t height = (m_ViewportHeight > 0) ? m_ViewportHeight : component.Settings.Height;
+		EnsureGBuffer(width, height);
+	}
 }

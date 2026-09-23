@@ -17,10 +17,14 @@ namespace Monsi {
 		void BindDepthTexture(uint32_t slot) const override;
 
 	private:
-		uint32_t m_ID;
-		uint32_t m_ShadowMap;
-		uint32_t m_Width, m_Height;
-		int32_t m_PrevFramebuffer, m_PrevViewport[4] = { 0, 0, 0, 0 };
+		void Init();
+		void Cleanup();
+
+	private:
+		uint32_t m_ID = 0;
+		uint32_t m_ShadowMap = 0;
+		uint32_t m_Width = 0, m_Height = 0;
+		int32_t m_PrevFramebuffer = 0, m_PrevViewport[4] = { 0, 0, 0, 0 };
 	};
 
 }

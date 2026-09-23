@@ -75,6 +75,10 @@ void Sandbox3D::OnLayerAttach()
 	auto& coc = m_CameraOrthogonalEntity.AddComponent<Monsi::CameraComponent>();
 	coc.Primary = false;
 
+	Monsi::Reference<Monsi::SSAO> m_SSAOInstance = Monsi::SSAO::Create(Monsi::SSAOSettings{});
+	m_SSAOEntity = m_Scene->CreateEntity("SSAO", false);
+	m_SSAOEntity.AddComponent<Monsi::SSAOComponent>(m_SSAOInstance);
+
 	m_MainLightEntity = m_Scene->CreateEntity("Directional Light", false);
 	auto& mainLight = m_MainLightEntity.AddComponent<Monsi::DirectionalLightComponent>();
 	mainLight.Direction = glm::vec3(0.0f, -1.0f, 0.0f);
@@ -161,6 +165,7 @@ void Sandbox3D::OnLayerUpdate(Monsi::TimeStep timestep)
 	m_Scene->OnUpdate(timestep);
 
 	m_FrameBuffer->Unbind();
+	m_FrameBuffer->BlitToWindow();
 }
 
 void Sandbox3D::OnLayerDetach()

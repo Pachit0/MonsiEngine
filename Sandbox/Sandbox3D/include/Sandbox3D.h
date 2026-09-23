@@ -62,6 +62,7 @@ private:
 	Monsi::Entity m_CylinderEntity;
 	Monsi::Entity m_QuadEntity;
 	Monsi::Entity m_ShadowMapEntity;
+	Monsi::Entity m_SSAOEntity;
 
 	Monsi::SceneHierarchyUnit m_Unit;
 	glm::vec3 m_SpherePosition;
