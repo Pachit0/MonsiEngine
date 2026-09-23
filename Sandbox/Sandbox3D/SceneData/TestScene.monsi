@@ -167,10 +167,17 @@ Entities:
       Intensity: 1
   - Entity_ID: 1337420
     TagComponent:
+      Tag: SSAO
+    SSAOComponent:
+      KernelSize: 64
+      Radius: 0.5
+      Bias: 0.025
+  - Entity_ID: 1337420
+    TagComponent:
       Tag: Orthogonal Camera
     TransformComponent:
-      Translation: [-46.503845, 2.4322762, 4.046407]
-      Rotation: [-0.9370836, -0.06141981, -0.34292388, 0.022476457]
+      Translation: [-17.126122, 5.237704, -3.2939353]
+      Rotation: [0.6308275, -0.09146565, -0.76253957, -0.110562995]
       Scale: [1, 1, 1]
     CameraComponent:
       Primary: false
@@ -187,8 +194,8 @@ Entities:
     TagComponent:
       Tag: Perspective Camera
     TransformComponent:
-      Translation: [-46.503845, 2.4322762, 4.046407]
-      Rotation: [-0.9370836, -0.06141981, -0.34292388, 0.022476457]
+      Translation: [-17.126411, 5.2369404, -3.294001]
+      Rotation: [0.6308275, -0.09146565, -0.76253957, -0.110562995]
       Scale: [1, 1, 1]
     CameraComponent:
       Primary: true

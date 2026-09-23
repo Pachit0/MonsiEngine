@@ -264,6 +264,16 @@ namespace Monsi {
 			out << YAML::EndMap;
 		}
 
+		if (entity.HasComponent<SSAOComponent>()) {
+			auto& sc = entity.GetComponent<SSAOComponent>();
+			out << YAML::Key << "SSAOComponent";
+			out << YAML::BeginMap;
+			out << YAML::Key << "KernelSize" << YAML::Value << sc.Settings.KernelSize;
+			out << YAML::Key << "Radius" << YAML::Value << sc.Settings.Radius;
+			out << YAML::Key << "Bias" << YAML::Value << sc.Settings.Bias;
+			out << YAML::EndMap;
+		}
+
 		if (entity.HasComponent<PointLightComponent>()) {
 			auto& plc = entity.GetComponent<PointLightComponent>();
 			out << YAML::Key << "PointLightComponent";
@@ -420,13 +430,12 @@ namespace Monsi {
 					name = tagComponentNode["Tag"].as<std::string>();
 				}
 
+				Entity deserializedEntity = m_Scene->CreateEntity(name, false);
 				ENGINE_LOG_TRACE("Loaded entity with ID = {0}, name = {1}", uuid, name);
-
-				Entity deserializedEntity = m_Scene->CreateEntity(name);
 
 				auto transformComponentNode = entityNode["TransformComponent"];
 				if (transformComponentNode) {
-					auto& tc = deserializedEntity.GetComponent<TransformComponent>();
+					auto& tc = deserializedEntity.AddComponent<TransformComponent>();
 					tc.Translation = transformComponentNode["Translation"].as<glm::vec3>();
 					tc.Rotation = transformComponentNode["Rotation"].as<glm::quat>();
 					tc.Scale = transformComponentNode["Scale"].as<glm::vec3>();
@@ -489,6 +498,20 @@ namespace Monsi {
 					smc.Settings.FarPlane = shadowMapComponent["Far"].as<float>();
 					smc.Settings.OrthoSize = shadowMapComponent["OrthoSize"].as<float>();
 					smc.Settings.ShadowIntensity = shadowMapComponent["ShadowIntensity"].as<float>();
+				}
+
+				auto ssaoComponentNode = entityNode["SSAOComponent"];
+				if (ssaoComponentNode) {
+					auto ssaoInstance = SSAO::Create();
+					auto& sc = deserializedEntity.AddComponent<SSAOComponent>(ssaoInstance);
+
+					sc.Settings.KernelSize = ssaoComponentNode["KernelSize"].as<int>();
+					sc.Settings.Radius = ssaoComponentNode["Radius"].as<float>();
+					sc.Settings.Bias = ssaoComponentNode["Bias"].as<float>();
+
+					if (sc.SSAOInstance) {
+						sc.SSAOInstance->SetSettings(sc.Settings);
+					}
 				}
 
 				auto meshComponentNode = entityNode["MeshComponent"];
