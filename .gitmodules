@@ -16,3 +16,6 @@
 [submodule "Engine/thirdparty/yaml-cpp"]
 	path = Engine/thirdparty/yaml-cpp
 	url = https://github.com/jbeder/yaml-cpp.git
+[submodule "docs/doxygen-awesome"]
+	path = docs/doxygen-awesome
+	url = https://github.com/jothepro/doxygen-awesome-css.git

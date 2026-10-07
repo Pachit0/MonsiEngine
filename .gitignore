@@ -2,5 +2,6 @@
 build/
 /.vs
 /Old
+/docs
 CMakeSettings.json
 CppProperties.json

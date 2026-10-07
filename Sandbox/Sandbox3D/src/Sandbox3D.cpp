@@ -44,7 +44,7 @@ void Sandbox3D::OnLayerAttach()
 	m_SkyBoxEntity = m_Scene->CreateEntity("SkyBox", false);
 	m_SkyBoxEntity.AddComponent<Monsi::SkyBoxComponent>(m_SkyBoxTest, skyBoxTexturesPaths);
 
-	m_ShadowMap = Monsi::ShadowMap::Create(8192, 8192);
+	m_ShadowMap = Monsi::ShadowMap::Create(8196, 8196);
 
 	m_ShpereMaterial = Monsi::CreateReference<Monsi::Material>();
 	m_ShpereMaterial->AmbientColor = glm::vec3(0.247f, 0.199f, 0.074f);
