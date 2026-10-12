@@ -20,6 +20,11 @@ target_include_directories( Game PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../../SceneEditor/Panel
 )
 
+
+if(WIN32)
+    target_compile_definitions(Editor PRIVATE MONSI_BUILD_DEBUG)
+endif()
+
 target_link_libraries( Game PRIVATE 
     Engine
 )

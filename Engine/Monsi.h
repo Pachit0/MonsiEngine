@@ -45,3 +45,5 @@
 
 //  Scripts
 #include "Scripts/CameraControllerScript.h"
+#include "Scripts/CameraFollowScript.h"
+#include "Scripts/PlayerControllerScript.h"

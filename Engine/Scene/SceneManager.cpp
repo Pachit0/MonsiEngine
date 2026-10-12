@@ -3,6 +3,9 @@
 #include "Entity.h"
 #include "Components.h"
 #include "MeshBuilder.h"
+#include "Scripts/PlayerControllerScript.h"
+#include "Scripts/CameraControllerScript.h"
+#include "Scripts/CameraFollowScript.h"
 #include <yaml-cpp/yaml.h>
 
 namespace YAML {
@@ -210,6 +213,11 @@ namespace YAML {
 
 namespace Monsi {
 
+	struct DeferredCameraFollowLink {
+		CameraFollowScript* FollowScript;
+		std::string TargetTag;
+	};
+
 	static void SerializeEntity(YAML::Emitter& out, Entity entity) {
 		out << YAML::BeginMap;
 		out << YAML::Key << "Entity_ID" << YAML::Value << "1337420"; // TODO: replace with a UUID per entity
@@ -261,6 +269,37 @@ namespace Monsi {
 			out << YAML::Key << "Far" << YAML::Value << smc.Settings.FarPlane;
 			out << YAML::Key << "OrthoSize" << YAML::Value << smc.Settings.OrthoSize;
 			out << YAML::Key << "ShadowIntensity" << YAML::Value << smc.Settings.ShadowIntensity;
+			out << YAML::EndMap;
+		}
+
+		if (entity.HasComponent<NativeScriptComponent>()) {
+			auto& nsc = entity.GetComponent<NativeScriptComponent>();
+			out << YAML::Key << "NativeScriptComponent";
+			out << YAML::BeginMap;
+
+			if (auto* playerScript = nsc.GetScriptAs<PlayerControllerScript>()) {
+				out << YAML::Key << "ScriptClassName" << YAML::Value << "PlayerControllerScript";
+			}
+			else if (auto* camScript = nsc.GetScriptAs<CameraControllerScript>()) {
+				out << YAML::Key << "ScriptClassName" << YAML::Value << "CameraControllerScript";
+				out << YAML::Key << "LookMode" << YAML::Value << (int)camScript->GetLookMode();
+				out << YAML::Key << "YawPitchRoll" << YAML::Value << camScript->GetYawPitchRoll();
+			}
+			else if (auto* followScript = nsc.GetScriptAs<CameraFollowScript>()) {
+				out << YAML::Key << "ScriptClassName" << YAML::Value << "CameraFollowScript";
+				out << YAML::Key << "LookAtTarget" << YAML::Value << followScript->GetLookAtTarget();
+				out << YAML::Key << "LookAtOffset" << YAML::Value << followScript->GetLookAtOffset();
+				out << YAML::Key << "PositionSmoothSpeed" << YAML::Value << followScript->GetPositionSmoothSpeed();
+				out << YAML::Key << "RotationSmoothSpeed" << YAML::Value << followScript->GetRotationSmoothSpeed();
+				out << YAML::Key << "PositionOffset" << YAML::Value << followScript->GetPositionOffset();
+				out << YAML::Key << "RotationOffset" << YAML::Value << followScript->GetRotationOffset();
+
+				Entity target = followScript->GetTarget();
+				if (target && target.HasComponent<TagComponent>()) {
+					out << YAML::Key << "TargetTag" << YAML::Value << target.GetComponent<TagComponent>().Tag;
+				}
+			}
+
 			out << YAML::EndMap;
 		}
 
@@ -418,6 +457,8 @@ namespace Monsi {
 
 		std::string sceneName = data["Scene"].as<std::string>();
 		ENGINE_LOG_TRACE("Loading scene '{0}'", sceneName);
+
+		std::vector<DeferredCameraFollowLink> deferredCameraFollowLinks;
 
 		auto entities = data["Entities"];
 		if (entities) {
@@ -640,11 +681,76 @@ namespace Monsi {
 
 						deserializedEntity.AddComponent<Monsi::SkyBoxComponent>(skyBoxTexture, assetPaths);
 					}
+
+					auto nativeScriptComponentNode = entityNode["NativeScriptComponent"];
+					if (nativeScriptComponentNode) {
+						std::string scriptClassName = nativeScriptComponentNode["ScriptClassName"].as<std::string>();
+
+						if (scriptClassName == "PlayerControllerScript") {
+							auto& nsc = deserializedEntity.AddComponent<NativeScriptComponent>();
+							nsc.Bind<PlayerControllerScript>();
+						}
+						else if (scriptClassName == "CameraControllerScript") {
+							auto& nsc = deserializedEntity.AddComponent<NativeScriptComponent>();
+							nsc.Bind<CameraControllerScript>();
+							auto* camScript = nsc.GetScriptAs<CameraControllerScript>();
+
+							if (camScript) {
+								if (nativeScriptComponentNode["LookMode"]) {
+									camScript->SetLookMode((CameraControllerScript::LookMode)nativeScriptComponentNode["LookMode"].as<int>());
+								}
+								if (nativeScriptComponentNode["YawPitchRoll"]) {
+									glm::vec3 ypr = nativeScriptComponentNode["YawPitchRoll"].as<glm::vec3>();
+									camScript->SetYawPitchRoll(ypr.x, ypr.y, ypr.z);
+								}
+							}
+						}
+						else if (scriptClassName == "CameraFollowScript") {
+							auto& nsc = deserializedEntity.AddComponent<NativeScriptComponent>();
+							nsc.Bind<CameraFollowScript>();
+							auto* followScript = nsc.GetScriptAs<CameraFollowScript>();
+
+							if (followScript) {
+								if (nativeScriptComponentNode["LookAtTarget"]) {
+									followScript->SetLookAtTarget(nativeScriptComponentNode["LookAtTarget"].as<bool>());
+								}
+								if (nativeScriptComponentNode["LookAtOffset"]) {
+									followScript->SetLookAtOffset(nativeScriptComponentNode["LookAtOffset"].as<glm::vec3>());
+								}
+								if (nativeScriptComponentNode["PositionSmoothSpeed"]) {
+									followScript->SetPositionSmoothSpeed(nativeScriptComponentNode["PositionSmoothSpeed"].as<float>());
+								}
+								if (nativeScriptComponentNode["RotationSmoothSpeed"]) {
+									followScript->SetRotationSmoothSpeed(nativeScriptComponentNode["RotationSmoothSpeed"].as<float>());
+								}
+								if (nativeScriptComponentNode["PositionOffset"]) {
+									followScript->SetPositionOffset(nativeScriptComponentNode["PositionOffset"].as<glm::vec3>());
+								}
+								if (nativeScriptComponentNode["RotationOffset"]) {
+									followScript->SetRotationOffset(nativeScriptComponentNode["RotationOffset"].as<glm::quat>());
+								}
+
+								if (nativeScriptComponentNode["TargetTag"]) {
+									std::string targetTag = nativeScriptComponentNode["TargetTag"].as<std::string>();
+									deferredCameraFollowLinks.push_back({ followScript, targetTag });
+								}
+							}
+						}
+					}
 				}
 			}
+
+			for (const auto& link : deferredCameraFollowLinks) {
+				for (auto entHandle : m_Scene->m_Registry.view<entt::entity>()) {
+					Entity ent{ entHandle, m_Scene.get() };
+					if (ent.HasComponent<TagComponent>() && ent.GetComponent<TagComponent>().Tag == link.TargetTag) {
+						link.FollowScript->SetTarget(ent);
+						break;
+					}
+				}
+			}
+
+			return true;
 		}
-
-		return true;
 	}
-
 }

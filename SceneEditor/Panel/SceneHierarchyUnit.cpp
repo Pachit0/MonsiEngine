@@ -3,6 +3,8 @@
 
 #include "MonsiKeyCodes.h"
 #include "Scripts/CameraControllerScript.h"
+#include "Scripts/CameraFollowScript.h"
+#include "Scripts/PlayerControllerScript.h"
 #include "SceneHierarchyUnit.h"
 #include "RenderInitializator.h"
 #include "MeshBuilder.h"
@@ -225,12 +227,14 @@ namespace Monsi {
 
 			if (ImGui::BeginPopupContextWindow(0, ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems)) {
 				if (ImGui::BeginMenu("Add Component")) {
-					if (ImGui::MenuItem("Camera")) {
-						m_Selected.AddComponent<CameraComponent>();
-						if (!m_Selected.HasComponent<TransformComponent>()) {
-							m_Selected.AddComponent<TransformComponent>();
+					if (!m_Selected.HasComponent<CameraComponent>()) {
+						if (ImGui::MenuItem("Camera")) {
+							m_Selected.AddComponent<CameraComponent>();
+							if (!m_Selected.HasComponent<TransformComponent>()) {
+								m_Selected.AddComponent<TransformComponent>();
+							}
+							ImGui::CloseCurrentPopup();
 						}
-						ImGui::CloseCurrentPopup();
 					}
 
 					if (RenderSystem::GetActiveType() == RenderTypeEnum::Renderer2D) {
@@ -347,19 +351,32 @@ namespace Monsi {
 					}
 					ImGui::EndMenu();
 				}
-
-				if (m_Selected.HasComponent<CameraComponent>()) {
-					if (!m_Selected.HasComponent<NativeScriptComponent>()) {
-						if (ImGui::BeginMenu("Add Script")) {
-							if (m_Selected.HasComponent<CameraComponent>()) {
-
-								if (ImGui::MenuItem("Camera Controller")) {
-									m_Selected.AddComponent<Monsi::NativeScriptComponent>().Bind<Monsi::PerspectiveCameraControllerScript>();
-									ImGui::CloseCurrentPopup();
-								}
-							}
-							ImGui::EndMenu();
+				
+				if (!m_Selected.HasComponent<NativeScriptComponent>() &&
+					!m_Selected.HasComponent<SSAOComponent>() &&
+					!m_Selected.HasComponent<ShadowMapComponent>() &&
+					!m_Selected.HasComponent<SkyBoxComponent>() &&
+					!m_Selected.HasComponent<DirectionalLightComponent>())
+				{
+					if (ImGui::BeginMenu("Add Script")) {
+						if (ImGui::MenuItem("Player Controller")) {
+							m_Selected.AddComponent<Monsi::NativeScriptComponent>().Bind<Monsi::PlayerControllerScript>();
+							ImGui::CloseCurrentPopup();
 						}
+
+						if (m_Selected.HasComponent<CameraComponent>()) {
+							if (ImGui::MenuItem("Camera Controller")) {
+								m_Selected.AddComponent<Monsi::NativeScriptComponent>().Bind<Monsi::CameraControllerScript>();
+								ImGui::CloseCurrentPopup();
+							}
+
+							if (ImGui::MenuItem("Camera Follow")) {
+								m_Selected.AddComponent<Monsi::NativeScriptComponent>().Bind<Monsi::CameraFollowScript>();
+								ImGui::CloseCurrentPopup();
+							}
+						}
+
+						ImGui::EndMenu();
 					}
 				}
 
@@ -510,7 +527,7 @@ namespace Monsi {
 
 				if (entity.HasComponent<NativeScriptComponent>()) {
 					auto& nsc = entity.GetComponent<NativeScriptComponent>();
-					if (auto* camScript = nsc.GetScriptAs<PerspectiveCameraControllerScript>()) {
+					if (auto* camScript = nsc.GetScriptAs<CameraControllerScript>()) {
 						camScript->SetYawPitchRoll(EulerDegrees.y, EulerDegrees.x, EulerDegrees.z);
 					}
 				}
@@ -629,32 +646,123 @@ namespace Monsi {
 			}
 			});
 
-		DrawComponent<NativeScriptComponent>("Camera Controller Script", entity, [&](auto& component) {
-			auto* camScript = component.template GetScriptAs<PerspectiveCameraControllerScript>();
-
-			if (!camScript) {
+		DrawComponent<NativeScriptComponent>("Script Component", entity, [&](auto& component) {
+			if (auto* playerScript = component.GetScriptAs<PlayerControllerScript>()) {
+				ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "PlayerControllerScript");
+				ImGui::Separator();
 				ImGui::TextDisabled("(script type has no exposed properties)");
-				return;
 			}
+			else if (auto* camScript = component.GetScriptAs<CameraControllerScript>()) {
+				ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "CameraControllerScript");
+				ImGui::Separator();
 
-			const char* lookModeNames[] = { "Right Click", "FPS" };
-			int currentMode = (int)camScript->GetLookMode();
+				const char* lookModeNames[] = { "Right Click", "FPS" };
+				int currentMode = (int)camScript->GetLookMode();
 
-			if (ImGui::BeginCombo("Look Mode", lookModeNames[currentMode])) {
-				for (int i = 0; i < 2; i++) {
-					bool selected = (currentMode == i);
-					if (ImGui::Selectable(lookModeNames[i], selected)) {
-						camScript->SetLookMode((PerspectiveCameraControllerScript::LookMode)i);
+				if (ImGui::BeginCombo("Look Mode", lookModeNames[currentMode])) {
+					for (int i = 0; i < 2; i++) {
+						bool selected = (currentMode == i);
+						if (ImGui::Selectable(lookModeNames[i], selected)) {
+							camScript->SetLookMode((CameraControllerScript::LookMode)i);
+						}
+						if (selected) {
+							ImGui::SetItemDefaultFocus();
+						}
 					}
-					if (selected) {
+					ImGui::EndCombo();
+				}
+
+				glm::vec3 scriptYawPitchRoll = camScript->GetYawPitchRoll();
+				ImGui::Text("Yaw: %.2f  Pitch: %.2f  Roll: %.2f", scriptYawPitchRoll.x, scriptYawPitchRoll.y, scriptYawPitchRoll.z);
+			}
+			else if (auto* followScript = component.GetScriptAs<CameraFollowScript>()) {
+				ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "CameraFollowScript");
+				ImGui::Separator();
+
+				Entity currentTarget = followScript->GetTarget();
+				std::string currentTargetName = "None";
+				if (currentTarget && currentTarget.HasComponent<TagComponent>()) {
+					currentTargetName = currentTarget.GetComponent<TagComponent>().Tag;
+				}
+
+				if (ImGui::BeginCombo("Target", currentTargetName.c_str())) {
+					bool isNoneSelected = !currentTarget;
+					if (ImGui::Selectable("None", isNoneSelected)) {
+						followScript->SetTarget({});
+					}
+					if (isNoneSelected) {
 						ImGui::SetItemDefaultFocus();
 					}
-				}
-				ImGui::EndCombo();
-			}
 
-			glm::vec3 scriptYawPitchRoll = camScript->GetYawPitchRoll();
-			ImGui::Text("Yaw: %.2f  Pitch: %.2f  Roll: %.2f", scriptYawPitchRoll.x, scriptYawPitchRoll.y, scriptYawPitchRoll.z);
+					if (m_Scene) {
+						for (auto entHandle : m_Scene->m_Registry.view<entt::entity>()) {
+							Entity ent{ entHandle, m_Scene.get() };
+
+							if (ent == entity)
+								continue;
+
+							if (ent.HasComponent<SSAOComponent>() ||
+								ent.HasComponent<ShadowMapComponent>() ||
+								ent.HasComponent<SkyBoxComponent>() ||
+								ent.HasComponent<DirectionalLightComponent>()) 
+							{
+								continue;
+							}
+
+							if (ent.HasComponent<TagComponent>()) {
+								std::string tagName = ent.GetComponent<TagComponent>().Tag;
+								bool isSelected = (currentTarget == ent);
+
+								if (ImGui::Selectable(tagName.c_str(), isSelected)) {
+									followScript->SetTarget(ent);
+								}
+
+								if (isSelected) {
+									ImGui::SetItemDefaultFocus();
+								}
+							}
+						}
+					}
+					ImGui::EndCombo();
+				}
+
+				bool lookAt = followScript->GetLookAtTarget();
+				if (ImGui::Checkbox("Look At Target", &lookAt)) {
+					followScript->SetLookAtTarget(lookAt);
+				}
+
+				if (lookAt) {
+					glm::vec3 lookOffset = followScript->GetLookAtOffset();
+					if (ImGui::DragFloat3("Look At Offset", glm::value_ptr(lookOffset), 0.1f)) {
+						followScript->SetLookAtOffset(lookOffset);
+					}
+				}
+
+				float posSpeed = followScript->GetPositionSmoothSpeed();
+				if (ImGui::DragFloat("Position Smooth Speed", &posSpeed, 0.1f, 0.0f, 100.0f, "%.1f")) {
+					followScript->SetPositionSmoothSpeed(posSpeed);
+				}
+
+				float rotSpeed = followScript->GetRotationSmoothSpeed();
+				if (ImGui::DragFloat("Rotation Smooth Speed", &rotSpeed, 0.1f, 0.0f, 100.0f, "%.1f")) {
+					followScript->SetRotationSmoothSpeed(rotSpeed);
+				}
+
+				glm::vec3 posOffset = followScript->GetPositionOffset();
+				if (ImGui::DragFloat3("Position Offset", glm::value_ptr(posOffset), 0.1f)) {
+					followScript->SetPositionOffset(posOffset);
+				}
+
+				if (!lookAt) {
+					glm::vec3 rotOffsetEuler = glm::degrees(glm::eulerAngles(followScript->GetRotationOffset()));
+					if (ImGui::DragFloat3("Rotation Offset (Deg)", glm::value_ptr(rotOffsetEuler), 0.5f)) {
+						followScript->SetRotationOffset(glm::quat(glm::radians(rotOffsetEuler)));
+					}
+				}
+			}
+			else {
+				ImGui::TextDisabled("(script type has no exposed properties)");
+			}
 			});
 
 		DrawComponent<CameraComponent>("Camera", entity, [this, entity](auto& component) {

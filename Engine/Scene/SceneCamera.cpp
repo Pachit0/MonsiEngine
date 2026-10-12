@@ -1,4 +1,3 @@
-// SceneCamera.cpp
 #include "MonsiPch.h"
 #include "SceneCamera.h"
 #include "glm/gtc/matrix_transform.hpp"

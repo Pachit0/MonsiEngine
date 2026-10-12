@@ -17,7 +17,7 @@
 
 namespace Monsi {
 
-	class PerspectiveCameraControllerScript : public ScriptableEntity
+	class CameraControllerScript : public ScriptableEntity
 	{
 	public:
 		enum class LookMode { RightClick = 0, FPS = 1 };
@@ -36,6 +36,11 @@ namespace Monsi {
 
 		void OnUpdate(TimeStep ts)
 		{
+			auto& cameraComp = GetComponent<CameraComponent>();
+			if (!cameraComp.Primary) {
+				return;
+			}
+
 			auto& transform = GetComponent<TransformComponent>();
 
 			if (m_LookMode == LookMode::FPS)

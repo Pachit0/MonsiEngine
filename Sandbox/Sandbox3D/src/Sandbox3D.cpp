@@ -91,7 +91,7 @@ void Sandbox3D::OnLayerAttach()
 	pointLight.Intensity = 1.0f;
 	pointLight.Radius = 10.0f;
 
-	m_ShadowMapEntity = m_Scene->CreateEntity("ShadowMap", false);
+	m_ShadowMapEntity = m_Scene->CreateEntity("ShadowMap");
 	m_ShadowMapEntity.AddComponent<Monsi::ShadowMapComponent>(m_ShadowMap);
 
 	m_BackpackEntity = m_Scene->CreateEntity("Backpack");
@@ -133,8 +133,8 @@ void Sandbox3D::OnLayerAttach()
 
 	m_Unit.SetContext(m_Scene);
 
-	m_CameraPerspectiveEntity.AddComponent<Monsi::NativeScriptComponent>().Bind<Monsi::PerspectiveCameraControllerScript>();
-	m_CameraOrthogonalEntity.AddComponent<Monsi::NativeScriptComponent>().Bind<Monsi::PerspectiveCameraControllerScript>();
+	m_CameraPerspectiveEntity.AddComponent<Monsi::NativeScriptComponent>().Bind<Monsi::CameraControllerScript>();
+	m_CameraOrthogonalEntity.AddComponent<Monsi::NativeScriptComponent>().Bind<Monsi::CameraControllerScript>();
 }
 
 void Sandbox3D::OnLayerUpdate(Monsi::TimeStep timestep)
