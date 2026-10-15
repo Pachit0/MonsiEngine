@@ -681,72 +681,80 @@ namespace Monsi {
 
 						deserializedEntity.AddComponent<Monsi::SkyBoxComponent>(skyBoxTexture, assetPaths);
 					}
+				}
 
-					auto nativeScriptComponentNode = entityNode["NativeScriptComponent"];
-					if (nativeScriptComponentNode) {
-						std::string scriptClassName = nativeScriptComponentNode["ScriptClassName"].as<std::string>();
+				auto nativeScriptComponentNode = entityNode["NativeScriptComponent"];
+				if (nativeScriptComponentNode) {
+					std::string scriptClassName = nativeScriptComponentNode["ScriptClassName"].as<std::string>();
 
-						if (scriptClassName == "PlayerControllerScript") {
-							auto& nsc = deserializedEntity.AddComponent<NativeScriptComponent>();
-							nsc.Bind<PlayerControllerScript>();
-						}
-						else if (scriptClassName == "CameraControllerScript") {
-							auto& nsc = deserializedEntity.AddComponent<NativeScriptComponent>();
-							nsc.Bind<CameraControllerScript>();
-							auto* camScript = nsc.GetScriptAs<CameraControllerScript>();
+					if (scriptClassName == "PlayerControllerScript") {
+						auto& nsc = deserializedEntity.AddComponent<NativeScriptComponent>();
+						nsc.Bind<PlayerControllerScript>();
+					}
+					else if (scriptClassName == "CameraControllerScript") {
+						auto& nsc = deserializedEntity.AddComponent<NativeScriptComponent>();
+						nsc.Bind<CameraControllerScript>();
+						auto* camScript = nsc.GetScriptAs<CameraControllerScript>();
 
-							if (camScript) {
-								if (nativeScriptComponentNode["LookMode"]) {
-									camScript->SetLookMode((CameraControllerScript::LookMode)nativeScriptComponentNode["LookMode"].as<int>());
-								}
-								if (nativeScriptComponentNode["YawPitchRoll"]) {
-									glm::vec3 ypr = nativeScriptComponentNode["YawPitchRoll"].as<glm::vec3>();
-									camScript->SetYawPitchRoll(ypr.x, ypr.y, ypr.z);
-								}
+						if (camScript) {
+							if (nativeScriptComponentNode["LookMode"]) {
+								camScript->SetLookMode((CameraControllerScript::LookMode)nativeScriptComponentNode["LookMode"].as<int>());
+							}
+							if (nativeScriptComponentNode["YawPitchRoll"]) {
+								glm::vec3 ypr = nativeScriptComponentNode["YawPitchRoll"].as<glm::vec3>();
+								camScript->SetYawPitchRoll(ypr.x, ypr.y, ypr.z);
 							}
 						}
-						else if (scriptClassName == "CameraFollowScript") {
-							auto& nsc = deserializedEntity.AddComponent<NativeScriptComponent>();
-							nsc.Bind<CameraFollowScript>();
-							auto* followScript = nsc.GetScriptAs<CameraFollowScript>();
+					}
+					else if (scriptClassName == "CameraFollowScript") {
+						auto& nsc = deserializedEntity.AddComponent<NativeScriptComponent>();
+						nsc.Bind<CameraFollowScript>();
+						auto* followScript = nsc.GetScriptAs<CameraFollowScript>();
 
-							if (followScript) {
-								if (nativeScriptComponentNode["LookAtTarget"]) {
-									followScript->SetLookAtTarget(nativeScriptComponentNode["LookAtTarget"].as<bool>());
-								}
-								if (nativeScriptComponentNode["LookAtOffset"]) {
-									followScript->SetLookAtOffset(nativeScriptComponentNode["LookAtOffset"].as<glm::vec3>());
-								}
-								if (nativeScriptComponentNode["PositionSmoothSpeed"]) {
-									followScript->SetPositionSmoothSpeed(nativeScriptComponentNode["PositionSmoothSpeed"].as<float>());
-								}
-								if (nativeScriptComponentNode["RotationSmoothSpeed"]) {
-									followScript->SetRotationSmoothSpeed(nativeScriptComponentNode["RotationSmoothSpeed"].as<float>());
-								}
-								if (nativeScriptComponentNode["PositionOffset"]) {
-									followScript->SetPositionOffset(nativeScriptComponentNode["PositionOffset"].as<glm::vec3>());
-								}
-								if (nativeScriptComponentNode["RotationOffset"]) {
-									followScript->SetRotationOffset(nativeScriptComponentNode["RotationOffset"].as<glm::quat>());
-								}
-
-								if (nativeScriptComponentNode["TargetTag"]) {
-									std::string targetTag = nativeScriptComponentNode["TargetTag"].as<std::string>();
-									deferredCameraFollowLinks.push_back({ followScript, targetTag });
-								}
+						if (followScript) {
+							if (nativeScriptComponentNode["LookAtTarget"]) {
+								followScript->SetLookAtTarget(nativeScriptComponentNode["LookAtTarget"].as<bool>());
 							}
+							if (nativeScriptComponentNode["LookAtOffset"]) {
+								followScript->SetLookAtOffset(nativeScriptComponentNode["LookAtOffset"].as<glm::vec3>());
+							}
+							if (nativeScriptComponentNode["PositionSmoothSpeed"]) {
+								followScript->SetPositionSmoothSpeed(nativeScriptComponentNode["PositionSmoothSpeed"].as<float>());
+							}
+							if (nativeScriptComponentNode["RotationSmoothSpeed"]) {
+								followScript->SetRotationSmoothSpeed(nativeScriptComponentNode["RotationSmoothSpeed"].as<float>());
+							}
+							if (nativeScriptComponentNode["PositionOffset"]) {
+								followScript->SetPositionOffset(nativeScriptComponentNode["PositionOffset"].as<glm::vec3>());
+							}
+							if (nativeScriptComponentNode["RotationOffset"]) {
+								followScript->SetRotationOffset(nativeScriptComponentNode["RotationOffset"].as<glm::quat>());
+							}
+
+							if (nativeScriptComponentNode["TargetTag"]) {
+								std::string targetTag = nativeScriptComponentNode["TargetTag"].as<std::string>();
+								deferredCameraFollowLinks.push_back({ followScript, targetTag });
+							}
+						}
+						else {
+							ENGINE_LOG_ERROR("CameraFollowScript instance was null after Bind");
 						}
 					}
 				}
 			}
 
 			for (const auto& link : deferredCameraFollowLinks) {
+				bool found = false;
 				for (auto entHandle : m_Scene->m_Registry.view<entt::entity>()) {
 					Entity ent{ entHandle, m_Scene.get() };
 					if (ent.HasComponent<TagComponent>() && ent.GetComponent<TagComponent>().Tag == link.TargetTag) {
 						link.FollowScript->SetTarget(ent);
+						found = true;
 						break;
 					}
+				}
+				if (!found) {
+					ENGINE_LOG_ERROR("CameraFollowScript target '{0}' not found", link.TargetTag);
 				}
 			}
 

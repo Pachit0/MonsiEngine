@@ -139,15 +139,23 @@ namespace Monsi {
 	struct NativeScriptComponent
 	{
 		ScriptableEntity* Instance = nullptr;
+		bool Created = false;
 
-		ScriptableEntity* (*InstantiateFuncPtr)();
-		void (*DestroyInstanceFuncPtr)(NativeScriptComponent*);
+		ScriptableEntity* (*InstantiateFuncPtr)() = nullptr;
+		void (*DestroyInstanceFuncPtr)(NativeScriptComponent*) = nullptr;
 
 		template<typename T>
 		void Bind()
 		{
 			InstantiateFuncPtr = []() { return static_cast<ScriptableEntity*>(new T()); };
-			DestroyInstanceFuncPtr = [](NativeScriptComponent* nativeScript) { delete nativeScript->Instance; nativeScript->Instance = nullptr; };
+			DestroyInstanceFuncPtr = [](NativeScriptComponent* nativeScript) {
+				delete nativeScript->Instance;
+				nativeScript->Instance = nullptr;
+				nativeScript->Created = false;
+				};
+
+			if (!Instance)
+				Instance = InstantiateFuncPtr();
 		}
 
 		template<typename T>

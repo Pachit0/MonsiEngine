@@ -19,6 +19,11 @@ namespace Monsi {
 
 	Scene::~Scene()
 	{
+		m_Registry.view<NativeScriptComponent>().each([](auto, auto& nsc)
+			{
+				if (nsc.Instance && nsc.DestroyInstanceFuncPtr)
+					nsc.DestroyInstanceFuncPtr(&nsc);
+			});
 	}
 
 	Entity Scene::CreateEntity(const std::string& name, bool hasTransform)
@@ -81,9 +86,15 @@ namespace Monsi {
 				{
 					if (!nativeScript.Instance)
 					{
+						if (!nativeScript.InstantiateFuncPtr) return;
 						nativeScript.Instance = nativeScript.InstantiateFuncPtr();
+					}
+
+					if (!nativeScript.Created)
+					{
 						nativeScript.Instance->m_Entity = Entity{ entity, this };
 						nativeScript.Instance->OnCreate();
+						nativeScript.Created = true;
 					}
 
 					nativeScript.Instance->OnUpdate(timeStep);

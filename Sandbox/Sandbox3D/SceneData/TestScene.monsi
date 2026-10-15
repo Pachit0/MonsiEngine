@@ -139,6 +139,10 @@ Entities:
   - Entity_ID: 1337420
     TagComponent:
       Tag: ShadowMap
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [1, 0, 0, 0]
+      Scale: [1, 1, 1]
     ShadowMapComponent:
       Width: 4096
       Height: 4096
@@ -176,9 +180,13 @@ Entities:
     TagComponent:
       Tag: Orthogonal Camera
     TransformComponent:
-      Translation: [-17.126122, 5.237704, -3.2939353]
-      Rotation: [0.6308275, -0.09146565, -0.76253957, -0.110562995]
+      Translation: [0, 0, 0]
+      Rotation: [0.70710677, 0, -0.70710677, 0]
       Scale: [1, 1, 1]
+    NativeScriptComponent:
+      ScriptClassName: CameraControllerScript
+      LookMode: 0
+      YawPitchRoll: [-90, 0, 0]
     CameraComponent:
       Primary: false
       FixedAspectRatio: false
@@ -194,9 +202,13 @@ Entities:
     TagComponent:
       Tag: Perspective Camera
     TransformComponent:
-      Translation: [-17.126411, 5.2369404, -3.294001]
-      Rotation: [0.6308275, -0.09146565, -0.76253957, -0.110562995]
+      Translation: [-30.761745, 8.572803, -1.9295552]
+      Rotation: [0.69401366, -0.06621472, -0.7136697, -0.068090074]
       Scale: [1, 1, 1]
+    NativeScriptComponent:
+      ScriptClassName: CameraControllerScript
+      LookMode: 0
+      YawPitchRoll: [-91.59999, -10.900002, 0]
     CameraComponent:
       Primary: true
       FixedAspectRatio: false
