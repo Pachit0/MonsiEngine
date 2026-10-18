@@ -5,6 +5,8 @@
 #include "ShadowMap.h"
 #include "FrameBuffer.h"
 
+#include <glm/glm.hpp>
+
 namespace Monsi {
 	class Entity;
 
@@ -19,6 +21,12 @@ namespace Monsi {
 		void RemoveEntity(Entity entity);
 		void OnUpdate(TimeStep timeStep);
 		void OnViewportResize(uint32_t width, uint32_t height);
+
+		glm::mat4 GetWorldTransform(entt::entity entity);
+		glm::mat4 GetWorldTransform(Entity entity);
+		glm::mat4 GetParentWorldTransform(Entity entity);
+
+		Entity GetPrimaryCameraEntity();
 	private:
 		template<typename T>
 		void OnAddComponent(Entity entity, T& component);

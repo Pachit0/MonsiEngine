@@ -19,3 +19,6 @@
 [submodule "docs/doxygen-awesome"]
 	path = docs/doxygen-awesome
 	url = https://github.com/jothepro/doxygen-awesome-css.git
+[submodule "Engine/ThirdParty/ImGuizmo"]
+	path = Engine/ThirdParty/ImGuizmo
+	url = https://github.com/CedricGuillemet/ImGuizmo.git

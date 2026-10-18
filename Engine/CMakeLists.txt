@@ -22,6 +22,7 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/ImGui/*.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/ModelLoader/*.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/Physics/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Core/*.cpp"
 )
 
 file(GLOB THIRD_PARTY_SOURCES
@@ -65,6 +66,7 @@ target_include_directories(Engine PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/Events
     ${CMAKE_CURRENT_SOURCE_DIR}/Physics
     ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/entt
+    ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/ImGuizmo/src
     ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/spdlog/include
     ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glfw/include
     ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/assimp/include
@@ -86,11 +88,12 @@ target_link_libraries(Engine
            assimp
            yaml-cpp::yaml-cpp
            Jolt
+           ImGuizmo
 )
 
 if(WIN32)
     target_link_libraries(Engine PUBLIC opengl32)
-else(CMAKE_SYSTEM_NAME MATCHES "Linux")
+elseif(CMAKE_SYSTEM_NAME MATCHES "Linux")
     find_package(X11 REQUIRED)
     target_link_libraries(Engine PUBLIC GL ${X11_LIBRARIES})
 endif()

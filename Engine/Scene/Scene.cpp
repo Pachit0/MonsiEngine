@@ -51,7 +51,55 @@ namespace Monsi {
 
 	void Scene::RemoveEntity(Entity entity)
 	{
-		m_Registry.destroy(entity);
+		entt::entity handle = entity;
+
+		if (!m_Registry.valid(handle))
+			return;
+
+		if (m_Registry.all_of<RelationshipComponent>(handle))
+		{
+			auto children = m_Registry.get<RelationshipComponent>(handle).Children;
+			for (auto child : children)
+				RemoveEntity(Entity{ child, this });
+		}
+
+		entity.RemoveParent();
+		m_Registry.destroy(handle);
+	}
+
+	glm::mat4 Scene::GetWorldTransform(entt::entity entity)
+	{
+		glm::mat4 local(1.0f);
+		if (m_Registry.all_of<TransformComponent>(entity))
+			local = m_Registry.get<TransformComponent>(entity).GetTransform();
+
+		if (m_Registry.all_of<RelationshipComponent>(entity))
+		{
+			entt::entity parent = m_Registry.get<RelationshipComponent>(entity).Parent;
+			if (parent != entt::null && m_Registry.valid(parent))
+				return GetWorldTransform(parent) * local;
+		}
+
+		return local;
+	}
+
+	glm::mat4 Scene::GetWorldTransform(Entity entity)
+	{
+		return GetWorldTransform((entt::entity)entity);
+	}
+
+	glm::mat4 Scene::GetParentWorldTransform(Entity entity)
+	{
+		entt::entity handle = entity;
+
+		if (m_Registry.all_of<RelationshipComponent>(handle))
+		{
+			entt::entity parent = m_Registry.get<RelationshipComponent>(handle).Parent;
+			if (parent != entt::null && m_Registry.valid(parent))
+				return GetWorldTransform(parent);
+		}
+
+		return glm::mat4(1.0f);
 	}
 
 	void Scene::EnsureGBuffer(uint32_t width, uint32_t height)
@@ -104,12 +152,12 @@ namespace Monsi {
 		auto view = m_Registry.view<TransformComponent, CameraComponent>();
 		for (auto entity : view)
 		{
-			auto [transform, camera] = view.get<TransformComponent, CameraComponent>(entity);
+			auto& camera = view.get<CameraComponent>(entity);
 			if (camera.Primary)
 			{
 				mainCamera = &camera.Camera;
-				cameraTransform = transform.GetTransform();
-				cameraPosition = transform.Translation;
+				cameraTransform = GetWorldTransform(entity);
+				cameraPosition = glm::vec3(cameraTransform[3]);
 				break;
 			}
 		}
@@ -128,7 +176,7 @@ namespace Monsi {
 			auto DirectionalLightView = m_Registry.view<DirectionalLightComponent>();
 			for (auto entity : DirectionalLightView)
 			{
-				auto light = DirectionalLightView.get<DirectionalLightComponent>(entity);
+				auto& light = DirectionalLightView.get<DirectionalLightComponent>(entity);
 				sceneLighting.MainLight.Direction = light.Direction;
 				sceneLighting.MainLight.Color = light.Color;
 				sceneLighting.MainLight.Intensity = light.Intensity;
@@ -137,8 +185,8 @@ namespace Monsi {
 			auto PointLightView = m_Registry.view<TransformComponent, PointLightComponent>();
 			for (auto entity : PointLightView)
 			{
-				auto [transform, light] = PointLightView.get<TransformComponent, PointLightComponent>(entity);
-				glm::vec3 position = transform.Translation;
+				auto& light = PointLightView.get<PointLightComponent>(entity);
+				glm::vec3 position = glm::vec3(GetWorldTransform(entity)[3]);
 				sceneLighting.PointLights.push_back({ position, light.Color, light.Intensity, light.Radius });
 			}
 
@@ -179,15 +227,15 @@ namespace Monsi {
 					auto gbufferMeshGroup = m_Registry.view<TransformComponent, StaticMeshComponent>();
 					for (auto entity : gbufferMeshGroup)
 					{
-						auto [transform, mesh] = gbufferMeshGroup.get<TransformComponent, StaticMeshComponent>(entity);
-						Renderer3D::DrawMeshToGBuffer(mesh.MeshAsset.get(), transform.GetTransform());
+						auto& mesh = gbufferMeshGroup.get<StaticMeshComponent>(entity);
+						Renderer3D::DrawMeshToGBuffer(mesh.MeshAsset.get(), GetWorldTransform(entity));
 					}
 
 					auto gbufferModelGroup = m_Registry.view<TransformComponent, StaticModelComponent>();
 					for (auto entity : gbufferModelGroup)
 					{
-						auto [transform, model] = gbufferModelGroup.get<TransformComponent, StaticModelComponent>(entity);
-						Renderer3D::DrawModelToGBuffer(model.ModelAsset, transform.GetTransform());
+						auto& model = gbufferModelGroup.get<StaticModelComponent>(entity);
+						Renderer3D::DrawModelToGBuffer(model.ModelAsset, GetWorldTransform(entity));
 					}
 
 					Renderer3D::EndGBuffer();
@@ -215,23 +263,23 @@ namespace Monsi {
 			auto staticMeshGroup = m_Registry.view<TransformComponent, StaticMeshComponent>();
 			for (auto entity : staticMeshGroup)
 			{
-				auto [transform, mesh] = staticMeshGroup.get<TransformComponent, StaticMeshComponent>(entity);
-				Renderer3D::DrawMesh(mesh.MeshAsset.get(), transform.GetTransform(), glm::vec4(1.0f));
+				auto& mesh = staticMeshGroup.get<StaticMeshComponent>(entity);
+				Renderer3D::DrawMesh(mesh.MeshAsset.get(), GetWorldTransform(entity), glm::vec4(1.0f));
 			}
 
 			auto staticModelGroup = m_Registry.view<TransformComponent, StaticModelComponent>();
 			for (auto entity : staticModelGroup)
 			{
-				auto [transform, model] = staticModelGroup.get<TransformComponent, StaticModelComponent>(entity);
-				Renderer3D::DrawModel(model.ModelAsset, transform.GetTransform(), glm::vec4(1.0f));
+				auto& model = staticModelGroup.get<StaticModelComponent>(entity);
+				Renderer3D::DrawModel(model.ModelAsset, GetWorldTransform(entity), glm::vec4(1.0f));
 			}
 
 			auto animatedModelGroup = m_Registry.view<TransformComponent, AnimatedModelComponent>();
 			for (auto entity : animatedModelGroup)
 			{
-				auto [transform, model] = animatedModelGroup.get<TransformComponent, AnimatedModelComponent>(entity);
+				auto& model = animatedModelGroup.get<AnimatedModelComponent>(entity);
 				model.ModelAsset->UpdateAnimation(timeStep);
-				Renderer3D::DrawAnimatedModel(model.ModelAsset, transform.GetTransform(), glm::vec4(1.0f));
+				Renderer3D::DrawAnimatedModel(model.ModelAsset, GetWorldTransform(entity), glm::vec4(1.0f));
 			}
 
 			bool hasShadowMap = false;
@@ -282,8 +330,8 @@ namespace Monsi {
 			auto spriteGroup = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
 			for (auto entity : spriteGroup)
 			{
-				auto [transform, sprite] = spriteGroup.get<TransformComponent, SpriteRendererComponent>(entity);
-				Renderer2D::drawQuad(transform.GetTransform(), sprite.Color);
+				auto& sprite = spriteGroup.get<SpriteRendererComponent>(entity);
+				Renderer2D::drawQuad(GetWorldTransform(entity), sprite.Color);
 			}
 
 			Renderer2D::EndScene2D();
@@ -305,6 +353,19 @@ namespace Monsi {
 				cameraComponent.Camera.SetViewportSize(width, height);
 			}
 		}
+	}
+
+	Monsi::Entity Scene::GetPrimaryCameraEntity()
+	{
+		auto view = m_Registry.view<CameraComponent>();
+		for (auto entity : view)
+		{
+			auto& camera = view.get<CameraComponent>(entity);
+			if (camera.Primary) {
+				return Entity{ entity, this };
+			}
+		}
+		return { entt::null, this };
 	}
 
 	template<typename T>

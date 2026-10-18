@@ -68,6 +68,12 @@ set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(YAML_MSVC_SHARED_RT ON CACHE BOOL "" FORCE)
 add_subdirectory(yaml-cpp)
 
+# ImGuizmo
+add_library(ImGuizmo STATIC ImGuizmo/src/ImGuizmo.cpp)
+target_include_directories(ImGuizmo PUBLIC ImGuizmo/src)
+target_link_libraries(ImGuizmo PUBLIC imgui)
+add_subdirectory(ImGuizmo)
+
 # Jolt Physics
 set(TARGET_UNIT_TESTS OFF CACHE BOOL "" FORCE)
 set(TARGET_SAMPLES OFF CACHE BOOL "" FORCE)

@@ -15,8 +15,12 @@ namespace Monsi {
 
 		void SetContext(const Reference<Scene>& scene);
 		void SetFPS(float fps) { m_FPS = fps; }
+		void SetGizmoType(int type);
+		void DrawGizmo(float x, float y, float width, float height);
 
 		void OnImGuiRender();
+
+		Entity GetSelectedEntity() const { return m_Selected; }
 	private:
 		void DrawEntityNode(Entity entity);
 		void DrawComponents(Entity entity);
@@ -35,6 +39,7 @@ namespace Monsi {
 		bool m_ShowInfoWindow = false;
 		bool m_ShowSettingsWindow = false;
 		float m_FPS = 0.0f;
+		int m_GizmoType = -1;
 	};
 
 

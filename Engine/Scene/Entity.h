@@ -10,6 +10,10 @@ namespace Monsi {
 		Entity() = default;
 		Entity(entt::entity handle, Scene* scene);
 		Entity(const Entity& other) = default;
+		Entity& operator=(const Entity& other) = default;
+
+		void SetParent(Entity parent, bool keepWorldTransform = false);
+		void RemoveParent(bool keepWorldTransform = false);
 
 		template<typename Component>
 		bool HasComponent() {
@@ -40,13 +44,13 @@ namespace Monsi {
 		operator bool() const { return m_Handle != entt::null && m_Scene != nullptr; }
 		operator uint32_t() const { return (uint32_t)m_Handle; }
 		operator entt::entity() const { return m_Handle; }
-		bool operator==(const Entity& other) const { return m_Handle == other.m_Handle && m_Scene == other.m_Scene;	}
+		bool operator==(const Entity& other) const { return m_Handle == other.m_Handle && m_Scene == other.m_Scene; }
 		bool operator!=(const Entity& other) const { return !(*this == other); }
 
 	private:
 		entt::entity m_Handle{ entt::null };
 		Scene* m_Scene = nullptr;
 	};
-	
+
 
 }

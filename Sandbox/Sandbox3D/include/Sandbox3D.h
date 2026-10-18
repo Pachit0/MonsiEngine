@@ -26,6 +26,7 @@ private:
 	glm::vec2 m_ViewportSize;
 	bool m_ViewportFocused;
 	bool m_ViewportHovered;
+	int m_GuizmoType = -1;
 
 	Monsi::Reference<Monsi::FrameBuffer> m_FrameBuffer;
 	
@@ -48,6 +49,7 @@ private:
 
 	Monsi::Reference<Monsi::Scene> m_Scene;
 	Monsi::Entity m_CesiumManEntity;
+	Monsi::Entity m_CesiumManVisualEntity;
 	Monsi::Entity m_CameraPerspectiveEntity;
 	Monsi::Entity m_CameraOrthogonalEntity;
 	Monsi::Entity m_SkyBoxEntity;

@@ -1,5 +1,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
+#include <ImGuizmo.h>
+#include <MonsiMath.h>
 
 #include "MonsiKeyCodes.h"
 #include "Scripts/CameraControllerScript.h"
@@ -28,6 +30,9 @@ namespace Monsi {
 
 		return result;
 	}
+
+	static entt::entity s_PendingChild = entt::null;
+	static entt::entity s_PendingParent = entt::null;
 
 	struct Vec3ControlParams {
 		const std::string& label = "null";
@@ -183,13 +188,55 @@ namespace Monsi {
 
 		if (m_Scene)
 		{
+			std::vector<entt::entity> rootEntities;
 			for (auto entity : m_Scene->m_Registry.view<entt::entity>())
 			{
 				Entity ent{ entity, m_Scene.get() };
-				if (ent.HasComponent<TagComponent>()) {
-					DrawEntityNode(ent);
+				if (!ent.HasComponent<TagComponent>())
+					continue;
+
+				if (ent.HasComponent<RelationshipComponent>() && ent.GetComponent<RelationshipComponent>().Parent != entt::null)
+					continue;
+
+				rootEntities.push_back(entity);
+			}
+
+			for (auto entity : rootEntities)
+				DrawEntityNode(Entity{ entity, m_Scene.get() });
+
+			ImVec2 dropAreaSize = ImGui::GetContentRegionAvail();
+			if (dropAreaSize.y > 1.0f)
+			{
+				ImGui::Dummy(dropAreaSize);
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("MONSI_ENTITY"))
+					{
+						s_PendingChild = *(const entt::entity*)payload->Data;
+						s_PendingParent = entt::null;
+					}
+					ImGui::EndDragDropTarget();
 				}
-			};
+			}
+
+			if (s_PendingChild != entt::null)
+			{
+				if (m_Scene->m_Registry.valid(s_PendingChild))
+				{
+					Entity child{ s_PendingChild, m_Scene.get() };
+					if (s_PendingParent == entt::null)
+					{
+						child.RemoveParent(true);
+					}
+					else if (m_Scene->m_Registry.valid(s_PendingParent))
+					{
+						child.SetParent(Entity{ s_PendingParent, m_Scene.get() }, true);
+					}
+				}
+
+				s_PendingChild = entt::null;
+				s_PendingParent = entt::null;
+			}
 		}
 
 		if (ImGui::BeginPopupContextWindow(0, ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems)) {
@@ -351,7 +398,7 @@ namespace Monsi {
 					}
 					ImGui::EndMenu();
 				}
-				
+
 				if (!m_Selected.HasComponent<NativeScriptComponent>() &&
 					!m_Selected.HasComponent<SSAOComponent>() &&
 					!m_Selected.HasComponent<ShadowMapComponent>() &&
@@ -456,17 +503,47 @@ namespace Monsi {
 	void SceneHierarchyUnit::DrawEntityNode(Entity entity)
 	{
 		auto& tag = entity.GetComponent<TagComponent>().Tag;
+
+		std::vector<entt::entity> children;
+		if (entity.HasComponent<RelationshipComponent>())
+			children = entity.GetComponent<RelationshipComponent>().Children;
+
 		ImGuiTreeNodeFlags flags = ((m_Selected == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
+		if (children.empty())
+			flags |= ImGuiTreeNodeFlags_Leaf;
+
 		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
 		if (ImGui::IsItemClicked())
 		{
 			m_Selected = entity;
 		}
 
+		if (ImGui::BeginDragDropSource())
+		{
+			entt::entity draggedHandle = entity;
+			ImGui::SetDragDropPayload("MONSI_ENTITY", &draggedHandle, sizeof(entt::entity));
+			ImGui::TextUnformatted(tag.c_str());
+			ImGui::EndDragDropSource();
+		}
+
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("MONSI_ENTITY"))
+			{
+				s_PendingChild = *(const entt::entity*)payload->Data;
+				s_PendingParent = entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
 		bool entityDeleted = false;
+		bool createChild = false;
 		if (ImGui::BeginPopupContextItem())
 		{
+			if (ImGui::MenuItem("Create Child"))
+				createChild = true;
+
 			if (ImGui::MenuItem("Delete Entity"))
 				entityDeleted = true;
 
@@ -475,19 +552,26 @@ namespace Monsi {
 
 		if (opened)
 		{
-			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
-			bool opened = ImGui::TreeNodeEx((void*)1337, flags, tag.c_str());
-			if (opened) {
-				ImGui::TreePop();
+			for (auto child : children)
+			{
+				if (m_Scene->m_Registry.valid(child) && m_Scene->m_Registry.all_of<TagComponent>(child))
+					DrawEntityNode(Entity{ child, m_Scene.get() });
 			}
+
 			ImGui::TreePop();
+		}
+
+		if (createChild)
+		{
+			Entity child = m_Scene->CreateEntity("Child");
+			child.SetParent(entity, false);
 		}
 
 		if (entityDeleted)
 		{
 			m_Scene->RemoveEntity(entity);
 
-			if (m_Selected == entity)
+			if (m_Selected && !m_Scene->m_Registry.valid((entt::entity)m_Selected))
 				m_Selected = {};
 		}
 
@@ -519,7 +603,10 @@ namespace Monsi {
 				LastRotationEntity = entity;
 			}
 
+			glm::vec3 actualEuler = glm::degrees(glm::eulerAngles(component.Rotation));
+
 			glm::vec3 beforeEdit = EulerDegrees;
+
 			DrawVec3Control({ "Rotation", EulerDegrees });
 
 			if (EulerDegrees != beforeEdit) {
@@ -531,6 +618,9 @@ namespace Monsi {
 						camScript->SetYawPitchRoll(EulerDegrees.y, EulerDegrees.x, EulerDegrees.z);
 					}
 				}
+			}
+			else {
+				EulerDegrees = actualEuler;
 			}
 
 			DrawVec3Control({ .label = "Scale", .values = component.Scale, .resetValue = 1.0f, .minVal = 0.001f, .maxVal = 1000.0f });
@@ -617,6 +707,16 @@ namespace Monsi {
 			settingsChanged |= ImGui::Checkbox("Flip UVs", &settings.FlipUVs);
 			settingsChanged |= ImGui::Checkbox("Gen Smooth Normals", &settings.GenSmoothNormals);
 			settingsChanged |= ImGui::Checkbox("Calc Tangent Space", &settings.CalcTangentSpace);
+			settingsChanged |= ImGui::Checkbox("Pre-transform Vertices", &settings.PreTransformVertices);
+			settingsChanged |= ImGui::Checkbox("Make Left Handed", &settings.MakeLeftHanded);
+			settingsChanged |= ImGui::Checkbox("Flip Winding Order", &settings.FlipWindingOrder);
+
+			const char* coordSystems[] = { "Default (Assimp)", "OpenGL (Right-Handed Y-Up)", "DirectX (Left-Handed Y-Up)", "Blender / Z-Up" };
+			int currentCoordSystem = settings.CoordinateSystem;
+			if (ImGui::Combo("Coordinate System", &currentCoordSystem, coordSystems, IM_ARRAYSIZE(coordSystems))) {
+				settings.CoordinateSystem = currentCoordSystem;
+				settingsChanged = true;
+			}
 
 			if (settingsChanged || ImGui::Button("Reload Model")) {
 				std::string path = component.ModelAsset->GetFilePath();
@@ -637,6 +737,16 @@ namespace Monsi {
 			settingsChanged |= ImGui::Checkbox("Flip UVs", &settings.FlipUVs);
 			settingsChanged |= ImGui::Checkbox("Gen Smooth Normals", &settings.GenSmoothNormals);
 			settingsChanged |= ImGui::Checkbox("Calc Tangent Space", &settings.CalcTangentSpace);
+			settingsChanged |= ImGui::Checkbox("Pre-transform Vertices", &settings.PreTransformVertices);
+			settingsChanged |= ImGui::Checkbox("Make Left Handed", &settings.MakeLeftHanded);
+			settingsChanged |= ImGui::Checkbox("Flip Winding Order", &settings.FlipWindingOrder);
+
+			const char* coordSystems[] = { "Default (Assimp)", "OpenGL (Right-Handed Y-Up)", "DirectX (Left-Handed Y-Up)", "Blender / Z-Up" };
+			int currentCoordSystem = settings.CoordinateSystem;
+			if (ImGui::Combo("Coordinate System", &currentCoordSystem, coordSystems, IM_ARRAYSIZE(coordSystems))) {
+				settings.CoordinateSystem = currentCoordSystem;
+				settingsChanged = true;
+			}
 
 			if (settingsChanged || ImGui::Button("Reload Model")) {
 				std::string path = component.ModelAsset->GetFilePath();
@@ -704,7 +814,7 @@ namespace Monsi {
 							if (ent.HasComponent<SSAOComponent>() ||
 								ent.HasComponent<ShadowMapComponent>() ||
 								ent.HasComponent<SkyBoxComponent>() ||
-								ent.HasComponent<DirectionalLightComponent>()) 
+								ent.HasComponent<DirectionalLightComponent>())
 							{
 								continue;
 							}
@@ -1026,4 +1136,50 @@ namespace Monsi {
 		ImGui::End();
 	}
 
+
+	void SceneHierarchyUnit::SetGizmoType(int type)
+	{
+		m_GizmoType = type;
+	}
+
+	void SceneHierarchyUnit::DrawGizmo(float x, float y, float width, float height)
+	{
+		if (!m_Scene || !m_Selected || m_GizmoType < 0 || !m_Selected.HasComponent<TransformComponent>())
+			return;
+
+		Entity cameraEntity = m_Scene->GetPrimaryCameraEntity();
+		if (!cameraEntity || !cameraEntity.HasComponent<CameraComponent>())
+			return;
+
+		const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
+		const glm::mat4& cameraProjection = camera.GetProjectionMatrix();
+		glm::mat4 cameraView = glm::inverse(m_Scene->GetWorldTransform(cameraEntity));
+
+		ImGuizmo::SetOrthographic(camera.GetProjectionType() == SceneCamera::ProjectionType::Orthographic);
+		ImGuizmo::SetDrawlist();
+		ImGuizmo::SetRect(x, y, width, height);
+
+		auto& tc = m_Selected.GetComponent<TransformComponent>();
+		glm::mat4 worldTransform = m_Scene->GetWorldTransform(m_Selected);
+
+		bool snap = Input::KeyPressed(MONSI_KEY_LEFT_CONTROL);
+		float snapValue = (m_GizmoType == ImGuizmo::OPERATION::ROTATE) ? 45.0f : 0.5f;
+		float snapValues[3] = { snapValue, snapValue, snapValue };
+
+		ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
+			(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::MODE::LOCAL,
+			glm::value_ptr(worldTransform), nullptr, snap ? snapValues : nullptr);
+
+		if (ImGuizmo::IsUsing())
+		{
+			glm::mat4 localTransform = glm::inverse(m_Scene->GetParentWorldTransform(m_Selected)) * worldTransform;
+
+			glm::vec3 translation, rotation, scale;
+			Math::DecomposeTransform(localTransform, translation, rotation, scale);
+
+			tc.Translation = translation;
+			tc.Rotation = glm::quat(rotation);
+			tc.Scale = scale;
+		}
+	}
 }

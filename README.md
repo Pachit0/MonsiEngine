@@ -4,8 +4,6 @@
 
 ## Features In Development
 
-- Skeletal Animations
-- Gizmos
 - Play Button
 - Jolt Physics
 - Indirect instancing

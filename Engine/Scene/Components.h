@@ -136,6 +136,15 @@ namespace Monsi {
 		}
 	};
 
+	struct RelationshipComponent
+	{
+		entt::entity Parent = entt::null;
+		std::vector<entt::entity> Children;
+
+		RelationshipComponent() = default;
+		RelationshipComponent(const RelationshipComponent&) = default;
+	};
+
 	struct NativeScriptComponent
 	{
 		ScriptableEntity* Instance = nullptr;

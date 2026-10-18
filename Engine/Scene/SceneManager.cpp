@@ -3,10 +3,12 @@
 #include "Entity.h"
 #include "Components.h"
 #include "MeshBuilder.h"
+#include "ModelImportSettings.h"
 #include "Scripts/PlayerControllerScript.h"
 #include "Scripts/CameraControllerScript.h"
 #include "Scripts/CameraFollowScript.h"
 #include <yaml-cpp/yaml.h>
+#include <unordered_map>
 
 namespace YAML {
 	Emitter& operator<<(Emitter& out, const glm::vec3& v) {
@@ -214,13 +216,47 @@ namespace YAML {
 namespace Monsi {
 
 	struct DeferredCameraFollowLink {
-		CameraFollowScript* FollowScript;
+		CameraFollowScript* FollowScript = nullptr;
 		std::string TargetTag;
+		uint64_t TargetID = 0;
+		bool HasTargetID = false;
 	};
 
-	static void SerializeEntity(YAML::Emitter& out, Entity entity) {
+	static uint64_t EntityToID(entt::entity handle) {
+		return (uint64_t)(uint32_t)handle;
+	}
+
+	static void SerializeModelSettings(YAML::Emitter& out, const ModelImportSettings& settings) {
+		out << YAML::Key << "CalcTangentSpace" << YAML::Value << settings.CalcTangentSpace;
+		out << YAML::Key << "FlipUVs" << YAML::Value << settings.FlipUVs;
+		out << YAML::Key << "GenSmoothNormals" << YAML::Value << settings.GenSmoothNormals;
+		out << YAML::Key << "PreTransformVertices" << YAML::Value << settings.PreTransformVertices;
+		out << YAML::Key << "MakeLeftHanded" << YAML::Value << settings.MakeLeftHanded;
+		out << YAML::Key << "FlipWindingOrder" << YAML::Value << settings.FlipWindingOrder;
+		out << YAML::Key << "CoordinateSystem" << YAML::Value << settings.CoordinateSystem;
+	}
+
+	template<typename T>
+	static T ReadOrDefault(const YAML::Node& node, const char* key, const T& defaultValue) {
+		auto child = node[key];
+		return child ? child.as<T>() : defaultValue;
+	}
+
+	static ModelImportSettings DeserializeModelSettings(const YAML::Node& node) {
+		ModelImportSettings settings;
+		settings.CalcTangentSpace = ReadOrDefault<bool>(node, "CalcTangentSpace", settings.CalcTangentSpace);
+		settings.FlipUVs = ReadOrDefault<bool>(node, "FlipUVs", settings.FlipUVs);
+		settings.GenSmoothNormals = ReadOrDefault<bool>(node, "GenSmoothNormals", settings.GenSmoothNormals);
+		settings.PreTransformVertices = ReadOrDefault<bool>(node, "PreTransformVertices", settings.PreTransformVertices);
+		settings.MakeLeftHanded = ReadOrDefault<bool>(node, "MakeLeftHanded", settings.MakeLeftHanded);
+		settings.FlipWindingOrder = ReadOrDefault<bool>(node, "FlipWindingOrder", settings.FlipWindingOrder);
+		settings.CoordinateSystem = ReadOrDefault<int>(node, "CoordinateSystem", settings.CoordinateSystem);
+		return settings;
+	}
+
+	static void SerializeEntity(YAML::Emitter& out, Entity entity, entt::registry& registry) {
 		out << YAML::BeginMap;
-		out << YAML::Key << "Entity_ID" << YAML::Value << "1337420"; // TODO: replace with a UUID per entity
+		out << YAML::Key << "Entity_ID" << YAML::Value << EntityToID((entt::entity)entity);
 
 		if (entity.HasComponent<TagComponent>()) {
 			auto& tag = entity.GetComponent<TagComponent>();
@@ -228,6 +264,31 @@ namespace Monsi {
 			out << YAML::BeginMap;
 			out << YAML::Key << "Tag" << YAML::Value << tag.Tag;
 			out << YAML::EndMap;
+		}
+
+		if (entity.HasComponent<RelationshipComponent>()) {
+			auto& rc = entity.GetComponent<RelationshipComponent>();
+
+			std::vector<uint64_t> childIDs;
+			for (auto child : rc.Children) {
+				if (registry.valid(child))
+					childIDs.push_back(EntityToID(child));
+			}
+
+			bool hasParent = rc.Parent != entt::null && registry.valid(rc.Parent);
+			if (hasParent || !childIDs.empty()) {
+				out << YAML::Key << "RelationshipComponent";
+				out << YAML::BeginMap;
+				if (hasParent) {
+					out << YAML::Key << "Parent" << YAML::Value << EntityToID(rc.Parent);
+				}
+				out << YAML::Key << "Children" << YAML::Value << YAML::Flow << YAML::BeginSeq;
+				for (auto childID : childIDs) {
+					out << childID;
+				}
+				out << YAML::EndSeq;
+				out << YAML::EndMap;
+			}
 		}
 
 		if (entity.HasComponent<TransformComponent>()) {
@@ -295,8 +356,11 @@ namespace Monsi {
 				out << YAML::Key << "RotationOffset" << YAML::Value << followScript->GetRotationOffset();
 
 				Entity target = followScript->GetTarget();
-				if (target && target.HasComponent<TagComponent>()) {
-					out << YAML::Key << "TargetTag" << YAML::Value << target.GetComponent<TagComponent>().Tag;
+				if (target && registry.valid((entt::entity)target)) {
+					out << YAML::Key << "TargetID" << YAML::Value << EntityToID((entt::entity)target);
+					if (target.HasComponent<TagComponent>()) {
+						out << YAML::Key << "TargetTag" << YAML::Value << target.GetComponent<TagComponent>().Tag;
+					}
 				}
 			}
 
@@ -378,9 +442,7 @@ namespace Monsi {
 			out << YAML::Key << "ModelComponent";
 			out << YAML::BeginMap;
 			out << YAML::Key << "AssetPath" << YAML::Value << mc.ModelAsset->GetFilePath();
-			out << YAML::Key << "CalcTangentSpace" << YAML::Value << mc.ModelAsset->GetModelSettings().CalcTangentSpace;
-			out << YAML::Key << "FlipUVs" << YAML::Value << mc.ModelAsset->GetModelSettings().FlipUVs;
-			out << YAML::Key << "GenSmoothNormals" << YAML::Value << mc.ModelAsset->GetModelSettings().GenSmoothNormals;
+			SerializeModelSettings(out, mc.ModelAsset->GetModelSettings());
 			out << YAML::EndMap;
 		}
 
@@ -389,9 +451,7 @@ namespace Monsi {
 			out << YAML::Key << "AnimatedModelComponent";
 			out << YAML::BeginMap;
 			out << YAML::Key << "AssetPath" << YAML::Value << mc.ModelAsset->GetFilePath();
-			out << YAML::Key << "CalcTangentSpace" << YAML::Value << mc.ModelAsset->GetModelSettings().CalcTangentSpace;
-			out << YAML::Key << "FlipUVs" << YAML::Value << mc.ModelAsset->GetModelSettings().FlipUVs;
-			out << YAML::Key << "GenSmoothNormals" << YAML::Value << mc.ModelAsset->GetModelSettings().GenSmoothNormals;
+			SerializeModelSettings(out, mc.ModelAsset->GetModelSettings());
 			out << YAML::EndMap;
 		}
 
@@ -436,7 +496,7 @@ namespace Monsi {
 			Entity entity{ entityHandle, m_Scene.get() };
 			if (!entity) continue;
 
-			SerializeEntity(out, entity);
+			SerializeEntity(out, entity, m_Scene->m_Registry);
 		}
 
 		out << YAML::EndSeq;
@@ -449,9 +509,19 @@ namespace Monsi {
 	bool SceneManager::LoadScene(const std::string& filePath)
 	{
 		std::ifstream stream(filePath);
+		if (!stream.is_open()) return false;
+
 		std::stringstream strStream;
 		strStream << stream.rdbuf();
-		YAML::Node data = YAML::Load(strStream.str());
+
+		YAML::Node data;
+		try {
+			data = YAML::Load(strStream.str());
+		}
+		catch (const YAML::Exception& e) {
+			ENGINE_LOG_ERROR("Failed to parse scene '{0}': {1}", filePath, e.what());
+			return false;
+		}
 
 		if (!data["Scene"]) return false;
 
@@ -459,11 +529,13 @@ namespace Monsi {
 		ENGINE_LOG_TRACE("Loading scene '{0}'", sceneName);
 
 		std::vector<DeferredCameraFollowLink> deferredCameraFollowLinks;
+		std::unordered_map<uint64_t, entt::entity> idToEntity;
+		std::vector<std::pair<uint64_t, YAML::Node>> relationshipNodes;
 
 		auto entities = data["Entities"];
 		if (entities) {
 			for (auto entityNode : entities) {
-				uint64_t uuid = entityNode["Entity_ID"].as<uint64_t>();
+				uint64_t uuid = entityNode["Entity_ID"] ? entityNode["Entity_ID"].as<uint64_t>() : 0;
 
 				std::string name;
 				auto tagComponentNode = entityNode["TagComponent"];
@@ -473,6 +545,13 @@ namespace Monsi {
 
 				Entity deserializedEntity = m_Scene->CreateEntity(name, false);
 				ENGINE_LOG_TRACE("Loaded entity with ID = {0}, name = {1}", uuid, name);
+
+				idToEntity[uuid] = (entt::entity)deserializedEntity;
+
+				auto relationshipComponentNode = entityNode["RelationshipComponent"];
+				if (relationshipComponentNode) {
+					relationshipNodes.emplace_back(uuid, relationshipComponentNode);
+				}
 
 				auto transformComponentNode = entityNode["TransformComponent"];
 				if (transformComponentNode) {
@@ -636,11 +715,8 @@ namespace Monsi {
 
 				auto modelComponentNode = entityNode["ModelComponent"];
 				if (modelComponentNode) {
-					ModelImportSettings settings;
 					std::string assetPath = modelComponentNode["AssetPath"].as<std::string>();
-					settings.CalcTangentSpace = modelComponentNode["CalcTangentSpace"].as<bool>();
-					settings.FlipUVs = modelComponentNode["FlipUVs"].as<bool>();
-					settings.GenSmoothNormals = modelComponentNode["GenSmoothNormals"].as<bool>();
+					ModelImportSettings settings = DeserializeModelSettings(modelComponentNode);
 
 					Reference<Monsi::StaticModel> model = CreateReference<Monsi::StaticModel>(assetPath, settings);
 
@@ -649,11 +725,8 @@ namespace Monsi {
 
 				auto animatedModelComponentNode = entityNode["AnimatedModelComponent"];
 				if (animatedModelComponentNode) {
-					ModelImportSettings settings;
 					std::string assetPath = animatedModelComponentNode["AssetPath"].as<std::string>();
-					settings.CalcTangentSpace = animatedModelComponentNode["CalcTangentSpace"].as<bool>();
-					settings.FlipUVs = animatedModelComponentNode["FlipUVs"].as<bool>();
-					settings.GenSmoothNormals = animatedModelComponentNode["GenSmoothNormals"].as<bool>();
+					ModelImportSettings settings = DeserializeModelSettings(animatedModelComponentNode);
 
 					Reference<Monsi::AnimatedModel> model = CreateReference<Monsi::AnimatedModel>(assetPath, settings);
 
@@ -685,7 +758,7 @@ namespace Monsi {
 
 				auto nativeScriptComponentNode = entityNode["NativeScriptComponent"];
 				if (nativeScriptComponentNode) {
-					std::string scriptClassName = nativeScriptComponentNode["ScriptClassName"].as<std::string>();
+					std::string scriptClassName = nativeScriptComponentNode["ScriptClassName"] ? nativeScriptComponentNode["ScriptClassName"].as<std::string>() : std::string();
 
 					if (scriptClassName == "PlayerControllerScript") {
 						auto& nsc = deserializedEntity.AddComponent<NativeScriptComponent>();
@@ -731,9 +804,17 @@ namespace Monsi {
 								followScript->SetRotationOffset(nativeScriptComponentNode["RotationOffset"].as<glm::quat>());
 							}
 
+							DeferredCameraFollowLink link;
+							link.FollowScript = followScript;
 							if (nativeScriptComponentNode["TargetTag"]) {
-								std::string targetTag = nativeScriptComponentNode["TargetTag"].as<std::string>();
-								deferredCameraFollowLinks.push_back({ followScript, targetTag });
+								link.TargetTag = nativeScriptComponentNode["TargetTag"].as<std::string>();
+							}
+							if (nativeScriptComponentNode["TargetID"]) {
+								link.TargetID = nativeScriptComponentNode["TargetID"].as<uint64_t>();
+								link.HasTargetID = true;
+							}
+							if (link.HasTargetID || !link.TargetTag.empty()) {
+								deferredCameraFollowLinks.push_back(link);
 							}
 						}
 						else {
@@ -743,22 +824,65 @@ namespace Monsi {
 				}
 			}
 
-			for (const auto& link : deferredCameraFollowLinks) {
-				bool found = false;
-				for (auto entHandle : m_Scene->m_Registry.view<entt::entity>()) {
-					Entity ent{ entHandle, m_Scene.get() };
-					if (ent.HasComponent<TagComponent>() && ent.GetComponent<TagComponent>().Tag == link.TargetTag) {
-						link.FollowScript->SetTarget(ent);
-						found = true;
-						break;
+			for (const auto& [ownerID, relationshipNode] : relationshipNodes) {
+				auto ownerIt = idToEntity.find(ownerID);
+				if (ownerIt == idToEntity.end()) continue;
+
+				Entity owner{ ownerIt->second, m_Scene.get() };
+
+				auto childrenNode = relationshipNode["Children"];
+				if (childrenNode && childrenNode.IsSequence()) {
+					for (auto childNode : childrenNode) {
+						auto childIt = idToEntity.find(childNode.as<uint64_t>());
+						if (childIt == idToEntity.end() || childIt->second == ownerIt->second) continue;
+
+						Entity child{ childIt->second, m_Scene.get() };
+						child.SetParent(owner, false);
 					}
 				}
+			}
+
+			for (const auto& [ownerID, relationshipNode] : relationshipNodes) {
+				auto ownerIt = idToEntity.find(ownerID);
+				if (ownerIt == idToEntity.end() || !relationshipNode["Parent"]) continue;
+
+				auto parentIt = idToEntity.find(relationshipNode["Parent"].as<uint64_t>());
+				if (parentIt == idToEntity.end() || parentIt->second == ownerIt->second) continue;
+
+				Entity owner{ ownerIt->second, m_Scene.get() };
+				bool alreadyParented = owner.HasComponent<RelationshipComponent>() && owner.GetComponent<RelationshipComponent>().Parent == parentIt->second;
+				if (!alreadyParented) {
+					owner.SetParent(Entity{ parentIt->second, m_Scene.get() }, false);
+				}
+			}
+
+			for (const auto& link : deferredCameraFollowLinks) {
+				bool found = false;
+
+				if (link.HasTargetID) {
+					auto targetIt = idToEntity.find(link.TargetID);
+					if (targetIt != idToEntity.end()) {
+						link.FollowScript->SetTarget(Entity{ targetIt->second, m_Scene.get() });
+						found = true;
+					}
+				}
+
+				if (!found && !link.TargetTag.empty()) {
+					for (auto entHandle : m_Scene->m_Registry.view<entt::entity>()) {
+						Entity ent{ entHandle, m_Scene.get() };
+						if (ent.HasComponent<TagComponent>() && ent.GetComponent<TagComponent>().Tag == link.TargetTag) {
+							link.FollowScript->SetTarget(ent);
+							found = true;
+							break;
+						}
+					}
+				}
+
 				if (!found) {
 					ENGINE_LOG_ERROR("CameraFollowScript target '{0}' not found", link.TargetTag);
 				}
 			}
-
-			return true;
 		}
+		return true;
 	}
 }

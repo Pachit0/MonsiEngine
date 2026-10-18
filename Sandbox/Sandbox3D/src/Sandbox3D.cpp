@@ -7,6 +7,8 @@
 #include "TimeStep.h"
 #include "SceneManager.h"
 #include "PlatformUtilities.h"
+#include <ImGuizmo.h>
+#include <MonsiMath.h>
 
 Sandbox3D::Sandbox3D() : Layer("Sandbox3D"), m_ViewportSize{ 0.0f,0.0f },
 m_ViewportFocused(false), m_ViewportHovered(false), m_SpherePosition({ -5.0f, 3.0f, 5.0f })
@@ -103,9 +105,12 @@ void Sandbox3D::OnLayerAttach()
 	m_SponzaEntity.GetComponent<Monsi::TransformComponent>().Scale = glm::vec3(0.05f);
 
 	m_CesiumManEntity = m_Scene->CreateEntity("CesiumMan");
-	m_CesiumManEntity.AddComponent<Monsi::AnimatedModelComponent>(m_CesiumMan);
 	m_CesiumManEntity.GetComponent<Monsi::TransformComponent>().Translation = glm::vec3(0.0f, 0.0f, 5.0f);
-	m_CesiumManEntity.GetComponent<Monsi::TransformComponent>().Rotation = glm::quat(glm::radians(glm::vec3(-90.0f, 120.0f, 0.0f)));
+
+	m_CesiumManVisualEntity = m_Scene->CreateEntity("CesiumMan_Visuals");
+	m_CesiumManVisualEntity.AddComponent<Monsi::AnimatedModelComponent>(m_CesiumMan);
+	m_CesiumManVisualEntity.GetComponent<Monsi::TransformComponent>().Rotation = glm::quat(glm::radians(glm::vec3(-90.0f, 120.0f, 0.0f)));
+	m_CesiumManVisualEntity.SetParent(m_CesiumManEntity);
 
 	m_SphereEntity = m_Scene->CreateEntity("Sphere");
 	m_SphereEntity.AddComponent<Monsi::StaticMeshComponent>(m_SphereTest);
@@ -132,6 +137,7 @@ void Sandbox3D::OnLayerAttach()
 	m_QuadEntity.GetComponent<Monsi::TransformComponent>().Translation = glm::vec3(30.0f, 1.0f, 0.0f);
 
 	m_Unit.SetContext(m_Scene);
+	m_Unit.SetGizmoType(ImGuizmo::OPERATION::TRANSLATE);
 
 	m_CameraPerspectiveEntity.AddComponent<Monsi::NativeScriptComponent>().Bind<Monsi::CameraControllerScript>();
 	m_CameraOrthogonalEntity.AddComponent<Monsi::NativeScriptComponent>().Bind<Monsi::CameraControllerScript>();
@@ -259,6 +265,11 @@ void Sandbox3D::OnImGuiDraw() {
 
 	uint32_t textureID = m_FrameBuffer->GetColorAttachmentID();
 	ImGui::Image((void*)textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
+
+	ImVec2 imagePosition = ImGui::GetItemRectMin();
+	ImVec2 imageSize = ImGui::GetItemRectSize();
+	m_Unit.DrawGizmo(imagePosition.x, imagePosition.y, imageSize.x, imageSize.y);
+
 	ImGui::End();
 	ImGui::PopStyleVar(1);
 }
@@ -304,6 +315,22 @@ bool Sandbox3D::OnKeyPressed(Monsi::KeyEventPressed& event)
 		}
 		break;
 	}
+	case MONSI_KEY_Q: {
+		m_Unit.SetGizmoType(-1);
+		break;
+	}
+	case MONSI_KEY_T: {
+		m_Unit.SetGizmoType(ImGuizmo::OPERATION::TRANSLATE);
+		break;
+	}
+	case MONSI_KEY_R: {
+		m_Unit.SetGizmoType(ImGuizmo::OPERATION::ROTATE);
+		break;
+	}
+	case MONSI_KEY_E: {
+		m_Unit.SetGizmoType(ImGuizmo::OPERATION::SCALE);
+		break;
+	}
 
 	default:
 		break;
@@ -338,17 +365,25 @@ void Sandbox3D::SceneOpenAs()
 {
 	std::string path = Monsi::FileDialogs::OpenFile("Monsi Scene (*.monsi)\0*.monsi\0");
 	if (!path.empty()) {
-		m_Scene = Monsi::CreateReference<Monsi::Scene>();
-		m_Scene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-		m_Unit.SetContext(m_Scene);
+		Monsi::Reference<Monsi::Scene> scene = Monsi::CreateReference<Monsi::Scene>();
+		scene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 
-		Monsi::SceneManager manager(m_Scene);
-		manager.LoadScene(path);
+		Monsi::SceneManager manager(scene);
+		if (manager.LoadScene(path)) {
+			m_Scene = scene;
+			m_Unit.SetContext(m_Scene);
+		}
 	}
 }
 
 void Sandbox3D::SceneOpen()
 {
-	Monsi::SceneManager manager(m_Scene);
-	manager.LoadScene("scene.monsi");
+	Monsi::Reference<Monsi::Scene> scene = Monsi::CreateReference<Monsi::Scene>();
+	scene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+
+	Monsi::SceneManager manager(scene);
+	if (manager.LoadScene("scene.monsi")) {
+		m_Scene = scene;
+		m_Unit.SetContext(m_Scene);
+	}
 }

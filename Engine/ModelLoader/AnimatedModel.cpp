@@ -126,12 +126,19 @@ namespace Monsi {
 		m_AnimationSpeed = 1.0f;
 		m_IsPaused = false;
 
-
 		unsigned int flags = aiProcess_Triangulate | aiProcess_LimitBoneWeights | aiProcess_PopulateArmatureData;
 
 		if (settings.GenSmoothNormals) flags |= aiProcess_GenSmoothNormals;
 		if (settings.CalcTangentSpace) flags |= aiProcess_CalcTangentSpace;
 		if (settings.FlipUVs)          flags |= aiProcess_FlipUVs;
+		if (settings.PreTransformVertices) flags |= aiProcess_PreTransformVertices;
+		if (settings.MakeLeftHanded) flags |= aiProcess_MakeLeftHanded;
+		if (settings.FlipWindingOrder) flags |= aiProcess_FlipWindingOrder;
+
+		if (settings.CoordinateSystem == 2)
+		{
+			flags |= aiProcess_ConvertToLeftHanded;
+		}
 
 		m_Scene = m_Importer.ReadFile(filepath, flags);
 
